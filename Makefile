@@ -6,9 +6,9 @@ NAME = Window
 $(NAME): $(SRC)
 	g++ $(CFLAGS) -o $(NAME) $(SRC) $(LDFLAGS)
 
-.PHONY: test clean re
+.PHONY: run clean re
 
-test: $(NAME)
+run: $(NAME)
 	./$(NAME)
 
 clean:

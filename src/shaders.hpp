@@ -1,0 +1,16 @@
+#ifndef SHADERS_HPP
+#define SHADERS_HPP
+
+#include <iostream>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include "errors.hpp"
+
+long compileShader(int type, const char *path);
+unsigned int createShaderProgram(unsigned int vertexShader, unsigned int fragmentShader);
+unsigned int createShaderProgram(const char *vertexPath, const char *fragmentPath);
+
+#endif
