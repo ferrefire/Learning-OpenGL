@@ -2,6 +2,7 @@
 #define MESH_HPP
 
 #include "shape.hpp"
+#include "shader.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -14,8 +15,8 @@ class Mesh
         unsigned int VBO;
         unsigned int EBO;
         unsigned int elements;
-        unsigned int shader;
-        Mesh(Shape shape, unsigned int shader);
+        Shader *shader;
+        Mesh(Shape shape, Shader *shader);
         //~Mesh();
 };
 

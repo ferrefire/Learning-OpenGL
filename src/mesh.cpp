@@ -1,6 +1,6 @@
 #include "mesh.hpp"
 
-Mesh::Mesh(Shape shape, unsigned int shader)
+Mesh::Mesh(Shape shape, Shader *shader)
 {
     this->shader = shader;
 

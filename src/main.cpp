@@ -5,38 +5,12 @@
 #include <stdio.h>
 #include "shape.hpp"
 #include "mesh.hpp"
+#include "shader.hpp"
 #include "learning.hpp"
 #include <fstream>
 #include <sstream>
 #include <filesystem>
 #include <cmath>
-
-int shape_index = 0;
-
-const char *vertexShaderSource = "#version 330 core\n"
-                                 "layout (location = 0) in vec3 aPos;\n"
-                                 "void main()\n"
-                                 "{\n"
-                                 " gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-                                 "}\0";
-const char *fragmentShaderSource = "#version 330 core\n"
-                                   "out vec4 FragColor;\n"
-                                   "void main()\n"
-                                   "{\n"
-                                   " FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-                                   "}\0";
-const char *fragment2ShaderSource = "#version 330 core\n"
-                                   "out vec4 FragColor;\n"
-                                   "void main()\n"
-                                   "{\n"
-                                   " FragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
-                                   "}\0";
-const char *fragment3ShaderSource = "#version 330 core\n"
-                                    "out vec4 FragColor;\n"
-                                    "void main()\n"
-                                    "{\n"
-                                    " FragColor = vec4(0.0f, 0.0f, 1.0f, 1.0f);\n"
-                                    "}\0";
 
 float triangle_vertices[] = {
     -0.5f, -0.5f, 0.0f,
@@ -111,9 +85,7 @@ void setupSettings(int argc, char **argv)
 {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    if (argc > 1 && strlen(argv[1]) == 1 && isdigit(*argv[1]) && *argv[1] - '0' < 3 && *argv[1] - '0' >= 0)
-        shape_index = *argv[1] - '0';
-    if (argc > 2 && strlen(argv[2]) == 1 && isdigit(*argv[2]) && *argv[2] - '0' == 1)
+    if (argc > 1 && strlen(argv[1]) == 1 && isdigit(*argv[1]) && *argv[1] - '0' == 1)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
@@ -130,15 +102,13 @@ int main(int argc, char **argv)
 
     setupSettings(argc, argv);
 
-    unsigned int shaderProgram1 = createShaderProgram((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment.glsl").c_str());
-    unsigned int shaderProgram2 = createShaderProgram((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment_2.glsl").c_str());
-    unsigned int shaderProgram3 = createShaderProgram((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment_3.glsl").c_str());
+    Shader shader1((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment.glsl").c_str());
+    Shader shader2((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment_2.glsl").c_str());
+    Shader shader3((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment_3.glsl").c_str());
 
-    int fragColorLocation = glGetUniformLocation(shaderProgram3, "ourColor");
-
-    Mesh tri_mesh(triangle, shaderProgram1);
-    Mesh row_mesh(row, shaderProgram2);
-    Mesh sqr_mesh(square, shaderProgram3);
+    Mesh tri_mesh(triangle, &shader1);
+    Mesh row_mesh(row, &shader2);
+    Mesh sqr_mesh(square, &shader3);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -146,8 +116,9 @@ int main(int argc, char **argv)
    
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram3);
-        glUniform4f(fragColorLocation, 0.0f, (sin(glfwGetTime()) / 2.0f) + 0.5f, 0.0f, 1.0f);
+        tri_mesh.shader->setFloat4("ourColor", (sin(glfwGetTime() + 1) / 2.0f) + 0.5f, 0.0f, 0.0f, 1.0f);
+        row_mesh.shader->setFloat4("ourColor", 0.0f, (sin(glfwGetTime() + 2) / 2.0f) + 0.5f, 0.0f, 1.0f);
+        sqr_mesh.shader->setFloat4("ourColor", 0.0f, 0.0f, (sin(glfwGetTime() + 3) / 2.0f) + 0.5f, 1.0f);
 
         renderMesh(row_mesh);
         renderMesh(sqr_mesh);
