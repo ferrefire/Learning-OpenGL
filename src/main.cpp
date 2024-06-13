@@ -11,15 +11,16 @@
 #include <sstream>
 #include <filesystem>
 #include <cmath>
+#include "stb_image.h"
 
 float updown = 1, leftright = 1;
 bool updownPressed, leftrightPressed;
 float x, y;
 
 float triangle_vertices[] = {
-	-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-	0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-	0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f,};
+	-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+	0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+	0.0f, 0.5f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f,};
 
 unsigned int triangle_indices[] = {
     0, 1, 2};
@@ -38,10 +39,10 @@ unsigned int row_indices[] = {
 };
 
 float square_vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-    0.5f, -0.5f, 0.0f,
-    -0.5f, 0.5f, 0.0f,
-    0.5f, 0.5f, 0.0f};
+    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+    0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+    -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+    0.5f, 0.5f, 0.0f, 1.0f, 1.0f};
 
 unsigned int square_indices[] = {
     0, 1, 2,
@@ -114,8 +115,8 @@ void setupSettings(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    Shape triangle("Triangle", sizeof(triangle_vertices), triangle_vertices, sizeof(triangle_indices), triangle_indices);
-    //Shape square("Square", sizeof(square_vertices), square_vertices, sizeof(square_indices), square_indices);
+    //Shape triangle("Triangle", sizeof(triangle_vertices), triangle_vertices, sizeof(triangle_indices), triangle_indices);
+    Shape square("Square", sizeof(square_vertices), square_vertices, sizeof(square_indices), square_indices);
     //Shape row("Row", sizeof(row_vertices), row_vertices, sizeof(row_indices), row_indices);
 
     std::string path = std::filesystem::current_path();
@@ -125,11 +126,21 @@ int main(int argc, char **argv)
 
     setupSettings(argc, argv);
 
-    Shader shader1((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment.glsl").c_str());
+	int width, height, nrChannels;
+	unsigned char *data = stbi_load((path + "/textures/brick.png").c_str(), &width, &height, &nrChannels, 0);
+
+	unsigned int texID;
+	glGenTextures(1, &texID);
+	glBindTexture(GL_TEXTURE_2D, texID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	stbi_image_free(data);
+
+	Shader shader1((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment.glsl").c_str());
     //Shader shader2((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment_2.glsl").c_str());
     //Shader shader3((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment_3.glsl").c_str());
 
-    Mesh tri_mesh(triangle, &shader1);
+    Mesh tri_mesh(square, &shader1);
     //Mesh row_mesh(row, &shader2);
     //Mesh sqr_mesh(square, &shader3);
 
@@ -139,7 +150,7 @@ int main(int argc, char **argv)
    
         glClear(GL_COLOR_BUFFER_BIT);
 
-		tri_mesh.shader->setFloat4("ourColor", (sin(glfwGetTime() + 1) / 4.0f) + 0.5f, (sin(glfwGetTime() + 2) / 4.0f) + 0.5f, (sin(glfwGetTime() + 3) / 4.0f) + 0.5f, 1.0f);
+		//tri_mesh.shader->setFloat4("ourColor", (sin(glfwGetTime() + 1) / 4.0f) + 0.75f, (sin(glfwGetTime() + 2) / 4.0f) + 0.75f, (sin(glfwGetTime() + 3) / 4.0f) + 0.75f, 1.0f);
 		if (updownPressed)
 			tri_mesh.shader->setFloat("upsideDown", sin(updown));
 		if (leftrightPressed)
@@ -147,6 +158,7 @@ int main(int argc, char **argv)
 		tri_mesh.shader->setFloat2("transform", x, y);
 		//row_mesh.shader->setFloat4("ourColor", 0.0f, (sin(glfwGetTime() + 2) / 2.0f) + 0.5f, 0.0f, 1.0f);
         //sqr_mesh.shader->setFloat4("ourColor", 0.0f, 0.0f, (sin(glfwGetTime() + 3) / 2.0f) + 0.5f, 1.0f);
+		glBindTexture(GL_TEXTURE_2D, texID);
 
 		renderMesh(tri_mesh);
 		//renderMesh(row_mesh);
