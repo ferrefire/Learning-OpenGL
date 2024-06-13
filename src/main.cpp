@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "shape.hpp"
-#include "mesh.hpp"
+#include "mesh.hpp" 
 #include "shader.hpp"
 #include "learning.hpp"
 #include <fstream>
@@ -12,10 +12,14 @@
 #include <filesystem>
 #include <cmath>
 
+float updown = 1, leftright = 1;
+bool updownPressed, leftrightPressed;
+float x, y;
+
 float triangle_vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-    0.5f, -0.5f, 0.0f,
-    -0.5f, 0.5f, 0.0f};
+	-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+	0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+	0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f,};
 
 unsigned int triangle_indices[] = {
     0, 1, 2};
@@ -51,8 +55,27 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 
 void processInput(GLFWwindow *window)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) glClearColor(0.25f, 0.87f, 0.81f, 1.0f);
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+		glClearColor(0.25f, 0.87f, 0.81f, 1.0f);
+
+	updownPressed = glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS;
+	if (updownPressed)
+		updown += 0.02f;
+	leftrightPressed = glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS;
+	if (leftrightPressed)
+		leftright += 0.02f;
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		y += 0.02f;
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		y -= 0.02f;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		x += 0.02f;
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		x -= 0.02f;
 }
 
 GLFWwindow *setupGLFW()
@@ -92,8 +115,8 @@ void setupSettings(int argc, char **argv)
 int main(int argc, char **argv)
 {
     Shape triangle("Triangle", sizeof(triangle_vertices), triangle_vertices, sizeof(triangle_indices), triangle_indices);
-    Shape square("Square", sizeof(square_vertices), square_vertices, sizeof(square_indices), square_indices);
-    Shape row("Row", sizeof(row_vertices), row_vertices, sizeof(row_indices), row_indices);
+    //Shape square("Square", sizeof(square_vertices), square_vertices, sizeof(square_indices), square_indices);
+    //Shape row("Row", sizeof(row_vertices), row_vertices, sizeof(row_indices), row_indices);
 
     std::string path = std::filesystem::current_path();
 
@@ -103,12 +126,12 @@ int main(int argc, char **argv)
     setupSettings(argc, argv);
 
     Shader shader1((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment.glsl").c_str());
-    Shader shader2((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment_2.glsl").c_str());
-    Shader shader3((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment_3.glsl").c_str());
+    //Shader shader2((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment_2.glsl").c_str());
+    //Shader shader3((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment_3.glsl").c_str());
 
     Mesh tri_mesh(triangle, &shader1);
-    Mesh row_mesh(row, &shader2);
-    Mesh sqr_mesh(square, &shader3);
+    //Mesh row_mesh(row, &shader2);
+    //Mesh sqr_mesh(square, &shader3);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -116,13 +139,18 @@ int main(int argc, char **argv)
    
         glClear(GL_COLOR_BUFFER_BIT);
 
-        tri_mesh.shader->setFloat4("ourColor", (sin(glfwGetTime() + 1) / 2.0f) + 0.5f, 0.0f, 0.0f, 1.0f);
-        row_mesh.shader->setFloat4("ourColor", 0.0f, (sin(glfwGetTime() + 2) / 2.0f) + 0.5f, 0.0f, 1.0f);
-        sqr_mesh.shader->setFloat4("ourColor", 0.0f, 0.0f, (sin(glfwGetTime() + 3) / 2.0f) + 0.5f, 1.0f);
+		tri_mesh.shader->setFloat4("ourColor", (sin(glfwGetTime() + 1) / 4.0f) + 0.5f, (sin(glfwGetTime() + 2) / 4.0f) + 0.5f, (sin(glfwGetTime() + 3) / 4.0f) + 0.5f, 1.0f);
+		if (updownPressed)
+			tri_mesh.shader->setFloat("upsideDown", sin(updown));
+		if (leftrightPressed)
+			tri_mesh.shader->setFloat("leftsideRight", sin(leftright));
+		tri_mesh.shader->setFloat2("transform", x, y);
+		//row_mesh.shader->setFloat4("ourColor", 0.0f, (sin(glfwGetTime() + 2) / 2.0f) + 0.5f, 0.0f, 1.0f);
+        //sqr_mesh.shader->setFloat4("ourColor", 0.0f, 0.0f, (sin(glfwGetTime() + 3) / 2.0f) + 0.5f, 1.0f);
 
-        renderMesh(row_mesh);
-        renderMesh(sqr_mesh);
-        renderMesh(tri_mesh);
+		renderMesh(tri_mesh);
+		//renderMesh(row_mesh);
+        //renderMesh(sqr_mesh);
 
         glBindVertexArray(0);
 

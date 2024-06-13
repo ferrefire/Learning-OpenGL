@@ -23,6 +23,12 @@ void Shader::setFloat(std::string name, float value)
     glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }
 
+void Shader::setFloat2(std::string name, float x, float y)
+{
+	glUseProgram(ID);
+	glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
+}
+
 void Shader::setFloat4(std::string name, float x, float y, float z, float w)
 {
     glUseProgram(ID);
