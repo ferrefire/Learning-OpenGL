@@ -3,6 +3,9 @@
 
 #include <string>
 #include "shaders.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 class Shader
 {
@@ -18,6 +21,7 @@ class Shader
         void setFloat(std::string name, float value);
 		void setFloat2(std::string name, float x, float y);
         void setFloat4(std::string name, float x, float y, float z, float w);
+        void setMatrix4(std::string name, glm::mat4 transformation);
 };
 
 #endif

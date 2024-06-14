@@ -12,6 +12,10 @@
 #include <filesystem>
 #include <cmath>
 #include "stb_image.h"
+#include "texture.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 float updown = 1, leftright = 1;
 bool updownPressed, leftrightPressed;
@@ -111,6 +115,7 @@ void setupSettings(int argc, char **argv)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     if (argc > 1 && strlen(argv[1]) == 1 && isdigit(*argv[1]) && *argv[1] - '0' == 1)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    stbi_set_flip_vertically_on_load(true);
 }
 
 int main(int argc, char **argv)
@@ -126,21 +131,23 @@ int main(int argc, char **argv)
 
     setupSettings(argc, argv);
 
-	int width, height, nrChannels;
-	unsigned char *data = stbi_load((path + "/textures/brick.png").c_str(), &width, &height, &nrChannels, 0);
+    Texture brickTex((path + "/textures/brick.png").c_str());
+    Texture stoneTex((path + "/textures/stone.png").c_str());
 
-	unsigned int texID;
-	glGenTextures(1, &texID);
-	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	stbi_image_free(data);
+    Shader shader((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment.glsl").c_str());
+    shader.setInt("texture1", 0);
+    shader.setInt("texture2", 1);
+    Shader shader2((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment.glsl").c_str());
+    shader2.setInt("texture1", 0);
+    shader2.setInt("texture2", 1);
+    brickTex.bindTexture(GL_TEXTURE0);
+    stoneTex.bindTexture(GL_TEXTURE1);
 
-	Shader shader1((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment.glsl").c_str());
     //Shader shader2((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment_2.glsl").c_str());
     //Shader shader3((path + "/shaders/simple_vertex.glsl").c_str(), (path + "/shaders/simple_fragment_3.glsl").c_str());
 
-    Mesh tri_mesh(square, &shader1);
+    Mesh mesh(square, &shader);
+    Mesh mesh2(square, &shader2);
     //Mesh row_mesh(row, &shader2);
     //Mesh sqr_mesh(square, &shader3);
 
@@ -151,16 +158,38 @@ int main(int argc, char **argv)
         glClear(GL_COLOR_BUFFER_BIT);
 
 		//tri_mesh.shader->setFloat4("ourColor", (sin(glfwGetTime() + 1) / 4.0f) + 0.75f, (sin(glfwGetTime() + 2) / 4.0f) + 0.75f, (sin(glfwGetTime() + 3) / 4.0f) + 0.75f, 1.0f);
-		if (updownPressed)
-			tri_mesh.shader->setFloat("upsideDown", sin(updown));
-		if (leftrightPressed)
-			tri_mesh.shader->setFloat("leftsideRight", sin(leftright));
-		tri_mesh.shader->setFloat2("transform", x, y);
-		//row_mesh.shader->setFloat4("ourColor", 0.0f, (sin(glfwGetTime() + 2) / 2.0f) + 0.5f, 0.0f, 1.0f);
-        //sqr_mesh.shader->setFloat4("ourColor", 0.0f, 0.0f, (sin(glfwGetTime() + 3) / 2.0f) + 0.5f, 1.0f);
-		glBindTexture(GL_TEXTURE_2D, texID);
 
-		renderMesh(tri_mesh);
+		//if (updownPressed)
+		//	tri_mesh.shader->setFloat("upsideDown", sin(updown));
+		//if (leftrightPressed)
+		//	tri_mesh.shader->setFloat("leftsideRight", sin(leftright));
+
+		//tri_mesh.shader->setFloat2("transform", x, y);
+        mesh.shader->setFloat("mixAmount", sin(glfwGetTime()) / 2.0f + 0.5f);
+
+        glm::mat4 transformation = glm::mat4(1.0f);
+        transformation = glm::translate(transformation, glm::vec3(0.5f, -0.5f, 0.0f));
+        transformation = glm::rotate(transformation, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        mesh.shader->setMatrix4("transform", transformation);
+
+        renderMesh(mesh);
+
+        float time = sin(glfwGetTime());
+        glm::mat4 transformation2 = glm::mat4(1.0f);
+        transformation2 = glm::scale(transformation2, glm::vec3(time, time, time));
+
+        mesh2.shader->setMatrix4("transform", transformation2);
+
+        renderMesh(mesh2);
+
+        //row_mesh.shader->setFloat4("ourColor", 0.0f, (sin(glfwGetTime() + 2) / 2.0f) + 0.5f, 0.0f, 1.0f);
+        //sqr_mesh.shader->setFloat4("ourColor", 0.0f, 0.0f, (sin(glfwGetTime() + 3) / 2.0f) + 0.5f, 1.0f);
+
+		//glBindTexture(GL_TEXTURE_2D, texture.ID);
+        
+
+        
 		//renderMesh(row_mesh);
         //renderMesh(sqr_mesh);
 

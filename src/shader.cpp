@@ -34,3 +34,9 @@ void Shader::setFloat4(std::string name, float x, float y, float z, float w)
     glUseProgram(ID);
     glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w);
 }
+
+void Shader::setMatrix4(std::string name, glm::mat4 transformation)
+{
+    glUseProgram(ID);
+    glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(transformation));
+}
