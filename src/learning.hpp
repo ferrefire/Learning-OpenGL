@@ -4,5 +4,6 @@
 #include "rendering.hpp"
 #include "shaders.hpp"
 #include "errors.hpp"
+#include "utilities.hpp"
 
 #endif

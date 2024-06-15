@@ -12,17 +12,22 @@
 class Mesh
 {
     private:
-
-    public:
         unsigned int VAO;
         unsigned int VBO;
         unsigned int EBO;
         unsigned int elements;
+
         Shader *shader;
-		Mesh(std::vector<float> vertices, std::vector<unsigned int> indices, Shader *shader);
-		Mesh(Shape shape, Shader *shader);
-		Mesh(std::vector<float> vertices, std::vector<Triangle> triangles, Shader *shader);
-		//~Mesh();
+        Shape *shape;
+    public:
+        Mesh(Shape *shape, Shader *shader);
+
+        unsigned int GetVAO();
+        unsigned int GetVBO();
+        unsigned int GetEBO();
+
+        Shader * GetShader();
+        Shape * GetShape();
 };
 
 #endif

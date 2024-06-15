@@ -3,14 +3,50 @@
 
 #include <vector>
 #include <string>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#define TRIANGLE 0
+#define QUAD 1
+#define CUBE 2
 
 class Shape
 {
-    public:
+    private:
         std::string name;
-        std::vector<float> vertices;
+
+        unsigned int vertexCount;
+        unsigned int indiceCount;
+        unsigned int dataCount;
+
+        std::vector<glm::vec3> vertices;
+        std::vector<glm::vec2> uvs;
         std::vector<unsigned int> indices;
-        Shape(std::string name, int vertices_size, float vertices[], int indices_size, unsigned int indices[]);
+
+        std::vector<float> data;
+        
+
+    public:
+        Shape();
+        Shape(int preset);
+
+        float * GetData();
+        unsigned int * GetIndices();
+
+        std::vector<glm::vec3> Vertices();
+        std::vector<glm::vec2> Uvs();
+        std::vector<unsigned int> Indices();
+
+        unsigned int VertexCount();
+        unsigned int IndiceCount();
+        unsigned int DataCount();
+
+        void Rotate(float degrees, glm::vec3 axis);
+        void Translate(glm::vec3 translation);
+
+        void RecalculateData();
+        void Join(Shape joinShape);
 };
 
 #endif
