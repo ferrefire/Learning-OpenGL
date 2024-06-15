@@ -3,8 +3,11 @@
 
 #include "shape.hpp"
 #include "shader.hpp"
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "glad.h"
+#include <glm/glm.hpp>
+#include <tuple>
+#include <vector>
+#include "triangle.hpp"
 
 class Mesh
 {
@@ -16,8 +19,10 @@ class Mesh
         unsigned int EBO;
         unsigned int elements;
         Shader *shader;
-        Mesh(Shape shape, Shader *shader);
-        //~Mesh();
+		Mesh(std::vector<float> vertices, std::vector<unsigned int> indices, Shader *shader);
+		Mesh(Shape shape, Shader *shader);
+		Mesh(std::vector<float> vertices, std::vector<Triangle> triangles, Shader *shader);
+		//~Mesh();
 };
 
 #endif
