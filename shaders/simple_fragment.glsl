@@ -7,10 +7,11 @@ in vec2 UV;
 uniform sampler2D texture1;
 uniform sampler2D texture2;
 uniform float mixAmount;
+uniform vec4 colMult;
 
 void main()
 {
-    //FragColor = ourColor;
+    //FragColor = colMult * 2;
     //FragColor = vec4(outColor * ourColor.rgb, 1.0);
-    FragColor = mix(texture(texture1, UV), texture(texture2, UV), mixAmount);
+    FragColor = mix(texture(texture1, UV), texture(texture2, UV), mixAmount) * colMult * 2;
 }

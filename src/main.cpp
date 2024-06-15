@@ -18,11 +18,13 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <tuple>
 #include <algorithm>
-#include "triangle.hpp"
+#include <chrono>
 
 float updown = 1, leftright = 1;
 bool updownPressed, leftrightPressed;
-float x, y;
+float x, y, z;
+int width = 1600;
+int height = 900;
 
 float triangle_vertices[] = {
 	-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
@@ -76,8 +78,8 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-		glClearColor(0.25f, 0.87f, 0.81f, 1.0f);
+    //if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+	//	glClearColor(0.25f, 0.87f, 0.81f, 1.0f);
 
 	updownPressed = glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS;
 	if (updownPressed)
@@ -94,6 +96,10 @@ void processInput(GLFWwindow *window)
 		x += 0.02f;
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 		x -= 0.02f;
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        z += 0.02f;
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+        z -= 0.02f;
 }
 
 GLFWwindow *setupGLFW()
@@ -103,7 +109,7 @@ GLFWwindow *setupGLFW()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(width, height, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -134,8 +140,7 @@ void setupSettings(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    //glm::vec4 v = glm::vec4(0.5f, 1.0f, 0.25f, 1.0f);
-    //v.
+    //std::cout << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() << std::endl;
     //return (0);
 
     std::string path = std::filesystem::current_path();
@@ -159,10 +164,38 @@ int main(int argc, char **argv)
     Mesh mesh(&shape, &shader);
 
 	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -6.0f));
 
 	glm::mat4 projection;
-	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 1000.0f);
+
+    int count = 100;
+    int dis = 250;
+    float min = dis / 2.0f;
+    if (argc > 1)
+    {
+        int i = 0;
+        while (i >= 0 && argv[1][i])
+        {
+            if (!isdigit(argv[1][i]))
+            {
+                i = -1;
+                break;
+            }
+            i++;
+        }
+        if (i > 0)
+        {
+            count = atoi(argv[1]);
+        }
+    }
+
+    glm::vec3 transformations[count];
+    for (int i = 0; i < count; i++)
+    {
+        srand(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() + i);
+        transformations[i] = glm::vec3((rand() % dis) - min, (rand() % dis) - min, -((rand() % 1000)));
+    }
 
 	while (!glfwWindowShouldClose(window))
     {
@@ -170,20 +203,38 @@ int main(int argc, char **argv)
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		mesh.GetShader()->setFloat("mixAmount", sin(glfwGetTime()) / 2.0f + 0.5f);
+        view = glm::translate(glm::mat4(1.0f), glm::vec3(x * -50, z * -50, y * 50));
 
-		glm::mat4 model = glm::mat4(1.0f);
-		//model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 0.0f));
+        mesh.GetShader()->setFloat("mixAmount", sin(glfwGetTime()) / 2.0f + 0.5f);
+        mesh.GetShader()->setMatrix4("view", view);
+        mesh.GetShader()->setMatrix4("projection", projection);
+
+        //model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 0.0f));
 		//model = glm::rotate(model, (float)glfwGetTime() + 1, glm::vec3(0.0f, 1.0f, 0.0f));
 		//model = glm::rotate(model, (float)glfwGetTime() + 2, glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::rotate(model, -y, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, x, glm::vec3(0.0f, 1.0f, 0.0f));
 
-		mesh.GetShader()->setMatrix4("model", model);
-		mesh.GetShader()->setMatrix4("view", view);
-		mesh.GetShader()->setMatrix4("projection", projection);
+        for (int i = 0; i < count; i++)
+        {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, transformations[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            model = glm::rotate(model, (float)glfwGetTime() + 10 * i, glm::vec3(1.0f, 0.0f, 0.0f));
+            model = glm::rotate(model, (float)glfwGetTime() + 20 * i, glm::vec3(0.0f, 1.0f, 0.0f));
+            // model = glm::rotate(model, -y, glm::vec3(1.0f, 0.0f, 0.0f));
+            // model = glm::rotate(model, x, glm::vec3(0.0f, 1.0f, 0.0f));
 
-		renderMesh(mesh);
+            mesh.GetShader()->setMatrix4("model", model);
+            srand(i);
+            float r = (rand() % 1000) / 1000.0f;
+            srand(r * 1000);
+            float g = (rand() % 1000) / 1000.0f;
+            srand(g * 1000);
+            float b = (rand() % 1000) / 1000.0f;
+            mesh.GetShader()->setFloat4("colMult", r, g, b, 1.0f);
+
+            renderMesh(mesh);
+        }
 
         glBindVertexArray(0);
 
