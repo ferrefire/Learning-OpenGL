@@ -12,9 +12,13 @@ class Shader
     private:
         /* data */
     public:
+		static unsigned int currentActiveShader;
+
         unsigned int ID;
 
         Shader(const char *vertexPath, const char *fragmentPath);
+
+		void useShader();
 
         void setBool(std::string name, bool value);
         void setInt(std::string name, int value);

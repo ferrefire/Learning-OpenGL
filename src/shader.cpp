@@ -5,38 +5,47 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath)
     ID = createShaderProgram(vertexPath, fragmentPath);
 }
 
+void Shader::useShader()
+{
+	if (currentActiveShader != ID)
+	{
+		glUseProgram(ID);
+		currentActiveShader = ID;
+	}
+}
+
 void Shader::setBool(std::string name, bool value)
 {
-    glUseProgram(ID);
+    useShader();
     glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
 }
 
 void Shader::setInt(std::string name, int value)
 {
-    glUseProgram(ID);
+    useShader();
     glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
 }
 
 void Shader::setFloat(std::string name, float value)
 {
-    glUseProgram(ID);
+    useShader();
     glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }
 
 void Shader::setFloat2(std::string name, float x, float y)
 {
-	glUseProgram(ID);
+	useShader();
 	glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
 }
 
 void Shader::setFloat4(std::string name, float x, float y, float z, float w)
 {
-    glUseProgram(ID);
+    useShader();
     glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w);
 }
 
 void Shader::setMatrix4(std::string name, glm::mat4 transformation)
 {
-    glUseProgram(ID);
+    useShader();
     glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(transformation));
 }

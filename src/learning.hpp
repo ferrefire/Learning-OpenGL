@@ -5,5 +5,6 @@
 #include "shaders.hpp"
 #include "errors.hpp"
 #include "utilities.hpp"
+#include "debug.hpp"
 
 #endif

@@ -20,6 +20,10 @@
 #include <algorithm>
 #include <chrono>
 
+double Debug::timeLastSecond = 0;
+unsigned int Debug::totalFramesThisSecond = 0;
+unsigned int Shader::currentActiveShader = INT_MAX;
+
 float updown = 1, leftright = 1;
 bool updownPressed, leftrightPressed;
 float x, y, z;
@@ -170,8 +174,7 @@ int main(int argc, char **argv)
 	projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 1000.0f);
 
     int count = 100;
-    int dis = 250;
-    float min = dis / 2.0f;
+    
     if (argc > 1)
     {
         int i = 0;
@@ -190,48 +193,78 @@ int main(int argc, char **argv)
         }
     }
 
-    glm::vec3 transformations[count];
-    for (int i = 0; i < count; i++)
+	int dis = 250;
+
+	if (argc > 2)
+	{
+		int i = 0;
+		while (i >= 0 && argv[2][i])
+		{
+			if (!isdigit(argv[2][i]))
+			{
+				i = -1;
+				break;
+			}
+			i++;
+		}
+		if (i > 0)
+		{
+			dis = atoi(argv[2]);
+		}
+	}
+
+	float min = dis / 2.0f;
+
+	glm::vec3 transformations[count];
+	//glm::mat4 models[count];
+	for (int i = 0; i < count; i++)
     {
         srand(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() + i);
-        transformations[i] = glm::vec3((rand() % dis) - min, (rand() % dis) - min, -((rand() % 1000)));
-    }
+		transformations[i] = glm::vec3((rand() % dis) - min, (rand() % dis) - min, (rand() % dis) - min);
+		//models[i] = glm::translate(glm::mat4(1.0f), transformations[i]);
+	}
 
 	while (!glfwWindowShouldClose(window))
     {
+		Debug::NewFrame();
+
         processInput(window);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         view = glm::translate(glm::mat4(1.0f), glm::vec3(x * -50, z * -50, y * 50));
 
-        mesh.GetShader()->setFloat("mixAmount", sin(glfwGetTime()) / 2.0f + 0.5f);
-        mesh.GetShader()->setMatrix4("view", view);
+		//mesh.GetShader()->setFloat("mixAmount", sin(glfwGetTime()) / 2.0f + 0.5f);
+		mesh.GetShader()->setFloat("time", glfwGetTime());
+		mesh.GetShader()->setMatrix4("view", view);
         mesh.GetShader()->setMatrix4("projection", projection);
 
         //model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 0.0f));
 		//model = glm::rotate(model, (float)glfwGetTime() + 1, glm::vec3(0.0f, 1.0f, 0.0f));
 		//model = glm::rotate(model, (float)glfwGetTime() + 2, glm::vec3(0.0f, 0.0f, 1.0f));
 
-        for (int i = 0; i < count; i++)
+		for (int i = 0; i < count; i++)
         {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, transformations[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            model = glm::rotate(model, (float)glfwGetTime() + 10 * i, glm::vec3(1.0f, 0.0f, 0.0f));
-            model = glm::rotate(model, (float)glfwGetTime() + 20 * i, glm::vec3(0.0f, 1.0f, 0.0f));
+            //float angle = 20.0f * i;
+            //model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            //model = glm::rotate(model, (float)glfwGetTime() + 10 * i, glm::vec3(1.0f, 0.0f, 0.0f));
+            //model = glm::rotate(model, (float)glfwGetTime() + 20 * i, glm::vec3(0.0f, 1.0f, 0.0f));
+
             // model = glm::rotate(model, -y, glm::vec3(1.0f, 0.0f, 0.0f));
             // model = glm::rotate(model, x, glm::vec3(0.0f, 1.0f, 0.0f));
 
-            mesh.GetShader()->setMatrix4("model", model);
-            srand(i);
-            float r = (rand() % 1000) / 1000.0f;
-            srand(r * 1000);
-            float g = (rand() % 1000) / 1000.0f;
-            srand(g * 1000);
-            float b = (rand() % 1000) / 1000.0f;
-            mesh.GetShader()->setFloat4("colMult", r, g, b, 1.0f);
+			//mesh.GetShader()->setMatrix4("model", models[i]);
+			mesh.GetShader()->setMatrix4("model", model);
+			mesh.GetShader()->setInt("id", i);
+            //srand(i);
+            //float r = (rand() % 1000) / 1000.0f;
+            //srand(r * 1000);
+            //float g = (rand() % 1000) / 1000.0f;
+            //srand(g * 1000);
+            //float b = (rand() % 1000) / 1000.0f;
+            //mesh.GetShader()->setFloat4("colMult", r, g, b, 1.0f);
 
             renderMesh(mesh);
         }
