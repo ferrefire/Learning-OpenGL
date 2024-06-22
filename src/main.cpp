@@ -30,6 +30,8 @@ float x, y, z;
 int width = 1600;
 int height = 900;
 
+glm::vec3 camPos = glm::vec3(3.0f, 5.0f, 10.0f);
+
 float triangle_vertices[] = {
 	-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
 	0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
@@ -92,18 +94,32 @@ void processInput(GLFWwindow *window)
 	if (leftrightPressed)
 		leftright += 0.02f;
 
+	y = 0;
+	x = 0;
+	z = 0;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		y += 0.02f;
+		y = 1.0f;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		y -= 0.02f;
+		y = -1.0f;
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		x += 0.02f;
+		x = 1.0f;
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		x -= 0.02f;
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        z += 0.02f;
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-        z -= 0.02f;
+		x = -1.0f;
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+		z = 1.0f;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+		z = -1.0f;
+
+	//glm::vec3 foward = glm::normalize(camPos - glm::vec3(0.0f, 0.0f, 0.0f));
+	//foward = glm::normalize(camPos - (camPos + foward));
+	glm::vec3 foward = glm::normalize(camPos - glm::vec3(0.0f, 0.0f, 0.0f));
+	glm::vec3 sideways = glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), foward));
+	glm::vec3 upwards = glm::cross(foward, sideways);
+	glm::vec3 movement = foward * -y + sideways * x + upwards * z;
+	//Utilities::PrintVec3(movement);
+	//glm::vec3 movement = glm::lookAt(camPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(-x, -z, y, 0.0f);
+	//Utilities::PrintVec3(movement);
+	camPos += movement;
 }
 
 GLFWwindow *setupGLFW()
@@ -147,7 +163,7 @@ int main(int argc, char **argv)
     //std::cout << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() << std::endl;
     //return (0);
 
-    std::string path = std::filesystem::current_path();
+	std::string path = std::filesystem::current_path();
 
     GLFWwindow *window = setupGLFW();
     if (window == NULL) return (quit(EXIT_FAILURE));
@@ -168,7 +184,7 @@ int main(int argc, char **argv)
     Mesh mesh(&shape, &shader);
 
 	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -6.0f));
+	//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -6.0f));
 
 	glm::mat4 projection;
 	projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 1000.0f);
@@ -230,9 +246,15 @@ int main(int argc, char **argv)
 
         processInput(window);
 
+		//Utilities::PrintVec3(camPos);
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        view = glm::translate(glm::mat4(1.0f), glm::vec3(x * -50, z * -50, y * 50));
+		//glm::vec3 foward = glm::normalize(camPos - glm::vec3(0.0f, 0.0f, 0.0f));
+		//view = glm::lookAt(camPos, camPos + foward, glm::vec3(0.0f, 1.0f, 0.0f));
+
+		view = glm::lookAt(camPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		//view = glm::translate(glm::mat4(1.0f), glm::vec3(x * -50, z * -50, y * 50));
 
 		//mesh.GetShader()->setFloat("mixAmount", sin(glfwGetTime()) / 2.0f + 0.5f);
 		mesh.GetShader()->setFloat("time", glfwGetTime());
@@ -247,10 +269,10 @@ int main(int argc, char **argv)
         {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, transformations[i]);
-            //float angle = 20.0f * i;
-            //model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            //model = glm::rotate(model, (float)glfwGetTime() + 10 * i, glm::vec3(1.0f, 0.0f, 0.0f));
-            //model = glm::rotate(model, (float)glfwGetTime() + 20 * i, glm::vec3(0.0f, 1.0f, 0.0f));
+    		float angle = 20.0f * i;
+    		model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+    		model = glm::rotate(model, (float)glfwGetTime() + 10 * i, glm::vec3(1.0f, 0.0f, 0.0f));
+    		model = glm::rotate(model, (float)glfwGetTime() + 20 * i, glm::vec3(0.0f, 1.0f, 0.0f));
 
             // model = glm::rotate(model, -y, glm::vec3(1.0f, 0.0f, 0.0f));
             // model = glm::rotate(model, x, glm::vec3(0.0f, 1.0f, 0.0f));
