@@ -21,8 +21,9 @@ class Shape
         unsigned int dataCount;
 
         std::vector<glm::vec3> vertices;
-        std::vector<glm::vec2> uvs;
-        std::vector<unsigned int> indices;
+		std::vector<glm::vec2> uvs;
+		std::vector<glm::vec3> normals;
+		std::vector<unsigned int> indices;
 
         std::vector<float> data;
         
@@ -35,8 +36,9 @@ class Shape
         unsigned int * GetIndices();
 
         std::vector<glm::vec3> Vertices();
-        std::vector<glm::vec2> Uvs();
-        std::vector<unsigned int> Indices();
+		std::vector<glm::vec2> Uvs();
+		std::vector<glm::vec3> Normals();
+		std::vector<unsigned int> Indices();
 
         unsigned int VertexCount();
         unsigned int IndiceCount();
