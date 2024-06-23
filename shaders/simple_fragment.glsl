@@ -1,17 +1,18 @@
 #version 330 core
 out vec4 FragColor;
-//in vec3 outColor;
 in vec2 UV;
 in vec3 Norm;
+in vec3 FragPos;
 in vec3 ranCol;
 
-//uniform vec4 ourColor;
 uniform sampler2D texture1;
 uniform sampler2D texture2;
 uniform float mixAmount;
 uniform float time;
 uniform int id;
 uniform vec4 colMult = vec4(1.0f);
+uniform vec3 lightPos;
+uniform vec3 viewPos;
 
 //float random (vec2 st)
 //{
@@ -20,20 +21,19 @@ uniform vec4 colMult = vec4(1.0f);
 
 void main()
 {
-    //FragColor = colMult * 2;
-    //FragColor = vec4(outColor * ourColor.rgb, 1.0);
-    //FragColor = mix(texture(texture1, UV), texture(texture2, UV), sin(time + id) * 0.5 + 0.5) * colMult;
-    //FragColor = vec4(Norm * 0.5f + 0.5f, 1.0f);
-	//return ;
-	//float ran1 = random(vec2(id, 1));
-	//float ran2 = random(vec2(1.0f, ran1));
-	//float ran3 = random(vec2(ran2, ran1));
-	float norm = dot(normalize(Norm), vec3(0.25f, 0.25f, 0.5f));
-	//norm = clamp(norm, 0.0f, 1.0f);
-	norm = norm * 0.5f + 0.5f;
-    norm = norm * norm;
-	//norm = 1.0f - clamp(norm, 0.0f, 1.0f);
-    //norm = 1.0f - (norm * norm);
-    //FragColor = texture(texture1, UV) * vec4(ranCol, 1.0f) * 3 * norm;
-    FragColor = vec4(ranCol, 1.0f) * 2 * norm;
+    vec3 lightDir = normalize(lightPos - FragPos);
+    //vec3 lightDir = lightPos;
+    vec3 norm = normalize(Norm);
+
+	float diff = dot(norm, lightDir);
+	diff = diff * 0.5f + 0.5f;
+    diff = diff * diff;
+    //vec3 diff = vec3(max(dot(norm, lightDir), 0.0));
+
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 reflectDir = reflect(-lightDir, norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    vec3 specular = vec3(0.75 * spec);
+
+    FragColor = vec4(ranCol * (vec3(0.25) + diff + specular), 1.0);
 }

@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "time.hpp"
+#include "utilities.hpp"
 
 class Camera
 {
@@ -25,6 +26,7 @@ class Camera
         void Move(glm::vec3 amount);
         void Rotate(glm::vec3 angles);
 
+        glm::vec3 Position();
         glm::vec3 Front();
         glm::vec3 Up();
         glm::vec3 Side();

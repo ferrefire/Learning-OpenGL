@@ -27,10 +27,16 @@ void Camera::Rotate(glm::vec3 angles)
     direction.z = sin(glm::radians(angles.y)) * cos(glm::radians(angles.x));
 
     front = glm::normalize(direction);
-    //up = glm::ve
-    side = glm::normalize(glm::cross(front, up));
+    //up = glm::normalize(Utilities::RotateVec3(front, -90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+    side = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
+    up = glm::normalize(glm::cross(side, front));
 
     view = glm::lookAt(position, position + front, up);
+}
+
+glm::vec3 Camera::Position()
+{
+    return (position);
 }
 
 glm::vec3 Camera::Front()

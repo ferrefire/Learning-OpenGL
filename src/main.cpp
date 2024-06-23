@@ -20,6 +20,10 @@
 #include <algorithm>
 #include <chrono>
 #include "camera.hpp"
+#include "input.hpp"
+
+const int width = 1600;
+const int height = 900;
 
 double Debug::timeLastSecond = 0;
 unsigned int Debug::totalFramesThisSecond = 0;
@@ -29,15 +33,18 @@ float Time::deltaTime = 0.0f;
 float Time::currentFrame = 0.0f;
 float Time::lastFrame = 0.0f;
 
+Camera cam = Camera();
+
+float Input::height = (float)height;
+float Input::width = (float)width;
+float Input::lastX = width * 0.5f;
+float Input::lastY = height * 0.5f;
+float Input::sensitivity = 0.1f;
+Camera &Input::camera = cam;
+
 float updown = 1, leftright = 1;
 bool updownPressed, leftrightPressed;
-int width = 1600;
-int height = 900;
 
-float lastX = 400, lastY = 300;
-const float sensitivity = 0.1f;
-
-Camera cam = Camera();
 
 float triangle_vertices[] = {
 	-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
@@ -86,52 +93,6 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
     //printf("Window resized: width-%d height-%d\n", width, height);
 }
 
-void processInput(GLFWwindow *window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-	{
-        cam.Move(cam.Front());
-    }
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-	{
-        cam.Move(-cam.Front());
-    }
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	{
-        cam.Move(cam.Side());
-    }
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	{
-        cam.Move(-cam.Side());
-    }
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-	{
-        cam.Move(cam.Up());
-    }
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-	{
-        cam.Move(-cam.Up());
-    }
-    
-	
-}
-
-void mouse_callback(GLFWwindow *window, double xpos, double ypos)
-{
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos;
-    lastX = xpos;
-    lastY = ypos;
-
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
-
-    cam.Rotate(cam.Angles() + glm::vec3(yoffset, xoffset, 0.0f));
-}
-
 GLFWwindow *setupGLFW()
 {
     glfwInit();
@@ -167,8 +128,11 @@ void setupSettings(int argc, char **argv, GLFWwindow *window)
     stbi_set_flip_vertically_on_load(true);
 	glEnable(GL_DEPTH_TEST);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPosCallback(window, mouse_callback);
     cam.speed = 10.0f;
+    glfwSetCursorPosCallback(window, Input::mouse_callback);
+    glfwSetScrollCallback(window, Input::scroll_callback);
+    
+    //Input::cam = &cam;
 }
 
 int main(int argc, char **argv)
@@ -191,19 +155,15 @@ int main(int argc, char **argv)
     shader.setInt("texture2", 1);
     brickTex.bindTexture(GL_TEXTURE0);
     stoneTex.bindTexture(GL_TEXTURE1);
+    //shader.setFloat3("lightPos", 0.25f, 0.25f, 0.5f);
+    shader.setFloat3("lightPos", 2500.0f, 2500.0f, 5000.0f);
 
     Shape shape(CUBE);
 
     Mesh mesh(&shape, &shader);
 
-	glm::mat4 view = glm::mat4(1.0f);
-	//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -6.0f));
-
-	glm::mat4 projection;
-	projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 1000.0f);
-
     int count = 100;
-    
+
     if (argc > 1)
     {
         int i = 0;
@@ -222,25 +182,28 @@ int main(int argc, char **argv)
         }
     }
 
-	int dis = 250;
+    int dis = 250;
 
-	if (argc > 2)
-	{
-		int i = 0;
-		while (i >= 0 && argv[2][i])
-		{
-			if (!isdigit(argv[2][i]))
-			{
-				i = -1;
-				break;
-			}
-			i++;
-		}
-		if (i > 0)
-		{
-			dis = atoi(argv[2]);
-		}
-	}
+    if (argc > 2)
+    {
+        int i = 0;
+        while (i >= 0 && argv[2][i])
+        {
+            if (!isdigit(argv[2][i]))
+            {
+                i = -1;
+                break;
+            }
+            i++;
+        }
+        if (i > 0)
+        {
+            dis = atoi(argv[2]);
+        }
+    }
+
+    glm::mat4 projection;
+	projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, dis * 5.0f);
 
 	float min = dis / 2.0f;
 
@@ -258,7 +221,7 @@ int main(int argc, char **argv)
         Time::NewFrame();
 		Debug::NewFrame();
 
-        processInput(window);
+        Input::processInput(window);
 
 		//Utilities::PrintVec3(camPos);
 
@@ -274,6 +237,7 @@ int main(int argc, char **argv)
 		mesh.GetShader()->setFloat("time", glfwGetTime());
 		mesh.GetShader()->setMatrix4("view", cam.View());
         mesh.GetShader()->setMatrix4("projection", projection);
+        mesh.GetShader()->setFloat3("viewPos", cam.Position());
 
         //model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 0.0f));
 		//model = glm::rotate(model, (float)glfwGetTime() + 1, glm::vec3(0.0f, 1.0f, 0.0f));
