@@ -15,7 +15,7 @@ uniform vec4 colMult = vec4(1.0f);
 
 //float random (vec2 st)
 //{
-//    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+//    return fract(sin(dot(st.xy, vec2(12d.9898,78.233))) * 43758.5453123);
 //}
 
 void main()
@@ -28,7 +28,12 @@ void main()
 	//float ran1 = random(vec2(id, 1));
 	//float ran2 = random(vec2(1.0f, ran1));
 	//float ran3 = random(vec2(ran2, ran1));
-	float norm = dot(normalize(Norm), vec3(0.0f, 0.25f, 0.75f));
-	norm = clamp(norm, 0.0f, 1.0f);
-    FragColor = texture(texture1, UV) * vec4(ranCol, 1.0f) * 2 * norm;
+	float norm = dot(normalize(Norm), vec3(0.25f, 0.25f, 0.5f));
+	//norm = clamp(norm, 0.0f, 1.0f);
+	norm = norm * 0.5f + 0.5f;
+    norm = norm * norm;
+	//norm = 1.0f - clamp(norm, 0.0f, 1.0f);
+    //norm = 1.0f - (norm * norm);
+    //FragColor = texture(texture1, UV) * vec4(ranCol, 1.0f) * 3 * norm;
+    FragColor = vec4(ranCol, 1.0f) * 2 * norm;
 }

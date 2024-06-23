@@ -6,5 +6,6 @@
 #include "errors.hpp"
 #include "utilities.hpp"
 #include "debug.hpp"
+#include "time.hpp"
 
 #endif

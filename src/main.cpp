@@ -19,18 +19,25 @@
 #include <tuple>
 #include <algorithm>
 #include <chrono>
+#include "camera.hpp"
 
 double Debug::timeLastSecond = 0;
 unsigned int Debug::totalFramesThisSecond = 0;
 unsigned int Shader::currentActiveShader = INT_MAX;
 
+float Time::deltaTime = 0.0f;
+float Time::currentFrame = 0.0f;
+float Time::lastFrame = 0.0f;
+
 float updown = 1, leftright = 1;
 bool updownPressed, leftrightPressed;
-float x, y, z;
 int width = 1600;
 int height = 900;
 
-glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 10.0f);
+float lastX = 400, lastY = 300;
+const float sensitivity = 0.1f;
+
+Camera cam = Camera();
 
 float triangle_vertices[] = {
 	-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
@@ -84,42 +91,45 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
-    //if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-	//	glClearColor(0.25f, 0.87f, 0.81f, 1.0f);
-
-	updownPressed = glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS;
-	if (updownPressed)
-		updown += 0.02f;
-	leftrightPressed = glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS;
-	if (leftrightPressed)
-		leftright += 0.02f;
-
-	y = 0;
-	x = 0;
-	z = 0;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		y = 1.0f;
+	{
+        cam.Move(cam.Front());
+    }
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		y = -1.0f;
+	{
+        cam.Move(-cam.Front());
+    }
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		x = 1.0f;
+	{
+        cam.Move(cam.Side());
+    }
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		x = -1.0f;
+	{
+        cam.Move(-cam.Side());
+    }
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-		z = 1.0f;
+	{
+        cam.Move(cam.Up());
+    }
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-		z = -1.0f;
+	{
+        cam.Move(-cam.Up());
+    }
+    
+	
+}
 
-	//glm::vec3 foward = glm::normalize(camPos - glm::vec3(0.0f, 0.0f, 0.0f));
-	//foward = glm::normalize(camPos - (camPos + foward));
-	glm::vec3 foward = glm::normalize(camPos - glm::vec3(0.0f, 0.0f, 0.0f));
-	glm::vec3 sideways = glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), foward));
-	glm::vec3 upwards = glm::cross(foward, sideways);
-	glm::vec3 movement = foward * -y + sideways * x + upwards * z;
-	//Utilities::PrintVec3(movement);
-	//glm::vec3 movement = glm::lookAt(camPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(-x, -z, y, 0.0f);
-	//Utilities::PrintVec3(movement);
-	camPos += movement;
+void mouse_callback(GLFWwindow *window, double xpos, double ypos)
+{
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    cam.Rotate(cam.Angles() + glm::vec3(yoffset, xoffset, 0.0f));
 }
 
 GLFWwindow *setupGLFW()
@@ -148,7 +158,7 @@ GLFWwindow *setupGLFW()
     return (window);
 }
 
-void setupSettings(int argc, char **argv)
+void setupSettings(int argc, char **argv, GLFWwindow *window)
 {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -156,6 +166,9 @@ void setupSettings(int argc, char **argv)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     stbi_set_flip_vertically_on_load(true);
 	glEnable(GL_DEPTH_TEST);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    cam.speed = 10.0f;
 }
 
 int main(int argc, char **argv)
@@ -168,7 +181,7 @@ int main(int argc, char **argv)
     GLFWwindow *window = setupGLFW();
     if (window == NULL) return (quit(EXIT_FAILURE));
 
-    setupSettings(argc, argv);
+    setupSettings(argc, argv, window);
 
     Texture brickTex((path + "/textures/brick.png").c_str());
     Texture stoneTex((path + "/textures/stone.png").c_str());
@@ -242,6 +255,7 @@ int main(int argc, char **argv)
 
 	while (!glfwWindowShouldClose(window))
     {
+        Time::NewFrame();
 		Debug::NewFrame();
 
         processInput(window);
@@ -253,12 +267,12 @@ int main(int argc, char **argv)
 		//glm::vec3 foward = glm::normalize(camPos - glm::vec3(0.0f, 0.0f, 0.0f));
 		//view = glm::lookAt(camPos, camPos + foward, glm::vec3(0.0f, 1.0f, 0.0f));
 
-		view = glm::lookAt(camPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		//view = glm::lookAt(camPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		//view = glm::translate(glm::mat4(1.0f), glm::vec3(x * -50, z * -50, y * 50));
 
 		//mesh.GetShader()->setFloat("mixAmount", sin(glfwGetTime()) / 2.0f + 0.5f);
 		mesh.GetShader()->setFloat("time", glfwGetTime());
-		mesh.GetShader()->setMatrix4("view", view);
+		mesh.GetShader()->setMatrix4("view", cam.View());
         mesh.GetShader()->setMatrix4("projection", projection);
 
         //model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 0.0f));
