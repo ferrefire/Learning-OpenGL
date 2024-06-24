@@ -5,5 +5,6 @@
 #include "mesh.hpp"
 
 void renderMesh(Mesh mesh);
+void renderMeshInstanced(Mesh mesh, int count);
 
 #endif

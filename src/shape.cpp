@@ -39,9 +39,9 @@ Shape::Shape(int preset)
     {
         name = std::string("quad");
 
-        vertices.push_back(glm::vec3(-0.5f, -0.5f, 0.0f));
-        vertices.push_back(glm::vec3(0.5f, -0.5f, 0.0f));
         vertices.push_back(glm::vec3(-0.5f, 0.5f, 0.0f));
+        vertices.push_back(glm::vec3(0.5f, -0.5f, 0.0f));
+        vertices.push_back(glm::vec3(-0.5f, -0.5f, 0.0f));
         vertices.push_back(glm::vec3(0.5f, 0.5f, 0.0f));
 
         uvs.push_back(glm::vec2(0.0f, 0.0f));
@@ -57,9 +57,9 @@ Shape::Shape(int preset)
 		indices.push_back(0);
         indices.push_back(1);
         indices.push_back(2);
+        indices.push_back(0);
         indices.push_back(3);
         indices.push_back(1);
-        indices.push_back(2);
 
         vertexCount = vertices.size();
         indiceCount = indices.size();
