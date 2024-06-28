@@ -56,6 +56,12 @@ void Shader::setFloat4(std::string name, float x, float y, float z, float w)
     glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w);
 }
 
+void Shader::setFloat4(std::string name, glm::vec4 vec)
+{
+    useShader();
+    glUniform4f(glGetUniformLocation(ID, name.c_str()), vec.x, vec.y, vec.z, vec.w);
+}
+
 void Shader::setMatrix4(std::string name, glm::mat4 transformation)
 {
     useShader();

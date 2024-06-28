@@ -13,3 +13,10 @@ void renderMeshInstanced(Mesh mesh, int count)
     glBindVertexArray(mesh.GetVAO());
     glDrawElementsInstanced(GL_TRIANGLES, mesh.GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0, count);
 }
+
+void renderObject(Object * object)
+{
+    glUseProgram(object->GetMesh()->GetShader()->ID);
+    glBindVertexArray(object->GetMesh()->GetVAO());
+    glDrawElements(GL_TRIANGLES, object->GetMesh()->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0);
+}

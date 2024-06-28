@@ -31,6 +31,7 @@ class Shape
     public:
         Shape();
         Shape(int preset);
+        Shape(int preset, float scale);
 
         float * GetData();
         unsigned int * GetIndices();
@@ -46,6 +47,7 @@ class Shape
 
         void Rotate(float degrees, glm::vec3 axis);
         void Translate(glm::vec3 translation);
+        void Scale(glm::vec3 scale);
 
         void RecalculateData();
         void Join(Shape joinShape);

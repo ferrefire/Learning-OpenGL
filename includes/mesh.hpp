@@ -17,10 +17,10 @@ class Mesh
         unsigned int EBO;
         unsigned int elements;
 
-        Shader *shader;
-        Shape *shape;
+        Shader * shader;
+        Shape * shape;
     public:
-        Mesh(Shape *shape, Shader *shader);
+        Mesh(Shape * shape, Shader * shader);
 
         unsigned int GetVAO();
         unsigned int GetVBO();

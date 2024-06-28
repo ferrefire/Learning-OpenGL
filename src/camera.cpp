@@ -2,6 +2,7 @@
 
 Camera::Camera()
 {
+    projection = glm::perspective(glm::radians(FOV), (float)width / (float)height, near, far);
     Move(glm::vec3(0.0f));
     Rotate(glm::vec3(0.0f, -90.0f, 0.0f));
 }
@@ -27,7 +28,6 @@ void Camera::Rotate(glm::vec3 angles)
     direction.z = sin(glm::radians(angles.y)) * cos(glm::radians(angles.x));
 
     front = glm::normalize(direction);
-    //up = glm::normalize(Utilities::RotateVec3(front, -90.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
     side = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
     up = glm::normalize(glm::cross(side, front));
 
@@ -62,4 +62,9 @@ glm::vec3 Camera::Angles()
 glm::mat4 Camera::View()
 {
     return (view);
+}
+
+glm::mat4 Camera::Projection()
+{
+    return (projection);
 }

@@ -27,7 +27,7 @@
 //	// glEnableVertexAttribArray(2);
 //}
 
-Mesh::Mesh(Shape *shape, Shader *shader)
+Mesh::Mesh(Shape * shape, Shader * shader)
 {
 	this->shader = shader;
     this->shape = shape;

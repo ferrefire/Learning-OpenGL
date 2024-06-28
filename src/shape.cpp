@@ -1,14 +1,5 @@
 #include "shape.hpp"
 
-//Shape::Shape(std::string name, int vertices_size, float vertices[], int indices_size, unsigned int indices[])
-//{
-//    this->name = name;
-//    for (int i = 0; i < vertices_size; i++)
-//        this->vertices.push_back(vertices[i]);
-//    for (int i = 0; i < indices_size; i++)
-//        this->indices.push_back(indices[i]);
-//}
-
 Shape::Shape()
 {
 
@@ -95,6 +86,11 @@ Shape::Shape(int preset)
     RecalculateData();
 }
 
+Shape::Shape(int preset, float scale)
+{
+    
+}
+
 float * Shape::GetData()
 {
     return (data.data());
@@ -172,6 +168,21 @@ void Shape::Translate(glm::vec3 translation)
     {
         glm::vec4 ri = glm::vec4(vertices[i], 1.0f);
         vertices[i] = translationMatrix * ri;
+    }
+
+    RecalculateData();
+}
+
+void Shape::Scale(glm::vec3 scale)
+{
+    glm::mat4 scaleMatrix = glm::mat4(1.0f);
+    scaleMatrix = glm::scale(scaleMatrix, scale);
+
+    int size = vertices.size();
+    for (int i = 0; i < size; i++)
+    {
+        glm::vec4 si = glm::vec4(vertices[i], 1.0f);
+        vertices[i] = scaleMatrix * si;
     }
 
     RecalculateData();
