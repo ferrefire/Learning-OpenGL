@@ -30,7 +30,9 @@ const int height = 900;
 
 double Debug::timeLastSecond = 0;
 unsigned int Debug::totalFramesThisSecond = 0;
+
 unsigned int Shader::currentActiveShader = INT_MAX;
+unsigned int Mesh::currentActiveVAO = INT_MAX;
 
 float Time::deltaTime = 0.0f;
 float Time::currentFrame = 0.0f;

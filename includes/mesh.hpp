@@ -20,6 +20,8 @@ class Mesh
         Shader * shader;
         Shape * shape;
     public:
+		static unsigned int currentActiveVAO;
+
         Mesh(Shape * shape, Shader * shader);
 
         unsigned int GetVAO();
@@ -28,6 +30,8 @@ class Mesh
 
         Shader * GetShader();
         Shape * GetShape();
+
+		void UseMesh();
 };
 
 #endif
