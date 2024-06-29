@@ -5,6 +5,11 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath)
     ID = createShaderProgram(vertexPath, fragmentPath);
 }
 
+Shader::Shader(const char *computePath)
+{
+    ID = createShaderProgram(computePath);
+}
+
 void Shader::useShader()
 {
 	if (currentActiveShader != ID)

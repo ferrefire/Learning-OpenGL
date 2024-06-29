@@ -1,4 +1,4 @@
-#version 330 core
+#version 460 core
 in vec2 UV;
 in vec3 Normal;
 in vec3 FragmentPosition;

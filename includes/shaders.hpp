@@ -10,6 +10,8 @@
 
 long compileShader(int type, const char *path);
 unsigned int createShaderProgram(unsigned int vertexShader, unsigned int fragmentShader);
+unsigned int createShaderProgram(unsigned int computeShader);
 unsigned int createShaderProgram(const char *vertexPath, const char *fragmentPath);
+unsigned int createShaderProgram(const char *computePath);
 
 #endif

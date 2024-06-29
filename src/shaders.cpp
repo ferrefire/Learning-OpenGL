@@ -71,10 +71,42 @@ unsigned int createShaderProgram(unsigned int vertexShader, unsigned int fragmen
     return (shaderProgram);
 }
 
+unsigned int createShaderProgram(unsigned int computeShader)
+{
+    unsigned int shaderProgram;
+    shaderProgram = glCreateProgram();
+
+    glAttachShader(shaderProgram, computeShader);
+
+    glLinkProgram(shaderProgram);
+
+    glDeleteShader(computeShader);
+
+    int success;
+    char infoLog[512];
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER_PROGRAM::LINKING_FAILED\n"
+                  << infoLog << std::endl;
+        quit(EXIT_FAILURE);
+    }
+
+    return (shaderProgram);
+}
+
 unsigned int createShaderProgram(const char *vertexPath, const char *fragmentPath)
 {
     unsigned int vertexShader = compileShader(GL_VERTEX_SHADER, vertexPath);
     unsigned int fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentPath);
 
     return (createShaderProgram(vertexShader, fragmentShader));
+}
+
+unsigned int createShaderProgram(const char *computePath)
+{
+    unsigned int computeShader = compileShader(GL_COMPUTE_SHADER, computePath);
+
+    return (createShaderProgram(computeShader));
 }

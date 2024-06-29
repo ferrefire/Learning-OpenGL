@@ -95,6 +95,7 @@ void setupSettings(int argc, char **argv, GLFWwindow *window)
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+    //glEnable(GL_PROGRAM_POINT_SIZE);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     cam.speed = 10.0f;
     glfwSetCursorPosCallback(window, Input::mouse_callback);
@@ -160,8 +161,13 @@ int main(int argc, char **argv)
     //instanceShader.setInt("instanceCount", 10000);
     //instanceShader.setInt("instanceCountSqrt", 100);
 
+    Shader computeShader((path + "/shaders/compute_shader.glsl").c_str());
+    computeShader.setInt("instanceCount", count);
+    computeShader.setInt("instanceCountSqrt", sqrt(count));
+
     Manager::AddShader(&shader);
     Manager::AddShader(&instanceShader);
+    Manager::AddShader(&computeShader);
 
     Shape shape(CUBE);
     Shape plane(QUAD);
@@ -185,6 +191,34 @@ int main(int argc, char **argv)
 
     Manager::AddInstanceBatch(&instanceMesh, count);
 
+    //struct data
+    //{
+    //    glm::vec3 pos;
+    //    glm::vec4 col;
+    //};
+//
+    //std::vector<data> d;
+//
+    //for (int i = 0; i < count; i++)
+    //{
+    //    data nd;
+    //    nd.pos = glm::vec3(GetRandom11(), GetRandom11(), GetRandom11()) * 1000.0f;
+    //    nd.col = glm::vec4(GetRandom01(), GetRandom01(), GetRandom01(), 1.0f);
+    //    d.push_back(nd);
+    //}
+
+    unsigned int buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, count * sizeof(float) * 7, NULL, GL_STATIC_COPY);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, buffer);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+    int inssqrt = sqrt(count);
+
+    //computeShader.useShader();
+    //glDispatchCompute(count, 1, 1);
+
     while (!glfwWindowShouldClose(window))
     {
         Time::NewFrame();
@@ -196,6 +230,9 @@ int main(int argc, char **argv)
 
         object.Move(glm::vec3(0.0f, Time::deltaTime * 0.1f, Time::deltaTime));
         object.Rotate(glm::vec3(Time::deltaTime * 100));
+
+        computeShader.useShader();
+        glDispatchCompute(count, 1, 1);
 
         //object.GetMesh()->GetShader()->setMatrix4("model", model);
         //object.GetMesh()->GetShader()->setFloat("time", glfwGetTime());
