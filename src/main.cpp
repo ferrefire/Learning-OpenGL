@@ -89,8 +89,9 @@ void setupSettings(int argc, char **argv, GLFWwindow *window)
     //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    if (argc > 1 && strlen(argv[1]) == 1 && isdigit(*argv[1]) && *argv[1] - '0' == 1)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //if (argc > 1 && strlen(argv[1]) == 1 && isdigit(*argv[1]) && *argv[1] - '0' == 1)
+    //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     stbi_set_flip_vertically_on_load(true);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -150,6 +151,7 @@ int main(int argc, char **argv)
     //Texture stoneTex((path + "/textures/stone.png").c_str());
 
     Shader shader((path + "/shaders/default_vertex.glsl").c_str(), (path + "/shaders/default_fragment.glsl").c_str());
+    Shader terrainShader((path + "/shaders/terrain_vertex.glsl").c_str(), (path + "/shaders/terrain_fragment.glsl").c_str());
     Shader instanceShader((path + "/shaders/instanced_vertex.glsl").c_str(), (path + "/shaders/instanced_fragment.glsl").c_str());
     //shader.setInt("texture1", 0);
     //shader.setInt("texture2", 1);
@@ -159,6 +161,10 @@ int main(int argc, char **argv)
     shader.setMatrix4("projection", cam.Projection());
     shader.setFloat("near", cam.near);
     shader.setFloat("far", cam.far);
+    terrainShader.setFloat3("lightPosition", 25000.0f, 25000.0f, 50000.0f);
+    terrainShader.setMatrix4("projection", cam.Projection());
+    terrainShader.setFloat("near", cam.near);
+    terrainShader.setFloat("far", cam.far);
     instanceShader.setFloat3("lightPosition", 25000.0f, 25000.0f, 50000.0f);
     instanceShader.setMatrix4("projection", cam.Projection());
     instanceShader.setFloat("near", cam.near);
@@ -176,17 +182,18 @@ int main(int argc, char **argv)
     Print(cam.far);
 
     Manager::AddShader(&shader);
+    Manager::AddShader(&terrainShader);
     Manager::AddShader(&instanceShader);
     Manager::AddShader(&computeShader);
 
     Shape shape(CUBE);
-    Shape plane(QUAD);
+    Shape plane(PLANE);
     plane.Scale(glm::vec3(1000.0f));
-    plane.Rotate(90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+    //plane.Rotate(90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 
     Mesh mesh(&shape, &shader);
     Mesh instanceMesh(&shape, &instanceShader);
-    Mesh planeMesh(&plane, &shader);
+    Mesh planeMesh(&plane, &terrainShader);
 
     //mesh.GetShader()->setInt("countRoot", count * count);
     //mesh.GetShader()->setInt("countRootRoot", count);

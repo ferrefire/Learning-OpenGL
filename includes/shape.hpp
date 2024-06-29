@@ -10,6 +10,7 @@
 #define TRIANGLE 0
 #define QUAD 1
 #define CUBE 2
+#define PLANE 3
 
 class Shape
 {
@@ -44,6 +45,8 @@ class Shape
         unsigned int VertexCount();
         unsigned int IndiceCount();
         unsigned int DataCount();
+
+        bool vertexOnly = false;
 
         void Rotate(float degrees, glm::vec3 axis);
         void Translate(glm::vec3 translation);
