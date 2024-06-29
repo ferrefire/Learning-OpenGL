@@ -26,8 +26,8 @@ uniform mat4 projection;
 uniform vec3 viewPosition;
 //uniform vec4 color;
 
-uniform int instanceCount;
-uniform int instanceCountSqrt;
+//uniform int instanceCount;
+//uniform int instanceCountSqrt;
 
 float random (vec2 st)
 {
@@ -47,7 +47,7 @@ void main()
     FragmentPosition = (model * vec4(iPosition + data[gl_InstanceID].pos, 1.0)).xyz;
 
 	UV = iUV;
-	Normal =  (model * vec4(iNormal, 0.0)).xyz;
+	Normal = (model * vec4(iNormal, 0.0)).xyz;
     //float ran = random(vec2(x, z));
     //Color = vec4(ran, random(vec2(ran, 1.0)), random(vec2(1.0, ran)), 1.0);
     Color = data[gl_InstanceID].col;
