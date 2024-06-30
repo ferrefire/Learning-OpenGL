@@ -28,7 +28,8 @@ void main()
 
     vec3 viewDirection = normalize(viewPosition - FragmentPosition);
     vec3 reflectDirection = reflect(-lightDirection, normal);
-    float specular = pow(max(dot(viewDirection, reflectDirection), 0.0), 32);
+    //float specular = pow(max(dot(viewDirection, reflectDirection), 0.0), 32);
+    float specular = 0;
     vec3 specularColor = vec3(0.5 * specular);
 
     oFragmentColor = mix(vec4(Color.xyz * (vec3(0.25) + diffuse + specularColor), 1.0), vec4(1.0), GetDepth());

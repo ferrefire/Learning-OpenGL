@@ -33,6 +33,8 @@ void Manager::NewFrame()
         shaders[i]->setFloat3("viewPosition", camera.Position());
     }
 
+    glEnable(GL_CULL_FACE);
+
     size = objects.size();
     for (int i = 0; i < size; i++)
     {
@@ -40,6 +42,8 @@ void Manager::NewFrame()
         objects[i]->GetMesh()->GetShader()->setFloat4("color", objects[i]->Color());
         renderObject(objects[i]);
     }
+
+    glDisable(GL_CULL_FACE);
 
     size = instanceBatches.size();
     for (int i = 0; i < size; i++)

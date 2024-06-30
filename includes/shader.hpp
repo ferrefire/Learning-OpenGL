@@ -15,6 +15,7 @@ class Shader
 		static unsigned int currentActiveShader;
 
         unsigned int ID;
+        bool cullFaces = true;
 
         Shader(const char *vertexPath, const char *fragmentPath);
         Shader(const char *computePath);

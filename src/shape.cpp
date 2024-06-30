@@ -11,13 +11,17 @@ Shape::Shape(int preset)
     {
         name = std::string("triangle");
 
-        vertices.push_back(glm::vec3(-0.5f, -0.5f, 0.0f));
-        vertices.push_back(glm::vec3(0.5f, -0.5f, 0.0f));
         vertices.push_back(glm::vec3(0.0f, 0.5f, 0.0f));
+        vertices.push_back(glm::vec3(0.5f, -0.5f, 0.0f));
+        vertices.push_back(glm::vec3(-0.5f, -0.5f, 0.0f));
 
-        uvs.push_back(glm::vec2(0.0f, 0.0f));
-        uvs.push_back(glm::vec2(1.0f, 0.0f));
         uvs.push_back(glm::vec2(0.5f, 1.0f));
+        uvs.push_back(glm::vec2(1.0f, 0.0f));
+        uvs.push_back(glm::vec2(0.0f, 0.0f));
+
+        normals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
+        normals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
+        normals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
 
         indices.push_back(0);
         indices.push_back(1);
@@ -87,7 +91,7 @@ Shape::Shape(int preset)
         name = std::string("plane");
         vertexOnly = true;
 
-        int sideVertCount = 16;
+        int sideVertCount = 1000;
         float halfLength = 0.5f;
 
         for (int i = 0, x = 0; x <= sideVertCount; ++x)
@@ -266,6 +270,24 @@ Shape::Shape(int preset)
 
         vertexCount = vertices.size();
         indiceCount = indices.size();
+    }
+    else if (preset == BLADE)
+    {
+        Shape base(QUAD);
+        base.Translate(glm::vec3(0.0f, -0.5f, 0.0));
+        Shape top(TRIANGLE);
+        top.Translate(glm::vec3(0.0f, 0.5f, 0.0));
+
+        Join(base);
+        Join(top);
+
+        vertexCount = vertices.size();
+        indiceCount = indices.size();
+
+        for (int i = 0; i < vertexCount; i++)
+        {
+            uvs[i] = glm::vec2(vertices[i].x + 0.5f, (vertices[i].y + 1.0f) * 0.5f);
+        }
     }
 
     RecalculateData();

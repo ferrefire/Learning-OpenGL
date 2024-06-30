@@ -86,19 +86,37 @@ float GenerateNoise(vec2 uv, int layers)
         float mult = 1.0 / (i + 1);
         noise += snoise(uv * scale + vec2(1000, 1000) * i) * weight;
         maxNoise += weight;
-        weight *= 0.6;
-        scale *= 1.75;
+        weight *= 0.4;
+        scale *= 2.0;
     }
 
     noise = InvLerp(0.0, maxNoise, noise);
     noise = noise * noise * noise;
-    //float expNoise = 1.0 - noise;
-    //expNoise = expNoise * expNoise;
-    //noise = 1.0 - expNoise;
 
     return (noise);
 }
 
+vec3 GenerateNoiseNormal(vec2 uv, int layers, float stepSize)
+{
+    float left = GenerateNoise(uv - vec2(stepSize, 0), layers);
+    float right = GenerateNoise(uv + vec2(stepSize, 0), layers);
+    float down = GenerateNoise(uv - vec2(0, stepSize), layers);
+    float up = GenerateNoise(uv + vec2(0, stepSize), layers);
+
+    vec3 normalTS = vec3((left - right) / (stepSize * 2), (down - up) / (stepSize * 2), 1);
+    //normalTS.xy *= 0.1;
+
+    return (normalize(normalTS).xzy);
+}
+
+float GetSteepness(vec3 normal)
+{
+    float steepness = dot(normal, vec3(0.0, 1.0, 0.0));
+    steepness = steepness * steepness;
+    steepness = 1.0 - steepness;
+
+    return steepness;
+}
 
 
 #endif

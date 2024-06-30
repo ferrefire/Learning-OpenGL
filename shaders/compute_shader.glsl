@@ -51,23 +51,27 @@ void main()
     if (gl_GlobalInvocationID.x >= instanceCountSqrt || gl_GlobalInvocationID.y >= instanceCountSqrt) return ;
     uint index = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * instanceCountSqrt;
     //uint index = gl_GlobalInvocationID;
-    int x = int(gl_GlobalInvocationID.x);
-    int y = 5;
-    int z = int(gl_GlobalInvocationID.y);
+    float x = float(gl_GlobalInvocationID.x) - instanceCountSqrt * 0.5 + floor(viewPosition.x);
+    float z = float(gl_GlobalInvocationID.y) - instanceCountSqrt * 0.5 + floor(viewPosition.z);
 
-    vec3 pos = GetRandomVec3(float(index) / instanceCount);
+    vec2 uv = vec2(x, z) * 0.001;
+
+    if (GetSteepness(GenerateNoiseNormal(uv, 7, 0.001)) > 0.5) return ;
+
+    float y = GenerateNoise(uv, 7) * 500 + 1.5;
+
+    vec3 pos = GetRandomVec3(float(x + z * instanceCountSqrt) / instanceCount);
+    pos.y -= 1.0;
     //vec3 position = vec3(x, 5, z) + pos * (sin(time + index / (instanceCountSqrt * 50.0)) * 0.5 + 0.5) * 100;
     //float perlinNoise = snoise(vec2(x, z) / instanceCountSqrt * 10) * 100;
-    float perlinNoise = GenerateNoise(vec2(x, z) / instanceCountSqrt * 2, 7) * 500;
-    perlinNoise = floor(perlinNoise);
-    vec3 position = vec3(x, perlinNoise, z);
+    vec3 position = vec3(x, y, z) + pos;
     //if (dot(viewPosition - position, viewPosition - position) > (far * far) * 1.25 || InView(position, 0.0) == 0) return ;
     if (InView(position, 0.1) == 0) return ;
     //data[gl_GlobalInvocationID.x].pos = ((sin(time + float(gl_GlobalInvocationID.x) / float(gl_NumWorkGroups.x) * 25) * 0.5 + 0.5) * pos * 100) + vec3(x, y, z);
     index = atomicAdd(computeCount, 1);
     data[index].pos = position;
     //data[index].col = vec4(GetRandomVec3(length(pos)), 1.0);
-    data[index].col = vec4(0.2, 0.75, 0.2, 1.0);
+    data[index].col = vec4(0.25, 0.6, 0.1, 1.0);
     
     //data[index].col = vec4(vec3(1.0 - float(index) / instanceCount), 1.0);
 }
