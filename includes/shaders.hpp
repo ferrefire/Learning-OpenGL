@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include "errors.hpp"
+#include "utilities.hpp"
 
 long compileShader(int type, const char *path);
 unsigned int createShaderProgram(unsigned int vertexShader, unsigned int fragmentShader);

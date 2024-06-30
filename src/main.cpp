@@ -150,9 +150,9 @@ int main(int argc, char **argv)
     //Texture brickTex((path + "/textures/brick.png").c_str());
     //Texture stoneTex((path + "/textures/stone.png").c_str());
 
-    Shader shader((path + "/shaders/default_vertex.glsl").c_str(), (path + "/shaders/default_fragment.glsl").c_str());
-    Shader terrainShader((path + "/shaders/terrain_vertex.glsl").c_str(), (path + "/shaders/terrain_fragment.glsl").c_str());
-    Shader instanceShader((path + "/shaders/instanced_vertex.glsl").c_str(), (path + "/shaders/instanced_fragment.glsl").c_str());
+    Shader shader("default_vertex.glsl", "default_fragment.glsl");
+    Shader terrainShader("terrain_vertex.glsl", "terrain_fragment.glsl");
+    Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
     //shader.setInt("texture1", 0);
     //shader.setInt("texture2", 1);
     //brickTex.bindTexture(GL_TEXTURE0);
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
     //instanceShader.setInt("instanceCount", 10000);
     //instanceShader.setInt("instanceCountSqrt", 100);
 
-    Shader computeShader((path + "/shaders/compute_shader.glsl").c_str());
+    Shader computeShader("compute_shader.glsl");
     computeShader.setInt("instanceCount", count);
     computeShader.setInt("instanceCountSqrt", sqrt(count));
     computeShader.setMatrix4("projection", cam.Projection());
@@ -204,7 +204,7 @@ int main(int argc, char **argv)
     floor.Paint(glm::vec4(0.1f, 0.75f, 0.1f, 1.0f));
 
     Manager::AddObject(&object);
-    Manager::AddObject(&floor);
+    //Manager::AddObject(&floor);
 
     Manager::AddInstanceBatch(&instanceMesh, count);
 

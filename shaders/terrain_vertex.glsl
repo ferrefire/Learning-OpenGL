@@ -13,11 +13,15 @@ uniform mat4 projection;
 uniform vec3 viewPosition;
 uniform vec4 color;
 
+#include "noise.glsl"
+
 void main()
 {
-    gl_Position = projection * view * model * vec4(iPosition, 1.0);
-    FragmentPosition = (model * vec4(iPosition, 1.0)).xyz;
-	UV = iPosition.xz;
+    UV = iPosition.xz;
+    vec3 position = iPosition;
+    position.y = snoise(UV) * 100.0;
+    gl_Position = projection * view * model * vec4(position, 1.0);
+    FragmentPosition = (model * vec4(position, 1.0)).xyz;
 	Normal =  vec3(0.0, 1.0, 0.0);
     Color = color;
 }

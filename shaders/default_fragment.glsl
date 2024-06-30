@@ -14,21 +14,7 @@ uniform vec3 viewPosition;
 uniform float near;
 uniform float far;
 
-//float random (vec2 st)
-//{
-//    return fract(sin(dot(st.xy, vec2(12d.9898,78.233))) * 43758.5453123);
-//}
-
-float GetDepth()
-{
-    float depth = gl_FragCoord.z;
-
-    depth = depth * 2.0 - 1.0;
-    depth = (2.0 * near * far) / (far + near - depth * (far - near));
-    depth = depth / far;
-
-    return (depth);
-}
+#include "depth.glsl"
 
 void main()
 {

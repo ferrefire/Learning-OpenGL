@@ -29,6 +29,9 @@ uniform float near;
 uniform int instanceCount;
 uniform int instanceCountSqrt;
 
+#include "culling.glsl"
+#include "noise.glsl"
+
 float GetRandom(float x)
 {
     return (fract(sin(x * 10000)*100000.0));
@@ -43,22 +46,6 @@ vec3 GetRandomVec3(float i)
     return (vec3(x, y, z));
 }
 
-int InView(vec3 position, float tolerance)
-{
-    vec4 viewSpace = projection * view * vec4(position, 1.0);
-
-    vec3 clipSpace = viewSpace.xyz;
-    clipSpace /= -viewSpace.w;
-
-    clipSpace.x = clipSpace.x * 0.5f + 0.5f;
-    clipSpace.y = clipSpace.y * 0.5f + 0.5f;
-    clipSpace.z = viewSpace.w;
-
-    return (clipSpace.x < -tolerance || clipSpace.x > 1.0f + tolerance ||
-        clipSpace.y < -tolerance || clipSpace.y > 1.0f + tolerance ||
-        clipSpace.z <= -(tolerance * 0.5f)) ? 0 : 1;
-}
-
 void main()
 {
     if (gl_GlobalInvocationID.x >= instanceCountSqrt || gl_GlobalInvocationID.y >= instanceCountSqrt) return ;
@@ -69,12 +56,18 @@ void main()
     int z = int(gl_GlobalInvocationID.y);
 
     vec3 pos = GetRandomVec3(float(index) / instanceCount);
-    vec3 position = vec3(x, 5, z) + pos * (sin(time + index / (instanceCountSqrt * 50.0)) * 0.5 + 0.5) * 100;
-    if (dot(viewPosition - position, viewPosition - position) > (far * far) || InView(position, 0.0) == 0) return ;
+    //vec3 position = vec3(x, 5, z) + pos * (sin(time + index / (instanceCountSqrt * 50.0)) * 0.5 + 0.5) * 100;
+    //float perlinNoise = snoise(vec2(x, z) / instanceCountSqrt * 10) * 100;
+    float perlinNoise = GenerateNoise(vec2(x, z) / instanceCountSqrt * 2, 7) * 500;
+    perlinNoise = floor(perlinNoise);
+    vec3 position = vec3(x, perlinNoise, z);
+    //if (dot(viewPosition - position, viewPosition - position) > (far * far) * 1.25 || InView(position, 0.0) == 0) return ;
+    if (InView(position, 0.1) == 0) return ;
     //data[gl_GlobalInvocationID.x].pos = ((sin(time + float(gl_GlobalInvocationID.x) / float(gl_NumWorkGroups.x) * 25) * 0.5 + 0.5) * pos * 100) + vec3(x, y, z);
     index = atomicAdd(computeCount, 1);
     data[index].pos = position;
-    data[index].col = vec4(GetRandomVec3(length(pos)), 1.0);
+    //data[index].col = vec4(GetRandomVec3(length(pos)), 1.0);
+    data[index].col = vec4(0.2, 0.75, 0.2, 1.0);
     
     //data[index].col = vec4(vec3(1.0 - float(index) / instanceCount), 1.0);
 }

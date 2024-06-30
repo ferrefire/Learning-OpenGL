@@ -2,28 +2,32 @@
 
 //"/home/ferrefire/Projects/OpenGL/LearningOpenGL/shaders/simple_fragment.glsl"
 
+void replaceShaderIncludes(std::string &shaderString, std::string &currentPath)
+{
+    size_t includePosition = shaderString.find("#include \"");
+    while (includePosition != std::string::npos)
+    {
+        includePosition += 10;
+        std::string includeFile = shaderString.substr(includePosition, shaderString.find("\"", includePosition) - includePosition);
+        std::string includeString = Utilities::FileToString((currentPath + "/shaders/includes/" + includeFile).c_str());
+        std::string replaceString = "#include \"" + includeFile + "\"";
+        Utilities::Replace(shaderString, replaceString, includeString);
+        includePosition = shaderString.find("#include \"");
+    }
+    //std::cout << includeFile << std::endl;
+}
+
 long compileShader(int type, const char *path)
 {
-    std::string shaderString;
-    std::ifstream shaderFile;
+    std::string currentPath = std::filesystem::current_path();
+    std::string shaderString = Utilities::FileToString((currentPath + "/shaders/" + path).c_str());
+    //std::string includeString = Utilities::FileToString((currentPath + "/shaders/includes/culling.glsl").c_str());
 
-    shaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    try
-    {
-        shaderFile.open(path);
+    replaceShaderIncludes(shaderString, currentPath);
 
-        std::stringstream shaderStream;
-        shaderStream << shaderFile.rdbuf();
+    //std::string replaceString = "#include \"culling.glsl\"";
 
-        shaderFile.close();
-        shaderString = shaderStream.str();
-    }
-    catch (std::ifstream::failure e)
-    {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << " -error: " << e.what() << std::endl;
-        quit(EXIT_FAILURE);
-    }
-
+    //Utilities::Replace(shaderString, replaceString, includeString);
     const char *shaderCode = shaderString.c_str();
 
     unsigned int shader;
