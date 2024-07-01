@@ -51,14 +51,17 @@ void main()
     if (gl_GlobalInvocationID.x >= instanceCountSqrt || gl_GlobalInvocationID.y >= instanceCountSqrt) return ;
     uint index = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * instanceCountSqrt;
     //uint index = gl_GlobalInvocationID;
-    float x = float(gl_GlobalInvocationID.x) - instanceCountSqrt * 0.5 + floor(viewPosition.x);
-    float z = float(gl_GlobalInvocationID.y) - instanceCountSqrt * 0.5 + floor(viewPosition.z);
+    float x = float(gl_GlobalInvocationID.x) - instanceCountSqrt * 0.5;
+    float z = float(gl_GlobalInvocationID.y) - instanceCountSqrt * 0.5;
+    float indexDis = max(abs(x), abs(z));
+    x = x * 0.5 + floor(viewPosition.x);
+    z = z * 0.5 + floor(viewPosition.z);
 
     vec2 uv = vec2(x, z) * 0.001;
+    float falloff = float(indexDis) / float(instanceCountSqrt * 0.5);
+    if (falloff > GetRandom(float(x + z * instanceCountSqrt) / instanceCount) || GetSteepness(GenerateNoiseNormal(uv, noiseLayers, 0.001)) > 0.5) return ;
 
-    if (GetSteepness(GenerateNoiseNormal(uv, 7, 0.001)) > 0.5) return ;
-
-    float y = GenerateNoise(uv, 7) * 500 + 1.5;
+    float y = GenerateNoise(uv, noiseLayers) * noiseHeight + 1.5;
 
     vec3 pos = GetRandomVec3(float(x + z * instanceCountSqrt) / instanceCount);
     pos.y -= 1.0;

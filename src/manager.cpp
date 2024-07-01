@@ -31,6 +31,9 @@ void Manager::NewFrame()
         shaders[i]->setFloat("time", glfwGetTime());
         shaders[i]->setMatrix4("view", camera.View());
         shaders[i]->setFloat3("viewPosition", camera.Position());
+        shaders[i]->setInt("noiseLayers", 8);
+        shaders[i]->setFloat("noiseScale", 0.5f);
+        shaders[i]->setFloat("noiseHeight", 1000.0f);
     }
 
     glEnable(GL_CULL_FACE);

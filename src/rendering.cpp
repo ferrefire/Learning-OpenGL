@@ -24,5 +24,5 @@ void renderObject(Object * object)
 	object->GetMesh()->GetShader()->useShader();
 	//glBindVertexArray(object->GetMesh()->GetVAO());
 	object->GetMesh()->UseMesh();
-	glDrawElements(GL_TRIANGLES, object->GetMesh()->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_PATCHES, object->GetMesh()->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0);
 }

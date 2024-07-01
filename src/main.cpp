@@ -50,6 +50,7 @@ Camera &Input::camera = cam;
 std::vector<Object *> Manager::objects = std::vector<Object *>();
 std::vector<Manager::InstanceBatch> Manager::instanceBatches = std::vector<Manager::InstanceBatch>();
 std::vector<Shader *> Manager::shaders = std::vector<Shader *>();
+bool Manager::wireframeActive = false;
 Camera &Manager::camera = cam;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -96,7 +97,7 @@ void setupSettings(int argc, char **argv, GLFWwindow *window)
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    //glPatchParameteri(GL_PATCH_VERTICES, 3);
+    glPatchParameteri(GL_PATCH_VERTICES, 3);
     //glEnable(GL_PROGRAM_POINT_SIZE);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     cam.speed = 10.0f;
@@ -152,7 +153,7 @@ int main(int argc, char **argv)
     //Texture stoneTex((path + "/textures/stone.png").c_str());
 
     Shader shader("default_vertex.glsl", "default_fragment.glsl");
-    Shader terrainShader("terrain_vertex.glsl", "terrain_fragment.glsl");
+    Shader terrainShader("terrain_vertex.glsl", "tesselation_control.glsl", "tesselation_evaluation.glsl", "terrain_fragment.glsl");
     Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
     //shader.setInt("texture1", 0);
     //shader.setInt("texture2", 1);
@@ -189,7 +190,7 @@ int main(int argc, char **argv)
     Shape instanceShape(BLADE);
     instanceShape.Scale(glm::vec3(0.25f, 2.0f, 1.0f));
     Shape plane(PLANE);
-    plane.Scale(glm::vec3(10000.0f));
+    plane.Scale(glm::vec3(100000.0f));
 
     Mesh mesh(&shape, &shader);
     Mesh instanceMesh(&instanceShape, &instanceShader);

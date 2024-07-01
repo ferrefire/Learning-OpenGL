@@ -10,6 +10,11 @@ Shader::Shader(const char *computePath)
     ID = createShaderProgram(computePath);
 }
 
+Shader::Shader(const char *vertexPath, const char *tesselationControlPath, const char *tesselationEvaluationPath, const char *fragmentPath)
+{
+    ID = createShaderProgram(vertexPath, tesselationControlPath, tesselationEvaluationPath, fragmentPath);
+}
+
 void Shader::useShader()
 {
 	if (currentActiveShader != ID)

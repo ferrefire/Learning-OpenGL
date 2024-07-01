@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include "camera.hpp"
+#include "manager.hpp"
 
 class Input
 {

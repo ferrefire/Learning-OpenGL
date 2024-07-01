@@ -100,6 +100,37 @@ unsigned int createShaderProgram(unsigned int computeShader)
     return (shaderProgram);
 }
 
+unsigned int createShaderProgram(unsigned int vertexShader, unsigned int tesselationControlShader, unsigned int tesselationEvaluationShader, unsigned int fragmentShader)
+{
+    unsigned int shaderProgram;
+    shaderProgram = glCreateProgram();
+
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, tesselationControlShader);
+    glAttachShader(shaderProgram, tesselationEvaluationShader);
+    glAttachShader(shaderProgram, fragmentShader);
+
+    glLinkProgram(shaderProgram);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(tesselationControlShader);
+    glDeleteShader(tesselationEvaluationShader);
+    glDeleteShader(fragmentShader);
+
+    int success;
+    char infoLog[512];
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER_PROGRAM::LINKING_FAILED\n"
+                  << infoLog << std::endl;
+        quit(EXIT_FAILURE);
+    }
+
+    return (shaderProgram);
+}
+
 unsigned int createShaderProgram(const char *vertexPath, const char *fragmentPath)
 {
     unsigned int vertexShader = compileShader(GL_VERTEX_SHADER, vertexPath);
@@ -113,4 +144,14 @@ unsigned int createShaderProgram(const char *computePath)
     unsigned int computeShader = compileShader(GL_COMPUTE_SHADER, computePath);
 
     return (createShaderProgram(computeShader));
+}
+
+unsigned int createShaderProgram(const char *vertexPath, const char *tesselationControlPath, const char *tesselationEvaluationPath, const char *fragmentPath)
+{
+    unsigned int vertexShader = compileShader(GL_VERTEX_SHADER, vertexPath);
+    unsigned int tesselationControlShader = compileShader(GL_TESS_CONTROL_SHADER, tesselationControlPath);
+    unsigned int tesselationEvaluationShader = compileShader(GL_TESS_EVALUATION_SHADER, tesselationEvaluationPath);
+    unsigned int fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentPath);
+
+    return (createShaderProgram(vertexShader, tesselationControlShader, tesselationEvaluationShader, fragmentShader));
 }

@@ -24,6 +24,7 @@ class Manager
         static std::vector<Shader *> shaders;
 
         static Camera &camera;
+        static bool wireframeActive;
 
         static void NewFrame();
 

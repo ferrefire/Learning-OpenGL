@@ -1,6 +1,10 @@
 #ifndef NOISE_INCLUDED
 #define NOISE_INCLUDED
 
+uniform int noiseLayers;
+uniform float noiseScale;
+uniform float noiseHeight;
+
 vec3 mod289(vec3 x)
 {
     return x - floor(x / 289.0) * 289.0;
@@ -84,7 +88,7 @@ float GenerateNoise(vec2 uv, int layers)
     for (int i = 0; i < layers; i++)
     {
         float mult = 1.0 / (i + 1);
-        noise += snoise(uv * scale + vec2(1000, 1000) * i) * weight;
+        noise += snoise(uv * noiseScale * scale + vec2(1000, 1000) * i) * weight;
         maxNoise += weight;
         weight *= 0.4;
         scale *= 2.0;
@@ -98,13 +102,13 @@ float GenerateNoise(vec2 uv, int layers)
 
 vec3 GenerateNoiseNormal(vec2 uv, int layers, float stepSize)
 {
-    float left = GenerateNoise(uv - vec2(stepSize, 0), layers);
-    float right = GenerateNoise(uv + vec2(stepSize, 0), layers);
-    float down = GenerateNoise(uv - vec2(0, stepSize), layers);
-    float up = GenerateNoise(uv + vec2(0, stepSize), layers);
+    float left = GenerateNoise(uv - vec2(stepSize * noiseScale, 0), layers);
+    float right = GenerateNoise(uv + vec2(stepSize * noiseScale, 0), layers);
+    float down = GenerateNoise(uv - vec2(0, stepSize * noiseScale), layers);
+    float up = GenerateNoise(uv + vec2(0, stepSize * noiseScale), layers);
 
-    vec3 normalTS = vec3((left - right) / (stepSize * 2), (down - up) / (stepSize * 2), 1);
-    //normalTS.xy *= 0.1;
+    vec3 normalTS = vec3((left - right) / (stepSize * noiseScale * 2), (down - up) / (stepSize * noiseScale * 2), 1);
+    normalTS.xy *= 1.25;
 
     return (normalize(normalTS).xzy);
 }
