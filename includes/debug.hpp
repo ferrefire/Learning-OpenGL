@@ -4,6 +4,8 @@
 #include <iostream>
 #include "glad.h"
 #include <GLFW/glfw3.h>
+#include "input.hpp"
+#include "manager.hpp"
 
 class Debug
 {

@@ -25,6 +25,7 @@ class Manager
 
         static Camera &camera;
         static bool wireframeActive;
+        static bool vSyncActive;
 
         static void NewFrame();
 

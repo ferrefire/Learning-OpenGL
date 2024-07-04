@@ -51,3 +51,17 @@ std::string Utilities::FileToString(const char *path)
 
     return (fileString);
 }
+
+void Utilities::Upper(std::string &str)
+{
+    int len = str.length();
+    for (int i = 0; i < len; i++)
+    {
+        str[i] = toupper(str[i]);
+    }
+}
+
+bool Utilities::Contains(const std::string &str, const std::string &find)
+{
+    return (str.find(find) != std::string::npos);
+}

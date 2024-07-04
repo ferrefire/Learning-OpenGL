@@ -1,5 +1,7 @@
 #version 460 core
 
+#define TESS_EVALUATION_STAGE
+
 layout (triangles, fractional_odd_spacing, ccw) in;
 
 in vec2 tUV[];
@@ -18,7 +20,15 @@ uniform mat4 projection;
 
 uniform vec4 color;
 
+uniform float near;
+uniform float far;
+
+uniform sampler2D heightMap;
+
 #include "noise.glsl"
+#include "LOD.glsl"
+#include "transformation.glsl"
+#include "heightmap.glsl"
 
 #define BARYCENTRIC_INTERPOLATE(fieldName) \
 		        fieldName[0] * gl_TessCoord[0] + \
@@ -29,12 +39,22 @@ void main()
 {
     vec4 position = gl_in[0].gl_Position * gl_TessCoord[0] + gl_in[1].gl_Position * gl_TessCoord[1] + gl_in[2].gl_Position * gl_TessCoord[2];
     fUV = BARYCENTRIC_INTERPOLATE(tUV);
-    position.y = GenerateNoise(fUV, noiseLayers) * noiseHeight;
-    fNormal = GenerateNoiseNormal(fUV, noiseLayers, 0.001);
-    fFragmentPosition = (model * position).xyz;;
+    int lod = GetLodLevel(position.xyz, far);
+
+    //position.y = GenerateNoise(fUV, lod) * noiseHeight;
+    position.y = texture(heightMap, fUV).r * noiseHeight;
+    //position.y = 0;
+
+    fFragmentPosition = (model * position).xyz;
+
+    //fNormal = GenerateNoiseNormal(fUV, lod, 0.0025);
+    fNormal = SampleNormal(fUV, 1.0 / 2048.0);
     float steepness = GetSteepness(fNormal);
     steepness = pow(steepness, 2);
     fColor = mix(color, vec4(0.25, 0.25, 0.25, 1), steepness);
+
+    //fNormal = vec3(0);
+    //fColor = vec4(0);
     
     gl_Position = projection * view * model * position;
 }

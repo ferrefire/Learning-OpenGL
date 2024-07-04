@@ -1,5 +1,7 @@
 #version 460 core
 
+#define VERTEX_STAGE
+
 layout (location = 0) in vec3 iPosition;
 
 out vec2 UV;
@@ -14,18 +16,20 @@ uniform mat4 projection;
 uniform vec3 viewPosition;
 uniform vec4 color;
 
+uniform float far;
+
+uniform sampler2D heightMap;
+
 #include "noise.glsl"
+#include "LOD.glsl"
 
 void main()
 {
-    UV = iPosition.xz * 0.001;
+    UV = iPosition.xz * 0.0001 + 0.5;
     vec3 position = iPosition;
-    position.y = GenerateNoise(UV, noiseLayers) * noiseHeight;
-    //gl_Position = projection * view * model * vec4(position, 1.0);
+    //position.y = GenerateNoise(UV, 4) * noiseHeight;
+    position.y = texture(heightMap, UV).r * noiseHeight;
+    //position.y = 0;
+
     gl_Position = vec4(position, 1.0);
-    //FragmentPosition = (model * vec4(position, 1.0)).xyz;
-	//Normal = GenerateNoiseNormal(UV, 7, 0.001);
-    //float steepness = GetSteepness(Normal);
-    //steepness = pow(steepness, 2);
-    //Color = mix(color, vec4(0.25, 0.25, 0.25, 1), steepness);
 }

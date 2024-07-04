@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <chrono>
 #include <vector>
+#include <map>
 #include "camera.hpp"
 #include "input.hpp"
 #include "object.hpp"
@@ -46,11 +47,13 @@ float Input::lastX = width * 0.5f;
 float Input::lastY = height * 0.5f;
 float Input::sensitivity = 0.1f;
 Camera &Input::camera = cam;
+std::map<int, Input::KeyStatus> Input::keys = std::map<int, Input::KeyStatus>();
 
 std::vector<Object *> Manager::objects = std::vector<Object *>();
 std::vector<Manager::InstanceBatch> Manager::instanceBatches = std::vector<Manager::InstanceBatch>();
 std::vector<Shader *> Manager::shaders = std::vector<Shader *>();
 bool Manager::wireframeActive = false;
+bool Manager::vSyncActive = true;
 Camera &Manager::camera = cam;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -98,6 +101,7 @@ void setupSettings(int argc, char **argv, GLFWwindow *window)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glPatchParameteri(GL_PATCH_VERTICES, 3);
+    glfwSwapInterval(1);
     //glEnable(GL_PROGRAM_POINT_SIZE);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     cam.speed = 10.0f;
@@ -152,6 +156,8 @@ int main(int argc, char **argv)
     //Texture brickTex((path + "/textures/brick.png").c_str());
     //Texture stoneTex((path + "/textures/stone.png").c_str());
 
+    
+
     Shader shader("default_vertex.glsl", "default_fragment.glsl");
     Shader terrainShader("terrain_vertex.glsl", "tesselation_control.glsl", "tesselation_evaluation.glsl", "terrain_fragment.glsl");
     Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
@@ -179,18 +185,37 @@ int main(int argc, char **argv)
     computeShader.setFloat("near", cam.near);
     computeShader.setFloat("far", cam.far);
 
+    Shader heightmapComputeShader("heightmap_compute.glsl");
+    heightmapComputeShader.setInt("heightMap", 0);
+
+    terrainShader.setInt("heightMap", 0);
+
+    unsigned int texture;
+
+    glGenTextures(1, &texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, 2048, 2048, 0, GL_RED, GL_FLOAT, NULL);
+
+    glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16F);
+
     //Print(cam.far);
 
     Manager::AddShader(&shader);
     Manager::AddShader(&terrainShader);
     Manager::AddShader(&instanceShader);
     Manager::AddShader(&computeShader);
+    Manager::AddShader(&heightmapComputeShader);
 
     Shape shape(CUBE);
     Shape instanceShape(BLADE);
     instanceShape.Scale(glm::vec3(0.25f, 2.0f, 1.0f));
     Shape plane(PLANE);
-    plane.Scale(glm::vec3(100000.0f));
+    plane.Scale(glm::vec3(10000.0f));
 
     Mesh mesh(&shape, &shader);
     Mesh instanceMesh(&instanceShape, &instanceShader);
@@ -225,17 +250,24 @@ int main(int argc, char **argv)
     Print(count);
     Print(inssqrt);
 
+    Time::NewFrame();
+    Debug::NewFrame();
+    Input::processInput(window);
+    Manager::NewFrame();
+
+    heightmapComputeShader.useShader();
+    glDispatchCompute(2048, 2048, 1);
+
     while (!glfwWindowShouldClose(window))
     {
         Time::NewFrame();
 		Debug::NewFrame();
-
         Input::processInput(window);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        object.Move(glm::vec3(0.0f, Time::deltaTime * 0.1f, Time::deltaTime));
-        object.Rotate(glm::vec3(Time::deltaTime * 100));
+        //object.Move(glm::vec3(0.0f, Time::deltaTime * 0.1f, Time::deltaTime));
+        //object.Rotate(glm::vec3(Time::deltaTime * 100));
 
         computeShader.useShader();
         glDispatchCompute(inssqrt / 8, inssqrt / 8, 1);

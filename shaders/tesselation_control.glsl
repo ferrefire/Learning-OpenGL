@@ -1,5 +1,7 @@
 #version 460 core
 
+#define TESS_CONTROL_STAGE
+
 layout (vertices = 3) out;
 
 in vec2 UV[];
@@ -16,18 +18,24 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-uniform float far;
-uniform float near;
 uniform vec3 viewPosition;
 
-#define TESS_CONTROL
+uniform float far;
+uniform float near;
 
 #include "culling.glsl"
-#include "depth.glsl"
 
 float NegativePow(float val)
 {
     return (1.0 - pow(1.0 - val, 4.0));
+}
+
+float TessellationFactor (vec3 p0, vec3 p1)
+{
+    float edgeLength = distance(p0, p1);
+    vec3 edgeCenter = (p0 + p1) * 0.5;
+    float viewDistance = distance(edgeCenter, viewPosition);
+    return edgeLength * 900.0 / (5 * viewDistance);
 }
 
 void main()
@@ -55,26 +63,26 @@ void main()
             return ;
         }
 
-        const int MIN_TESS_LEVEL = 4;
-        const int MAX_TESS_LEVEL = 64;
-        const float MIN_DISTANCE = 10;
-        const float MAX_DISTANCE = 5000;
+        //const int MIN_TESS_LEVEL = 4;
+        //const int MAX_TESS_LEVEL = 64;
+        //const float MIN_DISTANCE = 10;
+        //const float MAX_DISTANCE = 5000;
+//
+        //vec4 eyeSpacePos1 = projection * view * model * gl_in[0].gl_Position;
+        //vec4 eyeSpacePos2 = projection * view * model * gl_in[1].gl_Position;
+        //vec4 eyeSpacePos3 = projection * view * model * gl_in[2].gl_Position;
+//
+        //float distance1 = clamp((abs(eyeSpacePos1.z)-MIN_DISTANCE) / (MAX_DISTANCE-MIN_DISTANCE), 0.0, 1.0);
+        //float distance2 = clamp((abs(eyeSpacePos2.z)-MIN_DISTANCE) / (MAX_DISTANCE-MIN_DISTANCE), 0.0, 1.0);
+        //float distance3 = clamp((abs(eyeSpacePos3.z)-MIN_DISTANCE) / (MAX_DISTANCE-MIN_DISTANCE), 0.0, 1.0);
+//
+        //float tessLevel1 = mix(MAX_TESS_LEVEL, MIN_TESS_LEVEL, NegativePow(min(distance2, distance3)));
+        //float tessLevel2 = mix(MAX_TESS_LEVEL, MIN_TESS_LEVEL, NegativePow(min(distance3, distance1)));
+        //float tessLevel3 = mix(MAX_TESS_LEVEL, MIN_TESS_LEVEL, NegativePow(min(distance1, distance2)));
 
-        vec4 eyeSpacePos1 = projection * view * model * gl_in[0].gl_Position;
-        vec4 eyeSpacePos2 = projection * view * model * gl_in[1].gl_Position;
-        vec4 eyeSpacePos3 = projection * view * model * gl_in[2].gl_Position;
-
-        float distance1 = clamp((abs(eyeSpacePos1.z)-MIN_DISTANCE) / (MAX_DISTANCE-MIN_DISTANCE), 0.0, 1.0);
-        float distance2 = clamp((abs(eyeSpacePos2.z)-MIN_DISTANCE) / (MAX_DISTANCE-MIN_DISTANCE), 0.0, 1.0);
-        float distance3 = clamp((abs(eyeSpacePos3.z)-MIN_DISTANCE) / (MAX_DISTANCE-MIN_DISTANCE), 0.0, 1.0);
-
-        //float distance1 = 1.0 - GetDepth(eyeSpacePos1.z);
-        //float distance2 = 1.0 - GetDepth(eyeSpacePos2.z);
-        //float distance3 = 1.0 - GetDepth(eyeSpacePos3.z);
-
-        float tessLevel1 = mix(MAX_TESS_LEVEL, MIN_TESS_LEVEL, NegativePow(min(distance2, distance3)));
-        float tessLevel2 = mix(MAX_TESS_LEVEL, MIN_TESS_LEVEL, NegativePow(min(distance3, distance1)));
-        float tessLevel3 = mix(MAX_TESS_LEVEL, MIN_TESS_LEVEL, NegativePow(min(distance1, distance2)));
+        float tessLevel1 = TessellationFactor(gl_in[1].gl_Position.xyz, gl_in[2].gl_Position.xyz);
+        float tessLevel2 = TessellationFactor(gl_in[2].gl_Position.xyz, gl_in[0].gl_Position.xyz);
+        float tessLevel3 = TessellationFactor(gl_in[0].gl_Position.xyz, gl_in[1].gl_Position.xyz);
 
         gl_TessLevelOuter[0] = tessLevel1;
         gl_TessLevelOuter[1] = tessLevel2;

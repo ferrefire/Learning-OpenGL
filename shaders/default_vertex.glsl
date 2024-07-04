@@ -1,4 +1,7 @@
 #version 460 core
+
+#define VERTEX_STAGE
+
 layout (location = 0) in vec3 iPosition;
 layout (location = 1) in vec2 iUV;
 layout (location = 2) in vec3 iNormal;

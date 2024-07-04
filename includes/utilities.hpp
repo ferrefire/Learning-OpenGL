@@ -22,6 +22,8 @@ class Utilities
         static glm::vec3 RotateVec3(glm::vec3 vec, float angle, glm::vec3 axis);
         static void Replace(std::string &str, const std::string &from, const std::string &to);
         static std::string FileToString(const char *path);
+        static void Upper(std::string &str);
+        static bool Contains(const std::string &str, const std::string &find);
 };
 
 #endif

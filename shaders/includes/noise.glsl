@@ -4,6 +4,7 @@
 uniform int noiseLayers;
 uniform float noiseScale;
 uniform float noiseHeight;
+uniform float noiseSampleDistance = 0.0025;
 
 vec3 mod289(vec3 x)
 {
@@ -31,12 +32,9 @@ float snoise(vec2 v)
                              0.366025403784439,  // 0.5*(sqrt(3.0)-1.0)
                             -0.577350269189626,  // -1.0 + 2.0 * C.x
                              0.024390243902439);
-     // 1.0 / 41.0
-    // First corner
     vec2 i  = floor(v + dot(v, C.yy));
     vec2 x0 = v -   i + dot(i, C.xx);
 
-    // Other corners
     vec2 i1;
     i1.x = step(x0.y, x0.x);
     i1.y = 1.0 - i1.x;
@@ -102,12 +100,12 @@ float GenerateNoise(vec2 uv, int layers)
 
 vec3 GenerateNoiseNormal(vec2 uv, int layers, float stepSize)
 {
-    float left = GenerateNoise(uv - vec2(stepSize * noiseScale, 0), layers);
-    float right = GenerateNoise(uv + vec2(stepSize * noiseScale, 0), layers);
-    float down = GenerateNoise(uv - vec2(0, stepSize * noiseScale), layers);
-    float up = GenerateNoise(uv + vec2(0, stepSize * noiseScale), layers);
+    float left = GenerateNoise(uv - vec2(noiseSampleDistance * noiseScale, 0), layers);
+    float right = GenerateNoise(uv + vec2(noiseSampleDistance * noiseScale, 0), layers);
+    float down = GenerateNoise(uv - vec2(0, noiseSampleDistance * noiseScale), layers);
+    float up = GenerateNoise(uv + vec2(0, noiseSampleDistance * noiseScale), layers);
 
-    vec3 normalTS = vec3((left - right) / (stepSize * noiseScale * 2), (down - up) / (stepSize * noiseScale * 2), 1);
+    vec3 normalTS = vec3((left - right) / (noiseSampleDistance * noiseScale * 2), (down - up) / (noiseSampleDistance * noiseScale * 2), 1);
     normalTS.xy *= 1.25;
 
     return (normalize(normalTS).xzy);
@@ -116,10 +114,10 @@ vec3 GenerateNoiseNormal(vec2 uv, int layers, float stepSize)
 float GetSteepness(vec3 normal)
 {
     float steepness = dot(normal, vec3(0.0, 1.0, 0.0));
-    steepness = steepness * steepness;
-    steepness = 1.0 - steepness;
+    //steepness = steepness * steepness;
+    //steepness = 1.0 - steepness;
 
-    return steepness;
+    return 1.0 - steepness;
 }
 
 
