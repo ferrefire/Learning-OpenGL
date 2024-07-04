@@ -200,9 +200,9 @@ int main(int argc, char **argv)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, 2048, 2048, 0, GL_RED, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, 8192, 8192, 0, GL_RED, GL_FLOAT, NULL);
 
-    glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16F);
+    glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32F);
 
     //Print(cam.far);
 
@@ -257,7 +257,7 @@ int main(int argc, char **argv)
     Manager::NewFrame();
 
     heightmapComputeShader.useShader();
-    glDispatchCompute(2048, 2048, 1);
+    glDispatchCompute(8192 / 32, 8192 / 32, 1);
 
     while (!glfwWindowShouldClose(window))
     {

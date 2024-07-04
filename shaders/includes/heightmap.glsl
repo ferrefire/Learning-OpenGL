@@ -11,7 +11,7 @@ vec3 SampleNormal(vec2 uv, float stepSize)
     float up = texture(heightMap, uv + vec2(0, stepSize * sizeMultiplier)).r;
 
     vec3 normalTS = vec3((left - right) / (stepSize * sizeMultiplier * 2), (down - up) / (stepSize * sizeMultiplier * 2), 1);
-    normalTS.xy *= 0.25;
+    normalTS.xy *= 0.5;
 
     return (normalize(normalTS).xzy);
 }
