@@ -35,7 +35,7 @@ float TessellationFactor (vec3 p0, vec3 p1)
     float edgeLength = distance(p0, p1);
     vec3 edgeCenter = (p0 + p1) * 0.5;
     float viewDistance = distance(edgeCenter, viewPosition);
-    return edgeLength * 900.0 / (5 * viewDistance);
+    return edgeLength * 900.0 / (7.5 * viewDistance);
 }
 
 void main()
@@ -50,11 +50,11 @@ void main()
     {
         vec3 center = (gl_in[0].gl_Position + gl_in[1].gl_Position + gl_in[2].gl_Position).xyz * (1.0 / 3.0);
         float disSqr = dot(viewPosition - center, viewPosition - center);
-        if (disSqr > 25000 &&
-            InView(center, 0.175) == 0 && 
-            InView(gl_in[0].gl_Position.xyz, 0.175) == 0 &&
-            InView(gl_in[1].gl_Position.xyz, 0.175) == 0 &&
-            InView(gl_in[2].gl_Position.xyz, 0.175) == 0)
+        if (disSqr > 10000 &&
+            InView(center, 0.1) == 0 && 
+            InView(gl_in[0].gl_Position.xyz, 0.1) == 0 &&
+            InView(gl_in[1].gl_Position.xyz, 0.1) == 0 &&
+            InView(gl_in[2].gl_Position.xyz, 0.1) == 0)
         {
             gl_TessLevelOuter[0] = 0;
             gl_TessLevelOuter[1] = 0;

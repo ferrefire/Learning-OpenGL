@@ -37,4 +37,5 @@ void main()
     vec3 bladeColor = mix(Color.xyz * 0.5, Color.xyz, UV.y);
 
     oFragmentColor = mix(vec4(bladeColor * (vec3(0.25) + diffuse + specularColor), 1.0), vec4(1.0), GetDepth(gl_FragCoord.z, near, far));
+	//oFragmentColor = vec4(bladeColor * (vec3(0.25) + diffuse + specularColor), 1.0);
 }

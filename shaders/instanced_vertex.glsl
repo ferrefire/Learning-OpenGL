@@ -9,7 +9,8 @@ layout (location = 2) in vec3 iNormal;
 struct datastruct
 {
     vec3 pos;
-    vec4 col;
+    //vec4 col;
+	vec3 norm;
 };
 
 layout(std430, binding = 3) buffer iColors
@@ -27,6 +28,9 @@ uniform mat4 view;
 uniform mat4 projection;
 
 uniform vec3 viewPosition;
+
+uniform sampler2D heightMap;
+
 //uniform vec4 color;
 
 //uniform int instanceCount;
@@ -36,6 +40,7 @@ uniform vec3 viewPosition;
 //#define TWOPI 6.28318530718
 
 #include "noise.glsl"
+#include "heightmap.glsl"
 
 float random (vec2 st)
 {
@@ -44,7 +49,7 @@ float random (vec2 st)
 
 mat4 rotationMatrix(vec3 axis, float angle)
 {
-    axis = normalize(axis);
+    //axis = normalize(axis);
     float s = sin(angle);
     float c = cos(angle);
     float oc = 1.0 - c;
@@ -77,8 +82,13 @@ void main()
 	UV = iUV;
 	//Normal = (model * vec4(iNormal, 0.0)).xyz;
 	//Normal = vec3(0.0, 1.0, 0.0);
-	Normal = GenerateNoiseNormal(position.xz * 0.001, 7, 0.001);
+
+	//Normal = GenerateNoiseNormal(position.xz * 0.001, 7, 0.001);
+	//Normal = SampleNormal(position.xz * 0.0001 + 0.5, 1);
+	Normal = data[gl_InstanceID].norm;
+	
     //float ran = random(vec2(x, z));
     //Color = vec4(ran, random(vec2(ran, 1.0)), random(vec2(1.0, ran)), 1.0);
-    Color = data[gl_InstanceID].col;
+    //Color = data[gl_InstanceID].col;
+    Color = vec4(0.25, 0.6, 0.1, 1.0);
 }

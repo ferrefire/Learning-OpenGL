@@ -48,7 +48,7 @@ void main()
     fFragmentPosition = (model * position).xyz;
 
     //fNormal = GenerateNoiseNormal(fUV, lod, 0.0025);
-    fNormal = SampleNormal(fUV, 1.0 / 2048.0);
+    fNormal = SampleNormal(fUV, 1);
     float steepness = GetSteepness(fNormal);
     steepness = pow(steepness, 2);
     fColor = mix(color, vec4(0.25, 0.25, 0.25, 1), steepness);

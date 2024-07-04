@@ -2,12 +2,13 @@
 
 #define COMPUTE_STAGE
 
-layout (local_size_x = 8, local_size_y = 8) in;
+layout (local_size_x = 32, local_size_y = 32) in;
 
 struct datastruct
 {
     vec3 pos;
-    vec4 col;
+    //vec4 col;
+	vec3 norm;
 };
 
 layout(std430, binding = 3) buffer iColors
@@ -30,10 +31,14 @@ uniform float far;
 uniform float near;
 
 uniform int instanceCount;
+uniform float instanceMult;
 uniform int instanceCountSqrt;
+
+uniform sampler2D heightMap;
 
 #include "culling.glsl"
 #include "noise.glsl"
+#include "heightmap.glsl"
 
 float GetRandom(float x)
 {
@@ -59,17 +64,23 @@ void main()
     x = x * 0.5 + floor(viewPosition.x);
     z = z * 0.5 + floor(viewPosition.z);
 
-    vec2 uv = vec2(x, z) * 0.001;
+    vec2 uv = vec2(x, z) * 0.0001 + 0.5;
     float falloff = float(indexDis) / float(instanceCountSqrt * 0.5);
-    if (falloff > GetRandom(float(x + z * instanceCountSqrt) / instanceCount) || GetSteepness(GenerateNoiseNormal(uv, noiseLayers, 0.001)) > 0.5) return ;
+	vec3 norm = SampleNormal(uv, 1);
+	float ran = GetRandom(float(x + z * instanceCountSqrt) * instanceMult);
+    if (GetSteepness(norm) > 0.5 + (ran - 0.5) * 0.5 || falloff > pow(ran, 3)) return ;
+	//if (GetSteepness(GenerateNoiseNormal(uv, noiseLayers, 0.001)) > 0.5) return ;
 
-    float y = GenerateNoise(uv, noiseLayers) * noiseHeight + 1.5;
+    //float y = GenerateNoise(uv, noiseLayers) * noiseHeight + 1.5;
+    float y = texture(heightMap, uv).r * noiseHeight + 1.5;
 
-    vec3 pos = GetRandomVec3(float(x + z * instanceCountSqrt) / instanceCount);
-    pos.y -= 1.0;
+    vec3 pos = GetRandomVec3(float(x + z * instanceCountSqrt) * instanceMult);
+    //vec3 pos = vec3(0);
     vec3 position = vec3(x, y, z) + pos;
     if (InView(position, 0.1) == 0) return ;
     index = atomicAdd(computeCount, 1);
     data[index].pos = position;
-    data[index].col = vec4(0.25, 0.6, 0.1, 1.0);
+	data[index].norm = norm;
+    //data[index].col = vec4(0.25, 0.6, 0.1, 1.0);
+    
 }

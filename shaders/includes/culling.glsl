@@ -12,7 +12,7 @@ int InView(vec3 position, float tolerance)
     clipSpace.y = clipSpace.y * 0.5f + 0.5f;
     clipSpace.z = viewSpace.w;
 
-    if (clipSpace.z >= far) return (0);
+    if (clipSpace.z <= 0.0 || clipSpace.z >= far) return (0);
 
     return (clipSpace.x < -tolerance || clipSpace.x > 1.0f + tolerance ||
         clipSpace.y < -tolerance || clipSpace.y > 1.0f + tolerance ||

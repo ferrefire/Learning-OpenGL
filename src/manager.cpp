@@ -34,7 +34,8 @@ void Manager::NewFrame()
         shaders[i]->setInt("noiseLayers", 8);
         shaders[i]->setFloat("noiseScale", 0.5f);
         shaders[i]->setFloat("noiseHeight", 1000.0f);
-    }
+		shaders[i]->setFloat("sizeMultiplier", 1.0 / 2048.0);
+	}
 
     glEnable(GL_CULL_FACE);
 
@@ -52,8 +53,6 @@ void Manager::NewFrame()
     for (int i = 0; i < size; i++)
     {
         instanceBatches[i].mesh->GetShader()->setMatrix4("model", glm::mat4(1.0f));
-        //instanceBatches[i].mesh->GetShader()->setInt("instanceCount", instanceBatches[i].count);
-        //instanceBatches[i].mesh->GetShader()->setInt("instanceCountSqrt", sqrt(instanceBatches[i].count));
         renderMeshInstanced(*instanceBatches[i].mesh, instanceBatches[i].count);
     }
 }

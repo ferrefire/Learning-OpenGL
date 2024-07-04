@@ -114,10 +114,10 @@ vec3 GenerateNoiseNormal(vec2 uv, int layers, float stepSize)
 float GetSteepness(vec3 normal)
 {
     float steepness = dot(normal, vec3(0.0, 1.0, 0.0));
-    //steepness = steepness * steepness;
-    //steepness = 1.0 - steepness;
+    steepness = steepness * steepness;
+    steepness = 1.0 - steepness;
 
-    return 1.0 - steepness;
+    return steepness;
 }
 
 

@@ -179,8 +179,9 @@ int main(int argc, char **argv)
     instanceShader.setFloat("far", cam.far);
 
     Shader computeShader("compute_shader.glsl");
-    computeShader.setInt("instanceCount", count);
-    computeShader.setInt("instanceCountSqrt", sqrt(count));
+	computeShader.setInt("instanceCount", count);
+	computeShader.setFloat("instanceMult", 1.0 / float(count));
+	computeShader.setInt("instanceCountSqrt", sqrt(count));
     computeShader.setMatrix4("projection", cam.Projection());
     computeShader.setFloat("near", cam.near);
     computeShader.setFloat("far", cam.far);
@@ -205,29 +206,29 @@ int main(int argc, char **argv)
 
     //Print(cam.far);
 
-    Manager::AddShader(&shader);
+    //Manager::AddShader(&shader);
     Manager::AddShader(&terrainShader);
     Manager::AddShader(&instanceShader);
     Manager::AddShader(&computeShader);
     Manager::AddShader(&heightmapComputeShader);
 
-    Shape shape(CUBE);
+    //Shape shape(CUBE);
     Shape instanceShape(BLADE);
     instanceShape.Scale(glm::vec3(0.25f, 2.0f, 1.0f));
     Shape plane(PLANE);
     plane.Scale(glm::vec3(10000.0f));
 
-    Mesh mesh(&shape, &shader);
+    //Mesh mesh(&shape, &shader);
     Mesh instanceMesh(&instanceShape, &instanceShader);
     Mesh planeMesh(&plane, &terrainShader);
 
-    Object object(&mesh);
-    object.Paint(glm::vec4(glm::vec3(0.25f), 1.0f));
+    //Object object(&mesh);
+    //object.Paint(glm::vec4(glm::vec3(0.25f), 1.0f));
     Object floor(&planeMesh);
     //floor.Paint(glm::vec4(60.0f, 160.0f, 20.0f, 255.0f) / 255.0f);
     floor.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
 
-    Manager::AddObject(&object);
+    //Manager::AddObject(&object);
     Manager::AddObject(&floor);
 
     Manager::AddInstanceBatch(&instanceMesh, count);
@@ -235,14 +236,14 @@ int main(int argc, char **argv)
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, count * sizeof(float) * 8, NULL, GL_DYNAMIC_COPY);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, count * sizeof(float) * 8, NULL, GL_STATIC_COPY);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, buffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     unsigned int computeCount;
     glGenBuffers(1, &computeCount);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, computeCount);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(unsigned int), NULL, GL_DYNAMIC_COPY);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(unsigned int), NULL, GL_STATIC_COPY);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, computeCount);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -270,7 +271,7 @@ int main(int argc, char **argv)
         //object.Rotate(glm::vec3(Time::deltaTime * 100));
 
         computeShader.useShader();
-        glDispatchCompute(inssqrt / 8, inssqrt / 8, 1);
+        glDispatchCompute(inssqrt / 32, inssqrt / 32, 1);
         glMemoryBarrier(GL_ALL_BARRIER_BITS);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, computeCount);
         void *ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
