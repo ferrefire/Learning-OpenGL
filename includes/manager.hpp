@@ -2,8 +2,9 @@
 #define MANAGER_HPP
 
 #include <vector>
-#include "object.hpp"
 #include "shader.hpp"
+#include "mesh.hpp"
+#include "object.hpp"
 #include "time.hpp"
 #include "camera.hpp"
 #include "rendering.hpp"
@@ -33,6 +34,7 @@ class Manager
         static void AddInstanceBatch(InstanceBatch instanceBatch);
         static void AddInstanceBatch(Mesh *mesh, int count);
         static void AddShader(Shader *shader);
+		static void SetShaderVariables(Shader *shader);
 };
 
 #endif

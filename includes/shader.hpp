@@ -1,11 +1,12 @@
-#ifndef SHADER_H
-#define SHADER_H
+#ifndef SHADER_HPP
+#define SHADER_HPP
 
 #include <string>
 #include "shaders.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+//#include "manager.hpp"
 
 class Shader
 {
@@ -32,6 +33,16 @@ class Shader
         void setFloat4(std::string name, float x, float y, float z, float w);
         void setFloat4(std::string name, glm::vec4 vec);
         void setMatrix4(std::string name, glm::mat4 transformation);
+
+		static void setBoolGlobal(std::string name, bool value);
+		static void setIntGlobal(std::string name, int value);
+		static void setFloatGlobal(std::string name, float value);
+		static void setFloat2Global(std::string name, float x, float y);
+		static void setFloat3Global(std::string name, float x, float y, float z);
+		static void setFloat3Global(std::string name, glm::vec3 vec);
+		static void setFloat4Global(std::string name, float x, float y, float z, float w);
+		static void setFloat4Global(std::string name, glm::vec4 vec);
+		static void setMatrix4Global(std::string name, glm::mat4 transformation);
 };
 
 #endif

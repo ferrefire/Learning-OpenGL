@@ -1,7 +1,6 @@
 #include "mesh.hpp"
-#include <iostream>
 
-Mesh::Mesh(Shape * shape, Shader * shader)
+Mesh::Mesh(Shape *shape, Shader *shader)
 {
 	this->shader = shader;
     this->shape = shape;
@@ -52,12 +51,12 @@ unsigned int Mesh::GetEBO()
     return (EBO);
 }
 
-Shader * Mesh::GetShader()
+Shader *Mesh::GetShader()
 {
     return (shader);
 }
 
-Shape * Mesh::GetShape()
+Shape *Mesh::GetShape()
 {
     return (shape);
 }

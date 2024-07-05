@@ -18,7 +18,7 @@ void renderMeshInstanced(Mesh mesh, int count)
 	glDrawElementsInstanced(GL_TRIANGLES, mesh.GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0, count);
 }
 
-void renderObject(Object * object)
+void renderObject(Object *object)
 {
     //glUseProgram(object->GetMesh()->GetShader()->ID);
 	object->GetMesh()->GetShader()->useShader();

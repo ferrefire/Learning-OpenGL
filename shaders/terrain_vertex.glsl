@@ -10,16 +10,12 @@ out vec2 UV;
 //out vec4 Color;
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
 
-uniform vec3 viewPosition;
 uniform vec4 color;
-
-uniform float far;
 
 uniform sampler2D heightMap;
 
+#include "variables.glsl"
 #include "noise.glsl"
 #include "LOD.glsl"
 

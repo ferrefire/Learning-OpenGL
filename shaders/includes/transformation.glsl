@@ -3,7 +3,7 @@
 
 vec3 WorldToClip(vec3 position)
 {
-    vec4 viewSpace = projection * view * vec4(position, 1.0);
+    vec4 viewSpace = view * vec4(position, 1.0);
 
     vec3 clipSpace = viewSpace.xyz;
     clipSpace /= -viewSpace.w;

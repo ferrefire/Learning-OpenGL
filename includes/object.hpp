@@ -17,10 +17,10 @@ class Object
 
         //glm::mat4 translation;
 
-        Mesh * mesh;
+        Mesh *mesh;
 
     public:
-        Object(Mesh * mesh);
+        Object(Mesh *mesh);
 
         glm::vec3 Position();
         glm::vec3 Rotation();
@@ -28,7 +28,7 @@ class Object
         glm::vec4 Color();
 
         glm::mat4 Translation();
-        Mesh * GetMesh();
+        Mesh *GetMesh();
 
         void Move(glm::vec3 amount);
         void Rotate(glm::vec3 amount);

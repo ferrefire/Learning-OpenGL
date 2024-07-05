@@ -21,21 +21,13 @@ layout(std430, binding = 4) buffer oComputeCount
     uint computeCount;
 };
 
-uniform mat4 view;
-uniform mat4 projection;
-
-uniform vec3 viewPosition;
-
-uniform float time;
-uniform float far;
-uniform float near;
-
 uniform int instanceCount;
 uniform float instanceMult;
 uniform int instanceCountSqrt;
 
 uniform sampler2D heightMap;
 
+#include "variables.glsl"
 #include "culling.glsl"
 #include "noise.glsl"
 #include "heightmap.glsl"

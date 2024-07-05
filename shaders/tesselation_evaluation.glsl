@@ -15,16 +15,12 @@ out vec3 fFragmentPosition;
 out vec4 fColor;
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
 
 uniform vec4 color;
 
-uniform float near;
-uniform float far;
-
 uniform sampler2D heightMap;
 
+#include "variables.glsl"
 #include "noise.glsl"
 #include "LOD.glsl"
 #include "transformation.glsl"

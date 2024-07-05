@@ -9,21 +9,13 @@ in vec4 fColor;
 
 out vec4 oFragmentColor;
 
-uniform float time;
-
-uniform vec3 lightPosition;
-uniform vec3 viewPosition;
 uniform vec4 color;
 
-uniform float far;
-uniform float near;
-
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
 
 uniform sampler2D heightMap;
 
+#include "variables.glsl"
 #include "noise.glsl"
 #include "depth.glsl"
 #include "LOD.glsl"

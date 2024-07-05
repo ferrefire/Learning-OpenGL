@@ -1,6 +1,6 @@
 #include "object.hpp"
 
-Object::Object(Mesh * mesh)
+Object::Object(Mesh *mesh)
 {
     this->mesh = mesh;
 
@@ -44,7 +44,7 @@ glm::mat4 Object::Translation()
     return (translation);
 }
 
-Mesh * Object::GetMesh()
+Mesh *Object::GetMesh()
 {
     return (mesh);
 }

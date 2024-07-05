@@ -1,4 +1,5 @@
 #include "shader.hpp"
+#include "manager.hpp"
 
 Shader::Shader(const char *vertexPath, const char *fragmentPath)
 {
@@ -76,4 +77,76 @@ void Shader::setMatrix4(std::string name, glm::mat4 transformation)
 {
     useShader();
     glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(transformation));
+}
+
+void Shader::setBoolGlobal(std::string name, bool value)
+{
+	for (Shader *shader : Manager::shaders)
+	{
+		shader->setBool(name, value);
+	}
+}
+
+void Shader::setIntGlobal(std::string name, int value)
+{
+	for (Shader *shader : Manager::shaders)
+	{
+		shader->setInt(name, value);
+	}
+}
+
+void Shader::setFloatGlobal(std::string name, float value)
+{
+	for (Shader *shader : Manager::shaders)
+	{
+		shader->setFloat(name, value);
+	}
+}
+
+void Shader::setFloat2Global(std::string name, float x, float y)
+{
+	for (Shader *shader : Manager::shaders)
+	{
+		shader->setFloat2(name, x, y);
+	}
+}
+
+void Shader::setFloat3Global(std::string name, float x, float y, float z)
+{
+	for (Shader *shader : Manager::shaders)
+	{
+		shader->setFloat3(name, x, y, z);
+	}
+}
+
+void Shader::setFloat3Global(std::string name, glm::vec3 vec)
+{
+	for (Shader *shader : Manager::shaders)
+	{
+		shader->setFloat3(name, vec);
+	}
+}
+
+void Shader::setFloat4Global(std::string name, float x, float y, float z, float w)
+{
+	for (Shader *shader : Manager::shaders)
+	{
+		shader->setFloat4(name, x, y, z, w);
+	}
+}
+
+void Shader::setFloat4Global(std::string name, glm::vec4 vec)
+{
+	for (Shader *shader : Manager::shaders)
+	{
+		shader->setFloat4(name, vec);
+	}
+}
+
+void Shader::setMatrix4Global(std::string name, glm::mat4 transformation)
+{
+	for (Shader *shader : Manager::shaders)
+	{
+		shader->setMatrix4(name, transformation);
+	}
 }

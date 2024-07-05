@@ -24,21 +24,10 @@ out vec3 FragmentPosition;
 out vec4 Color;
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-
-uniform vec3 viewPosition;
 
 uniform sampler2D heightMap;
 
-//uniform vec4 color;
-
-//uniform int instanceCount;
-//uniform int instanceCountSqrt;
-
-//#define PI    3.14159265358
-//#define TWOPI 6.28318530718
-
+#include "variables.glsl"
 #include "noise.glsl"
 #include "heightmap.glsl"
 

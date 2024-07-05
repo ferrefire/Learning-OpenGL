@@ -10,14 +10,8 @@ in vec4 Color;
 out vec4 oFragmentColor;
 
 uniform sampler2D texture;
-uniform float time;
 
-uniform vec3 lightPosition;
-uniform vec3 viewPosition;
-
-uniform float far;
-uniform float near;
-
+#include "variables.glsl"
 #include "depth.glsl"
 
 void main()

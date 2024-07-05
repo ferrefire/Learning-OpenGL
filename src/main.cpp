@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <string.h>
 #include <stdio.h>
+#include "manager.hpp"
 #include "shape.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
@@ -24,7 +25,6 @@
 #include "camera.hpp"
 #include "input.hpp"
 #include "object.hpp"
-#include "manager.hpp"
 
 const int width = 1600;
 const int height = 900;
@@ -158,33 +158,18 @@ int main(int argc, char **argv)
 
     
 
-    Shader shader("default_vertex.glsl", "default_fragment.glsl");
+    //Shader shader("default_vertex.glsl", "default_fragment.glsl");
     Shader terrainShader("terrain_vertex.glsl", "tesselation_control.glsl", "tesselation_evaluation.glsl", "terrain_fragment.glsl");
     Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
     //shader.setInt("texture1", 0);
     //shader.setInt("texture2", 1);
     //brickTex.bindTexture(GL_TEXTURE0);
     //stoneTex.bindTexture(GL_TEXTURE1);
-    shader.setFloat3("lightPosition", 25000.0f, 25000.0f, 50000.0f);
-    shader.setMatrix4("projection", cam.Projection());
-    shader.setFloat("near", cam.near);
-    shader.setFloat("far", cam.far);
-    terrainShader.setFloat3("lightPosition", 25000.0f, 25000.0f, 50000.0f);
-    terrainShader.setMatrix4("projection", cam.Projection());
-    terrainShader.setFloat("near", cam.near);
-    terrainShader.setFloat("far", cam.far);
-    instanceShader.setFloat3("lightPosition", 25000.0f, 25000.0f, 50000.0f);
-    instanceShader.setMatrix4("projection", cam.Projection());
-    instanceShader.setFloat("near", cam.near);
-    instanceShader.setFloat("far", cam.far);
 
     Shader computeShader("compute_shader.glsl");
 	computeShader.setInt("instanceCount", count);
 	computeShader.setFloat("instanceMult", 1.0 / float(count));
 	computeShader.setInt("instanceCountSqrt", sqrt(count));
-    computeShader.setMatrix4("projection", cam.Projection());
-    computeShader.setFloat("near", cam.near);
-    computeShader.setFloat("far", cam.far);
 
     Shader heightmapComputeShader("heightmap_compute.glsl");
     heightmapComputeShader.setInt("heightMap", 0);
@@ -207,10 +192,6 @@ int main(int argc, char **argv)
     //Print(cam.far);
 
     //Manager::AddShader(&shader);
-    Manager::AddShader(&terrainShader);
-    Manager::AddShader(&instanceShader);
-    Manager::AddShader(&computeShader);
-    Manager::AddShader(&heightmapComputeShader);
 
     //Shape shape(CUBE);
     Shape instanceShape(BLADE);
@@ -229,8 +210,11 @@ int main(int argc, char **argv)
     floor.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
 
     //Manager::AddObject(&object);
-    Manager::AddObject(&floor);
-
+	Manager::AddShader(&terrainShader);
+	Manager::AddShader(&instanceShader);
+	Manager::AddShader(&computeShader);
+	Manager::AddShader(&heightmapComputeShader);
+	Manager::AddObject(&floor);
     Manager::AddInstanceBatch(&instanceMesh, count);
 
     unsigned int buffer;
@@ -250,11 +234,6 @@ int main(int argc, char **argv)
     int inssqrt = sqrt(count);
     Print(count);
     Print(inssqrt);
-
-    Time::NewFrame();
-    Debug::NewFrame();
-    Input::processInput(window);
-    Manager::NewFrame();
 
     heightmapComputeShader.useShader();
     glDispatchCompute(8192 / 32, 8192 / 32, 1);

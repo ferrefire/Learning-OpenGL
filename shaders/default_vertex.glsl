@@ -11,12 +11,9 @@ out vec3 Normal;
 out vec3 FragmentPosition;
 out vec4 Color;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-
-uniform vec3 viewPosition;
 uniform vec4 color;
+
+#include "variables.glsl"
 
 void main()
 {

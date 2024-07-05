@@ -15,15 +15,12 @@ out vec2 tUV[];
 //out vec4 tColor[];
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
 
-uniform vec3 viewPosition;
+uniform sampler2D heightMap;
 
-uniform float far;
-uniform float near;
-
+#include "variables.glsl"
 #include "culling.glsl"
+#include "heightmap.glsl"
 
 float NegativePow(float val)
 {
@@ -49,12 +46,17 @@ void main()
     if (gl_InvocationID == 0)
     {
         vec3 center = (gl_in[0].gl_Position + gl_in[1].gl_Position + gl_in[2].gl_Position).xyz * (1.0 / 3.0);
+        //vec2 uv = (tUV[0] + tUV[1] + tUV[2]) * (1.0 / 3.0);
+        //vec2 uv = UV[gl_InvocationID];
         float disSqr = dot(viewPosition - center, viewPosition - center);
-        if (disSqr > 10000 &&
-            InView(center, 0.1) == 0 && 
-            InView(gl_in[0].gl_Position.xyz, 0.1) == 0 &&
-            InView(gl_in[1].gl_Position.xyz, 0.1) == 0 &&
-            InView(gl_in[2].gl_Position.xyz, 0.1) == 0)
+		float tolerance = pow(1.0 - disSqr / (far * far), 2);
+		//vec3 normal = SampleNormal(uv, 1);
+		//float angled = 1.0 - pow(1.0 - NormalToViewDot(viewDirection, normal), 3);
+		//float angled = PositionToViewDot(gl_in[0].gl_Position.xyz, gl_in[1].gl_Position.xyz, gl_in[2].gl_Position.xyz);
+        if ((InView(center, tolerance) == 0 && 
+            InView(gl_in[0].gl_Position.xyz, tolerance) == 0 &&
+            InView(gl_in[1].gl_Position.xyz, tolerance) == 0 &&
+            InView(gl_in[2].gl_Position.xyz, tolerance) == 0))
         {
             gl_TessLevelOuter[0] = 0;
             gl_TessLevelOuter[1] = 0;

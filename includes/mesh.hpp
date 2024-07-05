@@ -1,13 +1,13 @@
 #ifndef MESH_HPP
 #define MESH_HPP
 
-#include "shape.hpp"
-#include "shader.hpp"
 #include "glad.h"
 #include <glm/glm.hpp>
 #include <tuple>
 #include <vector>
-#include "triangle.hpp"
+#include <iostream>
+#include "shape.hpp"
+#include "shader.hpp"
 
 class Mesh
 {
@@ -17,19 +17,19 @@ class Mesh
         unsigned int EBO;
         unsigned int elements;
 
-        Shader * shader;
-        Shape * shape;
+        Shader *shader;
+        Shape *shape;
     public:
 		static unsigned int currentActiveVAO;
 
-        Mesh(Shape * shape, Shader * shader);
+        Mesh(Shape *shape, Shader *shader);
 
         unsigned int GetVAO();
         unsigned int GetVBO();
         unsigned int GetEBO();
 
-        Shader * GetShader();
-        Shape * GetShape();
+        Shader *GetShader();
+        Shape *GetShape();
 
 		void UseMesh();
 };
