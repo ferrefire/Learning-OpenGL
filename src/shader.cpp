@@ -49,6 +49,12 @@ void Shader::setFloat2(std::string name, float x, float y)
 	glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
 }
 
+void Shader::setFloat2(std::string name, glm::vec2 vec)
+{
+	useShader();
+	glUniform2f(glGetUniformLocation(ID, name.c_str()), vec.x, vec.y);
+}
+
 void Shader::setFloat3(std::string name, float x, float y, float z)
 {
     useShader();
@@ -108,6 +114,14 @@ void Shader::setFloat2Global(std::string name, float x, float y)
 	for (Shader *shader : Manager::shaders)
 	{
 		shader->setFloat2(name, x, y);
+	}
+}
+
+void Shader::setFloat2Global(std::string name, glm::vec2 vec)
+{
+	for (Shader *shader : Manager::shaders)
+	{
+		shader->setFloat2(name, vec);
 	}
 }
 

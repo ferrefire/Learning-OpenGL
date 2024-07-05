@@ -12,8 +12,11 @@ class Time
         static float deltaTime;
         static float currentFrame;
         static float lastFrame;
+		static double timeLastSecond;
 
-        static void NewFrame();
+		static bool newSecond;
+
+		static void NewFrame();
 };
 
 #endif

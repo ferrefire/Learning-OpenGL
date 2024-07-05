@@ -2,7 +2,7 @@
 
 #define COMPUTE_STAGE
 
-layout (local_size_x = 32, local_size_y = 32) in;
+layout (local_size_x = 4, local_size_y = 4) in;
 
 struct datastruct
 {

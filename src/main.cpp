@@ -29,8 +29,8 @@
 const int width = 1600;
 const int height = 900;
 
-double Debug::timeLastSecond = 0;
 unsigned int Debug::totalFramesThisSecond = 0;
+double Debug::start = -1;
 
 unsigned int Shader::currentActiveShader = 0;
 unsigned int Mesh::currentActiveVAO = 0;
@@ -38,6 +38,8 @@ unsigned int Mesh::currentActiveVAO = 0;
 float Time::deltaTime = 0.0f;
 float Time::currentFrame = 0.0f;
 float Time::lastFrame = 0.0f;
+double Time::timeLastSecond = 0;
+bool Time::newSecond = false;
 
 Camera cam = Camera();
 
@@ -55,6 +57,7 @@ std::vector<Shader *> Manager::shaders = std::vector<Shader *>();
 bool Manager::wireframeActive = false;
 bool Manager::vSyncActive = true;
 bool Manager::mouseLocked = true;
+int Manager::heightMapResolution = 1024;
 Camera &Manager::camera = cam;
 GLFWwindow *Manager::window = NULL;
 
@@ -180,7 +183,10 @@ int main(int argc, char **argv)
 
     terrainShader.setInt("heightMap", 0);
 
-    unsigned int texture;
+	Manager::heightMapResolution = 4096;
+	heightmapComputeShader.setFloat("resolution", Manager::heightMapResolution);
+	heightmapComputeShader.setFloat("scale", 4);
+	unsigned int texture;
 
     glGenTextures(1, &texture);
     glActiveTexture(GL_TEXTURE0);
@@ -189,7 +195,7 @@ int main(int argc, char **argv)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16_SNORM, 8192, 8192, 0, GL_RED, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R16_SNORM, Manager::heightMapResolution, Manager::heightMapResolution, 0, GL_RED, GL_FLOAT, NULL);
 
 	glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16_SNORM);
 
@@ -239,10 +245,11 @@ int main(int argc, char **argv)
     Print(count);
     Print(inssqrt);
 
+	glm::vec2 offset = glm::vec2(0, 0);
     heightmapComputeShader.useShader();
-    glDispatchCompute(8192 / 32, 8192 / 32, 1);
+	glDispatchCompute(Manager::heightMapResolution / 4, Manager::heightMapResolution / 4, 1);
 
-    while (!glfwWindowShouldClose(window))
+	while (!glfwWindowShouldClose(window))
     {
         Time::NewFrame();
 		Debug::NewFrame();
@@ -250,12 +257,20 @@ int main(int argc, char **argv)
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //object.Move(glm::vec3(0.0f, Time::deltaTime * 0.1f, Time::deltaTime));
-        //object.Rotate(glm::vec3(Time::deltaTime * 100));
+		//if (Time::newSecond)
+		//{
+		//	Debug::DurationCheck();
+		//	heightmapComputeShader.useShader();
+		//	offset += glm::vec2(0.1, 0.1);
+		//	heightmapComputeShader.setFloat2("offset", offset);
+		//	glDispatchCompute(Manager::heightMapResolution / 4, Manager::heightMapResolution / 4, 1);
+		//	//glMemoryBarrier(GL_ALL_BARRIER_BITS);
+		//	//Debug::DurationCheck();
+		//}
 
         computeShader.useShader();
-        glDispatchCompute(inssqrt / 32, inssqrt / 32, 1);
-        glMemoryBarrier(GL_ALL_BARRIER_BITS);
+        glDispatchCompute(inssqrt / 4, inssqrt / 4, 1);
+        //glMemoryBarrier(GL_ALL_BARRIER_BITS);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, computeCount);
         void *ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
         unsigned int cCount = *(unsigned int *)ptr;
@@ -264,6 +279,8 @@ int main(int argc, char **argv)
         *(unsigned int *)ptr = 0;
         glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+		//if (Time::newSecond) Debug::DurationCheck();
 
         Manager::NewFrame();
 

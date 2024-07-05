@@ -30,6 +30,8 @@ class Manager
 		static bool vSyncActive;
 		static bool mouseLocked;
 
+		static int heightMapResolution;
+
 		static void NewFrame();
 
         static void AddObject(Object *object);

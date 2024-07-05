@@ -36,8 +36,8 @@ void Manager::SetShaderVariables(Shader *shader)
 	shader->setInt("noiseLayers", 8);
 	shader->setFloat("noiseScale", 0.5f);
 	shader->setFloat("noiseHeight", 2500.0f);
-	shader->setFloat("sizeMultiplier", 1.0 / 8192.0);
-	shader->setFloat("stepSizeMult", 8192.0 * 0.5);
+	shader->setFloat("sizeMultiplier", 1.0 / float(heightMapResolution));
+	shader->setFloat("stepSizeMult", float(heightMapResolution) * 0.5);
 }
 
 void Manager::AddShader(Shader *shader)

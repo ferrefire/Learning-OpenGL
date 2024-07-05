@@ -2,16 +2,12 @@
 
 void Debug::NewFrame()
 {
-	if (timeLastSecond == 0)
-		timeLastSecond = glfwGetTime();
-
 	totalFramesThisSecond++;
 
-	if (glfwGetTime() - timeLastSecond > 1.0f)
+	if (Time::newSecond)
 	{
 		std::cout << "FPS: " << totalFramesThisSecond << std::endl;
 		totalFramesThisSecond = 0;
-		timeLastSecond = 0;
 	}
 
     if (Input::GetKey(GLFW_KEY_L).pressed)
@@ -34,5 +30,18 @@ void Debug::NewFrame()
 	{
 		Manager::mouseLocked = !Manager::mouseLocked;
 		glfwSetInputMode(Manager::window, GLFW_CURSOR, Manager::mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+	}
+}
+
+void Debug::DurationCheck()
+{
+	if (start == -1)
+	{
+		start = glfwGetTime();
+	}
+	else
+	{
+		std::cout << "duration: " << (glfwGetTime() - start) * 1000.0 << " ms" << std::endl;
+		start = -1;
 	}
 }

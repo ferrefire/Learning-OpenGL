@@ -82,18 +82,31 @@ float GenerateNoise(vec2 uv, int layers)
     float maxNoise = 0;
     float weight = 1;
     float scale = 1;
+	float erosion = 0;
 
     for (int i = 0; i < layers; i++)
     {
         float mult = 1.0 / (i + 1);
-        noise += snoise(uv * noiseScale * scale + vec2(1000, 1000) * i) * weight;
-        maxNoise += weight;
+        //float point = snoise(uv * noiseScale * scale + vec2(1000, 1000) * i) * weight;
+        float point = snoise(uv * noiseScale * scale + vec2(1000, 1000) * i) * weight;
+        float point1 = snoise((uv + vec2(noiseSampleDistance * 0.5, 0)) * noiseScale * scale + vec2(1000, 1000) * i) * weight;
+        float point2 = snoise((uv + vec2(0, noiseSampleDistance * 0.5)) * noiseScale * scale + vec2(1000, 1000) * i) * weight;
+
+		vec2 derivative = vec2((point1 - point) / noiseSampleDistance * 0.5, (point2 - point) / noiseSampleDistance * 0.5);
+		erosion += (1.0 - length(derivative));
+		float erode = erosion / (i + 1);
+        noise += point * erode;
+
+        //noise += point;
+        maxNoise += weight * erode;
         weight *= 0.4;
+        //weight *= 0.4;
         scale *= 2.0;
     }
 
     noise = InvLerp(0.0, maxNoise, noise);
     noise = noise * noise * noise;
+    //noise = noise * noise * noise;
 
     return (noise);
 }

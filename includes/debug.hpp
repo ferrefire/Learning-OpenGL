@@ -4,6 +4,7 @@
 #include <iostream>
 #include "glad.h"
 #include <GLFW/glfw3.h>
+#include "time.hpp"
 #include "input.hpp"
 #include "manager.hpp"
 
@@ -12,10 +13,11 @@ class Debug
 	private:
 		
 	public:
-		static double timeLastSecond;
 		static unsigned int totalFramesThisSecond;
+		static double start;
 		
 		static void NewFrame();
+		static void DurationCheck();
 };
 
 #endif
