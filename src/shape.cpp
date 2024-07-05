@@ -91,7 +91,7 @@ Shape::Shape(int preset)
         name = std::string("plane");
         vertexOnly = true;
 
-        int sideVertCount = 200;
+        int sideVertCount = 50;
         float halfLength = 0.5f;
 
         for (int i = 0, x = 0; x <= sideVertCount; ++x)

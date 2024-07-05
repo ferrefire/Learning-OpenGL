@@ -24,6 +24,7 @@ layout(std430, binding = 4) buffer oComputeCount
 uniform int instanceCount;
 uniform float instanceMult;
 uniform int instanceCountSqrt;
+uniform float instanceCountSqrtMult;
 
 uniform sampler2D heightMap;
 
@@ -57,9 +58,15 @@ void main()
     z = z * 0.5 + floor(viewPosition.z);
 
     vec2 uv = vec2(x, z) * 0.0001 + 0.5;
-    float falloff = float(indexDis) / float(instanceCountSqrt * 0.5);
-	vec3 norm = SampleNormal(uv, 1);
+    float falloff = float(indexDis) * float(instanceCountSqrtMult * 2.0);
 	float ran = GetRandom(float(x + z * instanceCountSqrt) * instanceMult);
+	vec3 norm = SampleNormal(uv, 0.5);
+	//vec3 norm = SampleNormalUnNorm(uv);
+	//vec3 steepnessNormal = norm;
+	//norm.xz *= 0.25;
+	//norm = normalize(norm);
+	//steepnessNormal.xz *= 0.5;
+	//steepnessNormal = normalize(steepnessNormal);
     if (GetSteepness(norm) > 0.5 + (ran - 0.5) * 0.5 || falloff > pow(ran, 3)) return ;
 	//if (GetSteepness(GenerateNoiseNormal(uv, noiseLayers, 0.001)) > 0.5) return ;
 

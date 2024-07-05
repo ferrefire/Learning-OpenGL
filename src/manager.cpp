@@ -30,11 +30,14 @@ void Manager::SetShaderVariables(Shader *shader)
 	shader->setMatrix4("projection", camera.Projection());
 	shader->setFloat3("lightPosition", 25000.0f, 25000.0f, 50000.0f);
 	shader->setFloat("near", camera.near);
+	shader->setFloat("nearMult", 1.0 / camera.near);
 	shader->setFloat("far", camera.far);
+	shader->setFloat("farMult", 1.0 / camera.far);
 	shader->setInt("noiseLayers", 8);
 	shader->setFloat("noiseScale", 0.5f);
 	shader->setFloat("noiseHeight", 2500.0f);
 	shader->setFloat("sizeMultiplier", 1.0 / 8192.0);
+	shader->setFloat("stepSizeMult", 8192.0 * 0.5);
 }
 
 void Manager::AddShader(Shader *shader)

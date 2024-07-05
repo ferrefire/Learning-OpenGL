@@ -24,11 +24,13 @@ class Manager
         static std::vector<InstanceBatch> instanceBatches;
         static std::vector<Shader *> shaders;
 
-        static Camera &camera;
-        static bool wireframeActive;
-        static bool vSyncActive;
+		static Camera &camera;
+		static GLFWwindow *window;
+		static bool wireframeActive;
+		static bool vSyncActive;
+		static bool mouseLocked;
 
-        static void NewFrame();
+		static void NewFrame();
 
         static void AddObject(Object *object);
         static void AddInstanceBatch(InstanceBatch instanceBatch);

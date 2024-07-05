@@ -54,7 +54,9 @@ std::vector<Manager::InstanceBatch> Manager::instanceBatches = std::vector<Manag
 std::vector<Shader *> Manager::shaders = std::vector<Shader *>();
 bool Manager::wireframeActive = false;
 bool Manager::vSyncActive = true;
+bool Manager::mouseLocked = true;
 Camera &Manager::camera = cam;
+GLFWwindow *Manager::window = NULL;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -65,8 +67,8 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 GLFWwindow *setupGLFW()
 {
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow *window = glfwCreateWindow(width, height, "LearnOpenGL", NULL, NULL);
@@ -150,8 +152,9 @@ int main(int argc, char **argv)
 
     GLFWwindow *window = setupGLFW();
     if (window == NULL) return (quit(EXIT_FAILURE));
+	Manager::window = window;
 
-    setupSettings(argc, argv, window);
+	setupSettings(argc, argv, window);
 
     //Texture brickTex((path + "/textures/brick.png").c_str());
     //Texture stoneTex((path + "/textures/stone.png").c_str());
@@ -170,8 +173,9 @@ int main(int argc, char **argv)
 	computeShader.setInt("instanceCount", count);
 	computeShader.setFloat("instanceMult", 1.0 / float(count));
 	computeShader.setInt("instanceCountSqrt", sqrt(count));
+	computeShader.setFloat("instanceCountSqrtMult", 1.0 / float(sqrt(count)));
 
-    Shader heightmapComputeShader("heightmap_compute.glsl");
+	Shader heightmapComputeShader("heightmap_compute.glsl");
     heightmapComputeShader.setInt("heightMap", 0);
 
     terrainShader.setInt("heightMap", 0);
@@ -185,11 +189,11 @@ int main(int argc, char **argv)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, 8192, 8192, 0, GL_RED, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16_SNORM, 8192, 8192, 0, GL_RED, GL_FLOAT, NULL);
 
-    glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32F);
+	glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16_SNORM);
 
-    //Print(cam.far);
+	//Print(cam.far);
 
     //Manager::AddShader(&shader);
 

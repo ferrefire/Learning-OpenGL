@@ -4,7 +4,9 @@
 uniform float time;
 
 uniform float near;
+uniform float nearMult;
 uniform float far;
+uniform float farMult;
 
 uniform mat4 view;
 uniform mat4 projection;

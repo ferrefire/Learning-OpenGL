@@ -4,9 +4,11 @@ Camera::Camera()
 {
     far = 10000;
     projection = glm::perspective(glm::radians(FOV), (float)width / (float)height, near, far);
-    position.y = 250;
-    Move(glm::vec3(0.0f));
-    Rotate(glm::vec3(0.0f, -90.0f, 0.0f));
+	position.x = -2000;
+	position.z = 2000;
+	position.y = 1000;
+	Move(glm::vec3(0.0f));
+    Rotate(glm::vec3(25.0f, -90.0f, 0.0f));
 }
 
 void Camera::Move(glm::vec3 amount)

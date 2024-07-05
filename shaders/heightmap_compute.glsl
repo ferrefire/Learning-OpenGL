@@ -4,7 +4,7 @@
 
 layout (local_size_x = 32, local_size_y = 32) in;
 
-layout(r32f, binding = 0) uniform image2D heightMap;
+layout(r16_snorm, binding = 0) uniform image2D heightMap;
 
 #include "noise.glsl"
 

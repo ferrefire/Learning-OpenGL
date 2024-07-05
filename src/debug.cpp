@@ -29,4 +29,10 @@ void Debug::NewFrame()
         Manager::vSyncActive = !Manager::vSyncActive;
         glfwSwapInterval(Manager::vSyncActive);
     }
+
+	if (Input::GetKey(GLFW_KEY_M).pressed)
+	{
+		Manager::mouseLocked = !Manager::mouseLocked;
+		glfwSetInputMode(Manager::window, GLFW_CURSOR, Manager::mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+	}
 }

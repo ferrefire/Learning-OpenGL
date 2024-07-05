@@ -32,7 +32,7 @@ float TessellationFactor (vec3 p0, vec3 p1)
     float edgeLength = distance(p0, p1);
     vec3 edgeCenter = (p0 + p1) * 0.5;
     float viewDistance = distance(edgeCenter, viewPosition);
-    return edgeLength * 900.0 / (5.0 * viewDistance);
+    return (edgeLength * 900.0 * (1.0 / (15.0 * viewDistance)));
 }
 
 void main()
@@ -49,7 +49,7 @@ void main()
         //vec2 uv = (tUV[0] + tUV[1] + tUV[2]) * (1.0 / 3.0);
         //vec2 uv = UV[gl_InvocationID];
         float disSqr = dot(viewPosition - center, viewPosition - center);
-		float tolerance = pow(1.0 - disSqr / (far * far), 2);
+		float tolerance = pow(1.0 - disSqr * (farMult * farMult), 2);
 		//vec3 normal = SampleNormal(uv, 1);
 		//float angled = 1.0 - pow(1.0 - NormalToViewDot(viewDirection, normal), 3);
 		//float angled = PositionToViewDot(gl_in[0].gl_Position.xyz, gl_in[1].gl_Position.xyz, gl_in[2].gl_Position.xyz);
@@ -64,23 +64,6 @@ void main()
             gl_TessLevelInner[0] = 0;
             return ;
         }
-
-        //const int MIN_TESS_LEVEL = 4;
-        //const int MAX_TESS_LEVEL = 64;
-        //const float MIN_DISTANCE = 10;
-        //const float MAX_DISTANCE = 5000;
-//
-        //vec4 eyeSpacePos1 = projection * view * model * gl_in[0].gl_Position;
-        //vec4 eyeSpacePos2 = projection * view * model * gl_in[1].gl_Position;
-        //vec4 eyeSpacePos3 = projection * view * model * gl_in[2].gl_Position;
-//
-        //float distance1 = clamp((abs(eyeSpacePos1.z)-MIN_DISTANCE) / (MAX_DISTANCE-MIN_DISTANCE), 0.0, 1.0);
-        //float distance2 = clamp((abs(eyeSpacePos2.z)-MIN_DISTANCE) / (MAX_DISTANCE-MIN_DISTANCE), 0.0, 1.0);
-        //float distance3 = clamp((abs(eyeSpacePos3.z)-MIN_DISTANCE) / (MAX_DISTANCE-MIN_DISTANCE), 0.0, 1.0);
-//
-        //float tessLevel1 = mix(MAX_TESS_LEVEL, MIN_TESS_LEVEL, NegativePow(min(distance2, distance3)));
-        //float tessLevel2 = mix(MAX_TESS_LEVEL, MIN_TESS_LEVEL, NegativePow(min(distance3, distance1)));
-        //float tessLevel3 = mix(MAX_TESS_LEVEL, MIN_TESS_LEVEL, NegativePow(min(distance1, distance2)));
 
         float tessLevel1 = TessellationFactor(gl_in[1].gl_Position.xyz, gl_in[2].gl_Position.xyz);
         float tessLevel2 = TessellationFactor(gl_in[2].gl_Position.xyz, gl_in[0].gl_Position.xyz);

@@ -3,9 +3,9 @@
 #define FRAGMENT_STAGE
 
 in vec2 fUV;
-in vec3 fNormal;
+//in vec3 fNormal;
 in vec3 fFragmentPosition;
-in vec4 fColor;
+//in vec4 fColor;
 
 out vec4 oFragmentColor;
 
@@ -20,6 +20,7 @@ uniform sampler2D heightMap;
 #include "depth.glsl"
 #include "LOD.glsl"
 #include "transformation.glsl"
+#include "heightmap.glsl"
 
 void main()
 {
@@ -29,8 +30,33 @@ void main()
     float depth = GetDepth(gl_FragCoord.z, near, far);
     //float loddepth = pow(1.0 - depth, 2);
     
+	//vec3 normal = fNormal;
+	//vec4 Color = fColor;
+	//if (false && depth < 0.1)
+	//{
+	//	normal = normalize(normal);
+	//}
+	//else
+	//{
+	//	normal = SampleNormal(fUV, 1);
+	//	float steepness = GetSteepness(normal);
+    //	steepness = pow(steepness, 2);
+    //	Color = mix(color, vec4(0.25, 0.25, 0.25, 1), steepness);
+	//}
 
-    vec3 normal = normalize(fNormal);
+	//float power = mix(0.25, 1.0, depth);
+	//vec3 normal = SampleNormalUnNorm(fUV);
+	//vec3 steepnessNormal = normal;
+	//normal.xz *= power;
+	//normal = normalize(normal);
+	//steepnessNormal.xz *= 0.5;
+	//steepnessNormal = normalize(steepnessNormal);
+	vec3 normal = SampleNormal(fUV, 0.5);
+	float steepness = GetSteepness(normal);
+    steepness = pow(steepness, 2);
+    vec4 Color = mix(color, vec4(0.25, 0.25, 0.25, 1), steepness);
+
+    
     //vec4 Color = fColor;
 
     //float loddepth = 1.0 - depth;
@@ -54,5 +80,5 @@ void main()
     float specular = 0;
     vec3 specularColor = vec3(0.5 * specular);
 
-    oFragmentColor = mix(vec4(fColor.xyz * (vec3(0.25) + diffuse + specularColor), 1.0), vec4(1.0), depth);
+    oFragmentColor = mix(vec4(Color.xyz * (vec3(0.25) + diffuse + specularColor), 1.0), vec4(1.0), depth);
 }

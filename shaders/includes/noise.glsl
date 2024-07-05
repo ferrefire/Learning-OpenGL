@@ -105,7 +105,8 @@ vec3 GenerateNoiseNormal(vec2 uv, int layers, float stepSize)
     float down = GenerateNoise(uv - vec2(0, noiseSampleDistance * noiseScale), layers);
     float up = GenerateNoise(uv + vec2(0, noiseSampleDistance * noiseScale), layers);
 
-    vec3 normalTS = vec3((left - right) / (noiseSampleDistance * noiseScale * 2), (down - up) / (noiseSampleDistance * noiseScale * 2), 1);
+    vec3 normalTS = vec3((left - right) / (noiseSampleDistance * noiseScale * 2), 
+		(down - up) / (noiseSampleDistance * noiseScale * 2), 1);
     normalTS.xy *= 1.25;
 
     return (normalize(normalTS).xzy);
