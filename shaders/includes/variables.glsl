@@ -14,5 +14,6 @@ uniform mat4 projection;
 uniform vec3 viewPosition;
 uniform vec3 viewDirection;
 uniform vec3 lightPosition;
+uniform vec3 lightDirection;
 
 #endif

@@ -205,7 +205,7 @@ int main(int argc, char **argv)
 
     //Shape shape(CUBE);
     Shape instanceShape(BLADE);
-    instanceShape.Scale(glm::vec3(0.25f, 2.0f, 1.0f));
+    //instanceShape.Scale(glm::vec3(0.25f, 2.0f, 1.0f));
     Shape plane(PLANE);
     plane.Scale(glm::vec3(10000.0f));
 

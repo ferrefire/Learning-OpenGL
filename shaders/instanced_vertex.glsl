@@ -3,8 +3,8 @@
 #define VERTEX_STAGE
 
 layout (location = 0) in vec3 iPosition;
-layout (location = 1) in vec2 iUV;
-layout (location = 2) in vec3 iNormal;
+//layout (location = 1) in vec2 iUV;
+//layout (location = 2) in vec3 iNormal;
 
 struct datastruct
 {
@@ -20,6 +20,7 @@ layout(std430, binding = 3) buffer iColors
 
 out vec2 UV;
 out vec3 Normal;
+out vec3 TerrainNormal;
 out vec3 FragmentPosition;
 out vec4 Color;
 
@@ -58,22 +59,27 @@ void main()
     //FragmentPosition = (model * vec4(iPosition + vec3(x, y, z), 1.0)).xyz;
 
     //float angle = acos(dot(data[gl_InstanceID].pos.xz, viewPosition.xz) / (length(data[gl_InstanceID].pos.xz) * length(viewPosition.xz)));
-    mat4 rotation = rotationMatrix(vec3(1.0, 0.0, 0.0), radians(random(data[gl_InstanceID].pos.xz) * 25.0 * (iUV.y + 1)));
+    vec3 normal = vec3(0, 0, -1);
+    mat4 rotation = rotationMatrix(vec3(1.0, 0.0, 0.0), radians(random(data[gl_InstanceID].pos.xz) * 45.0 * (iPosition.y + 1)));
     vec3 position = (rotation * vec4(iPosition, 1.0)).xyz;
+    normal = (rotation * vec4(normal, 0.0)).xyz;
     rotation = rotationMatrix(vec3(0.0, 1.0, 0.0), radians(random(data[gl_InstanceID].pos.xz + data[gl_InstanceID].pos.y) * 360.0));
     position = (rotation * vec4(position, 1.0)).xyz + data[gl_InstanceID].pos;
+    normal = (rotation * vec4(normal, 0.0)).xyz;
     //vec3 position = iPosition + data[gl_InstanceID].pos;
 
     gl_Position = projection * view * model * vec4(position, 1.0);
     FragmentPosition = (model * vec4(position, 1.0)).xyz;
 
-	UV = iUV;
+	UV = vec2(iPosition.x * 10 + 0.5, iPosition.y);
 	//Normal = (model * vec4(iNormal, 0.0)).xyz;
 	//Normal = vec3(0.0, 1.0, 0.0);
 
 	//Normal = GenerateNoiseNormal(position.xz * 0.001, 7, 0.001);
 	//Normal = SampleNormal(position.xz * 0.0001 + 0.5, 1);
-	Normal = data[gl_InstanceID].norm;
+	//Normal = data[gl_InstanceID].norm;
+	TerrainNormal = data[gl_InstanceID].norm;
+	Normal = normal;
 	
     //float ran = random(vec2(x, z));
     //Color = vec4(ran, random(vec2(ran, 1.0)), random(vec2(1.0, ran)), 1.0);

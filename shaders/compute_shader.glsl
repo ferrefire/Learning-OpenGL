@@ -53,8 +53,8 @@ void main()
     float x = float(gl_GlobalInvocationID.x) - instanceCountSqrt * 0.5;
     float z = float(gl_GlobalInvocationID.y) - instanceCountSqrt * 0.5;
     float indexDis = max(abs(x), abs(z));
-    x = x * 0.5 + floor(viewPosition.x);
-    z = z * 0.5 + floor(viewPosition.z);
+    x = x * 0.25 + floor(viewPosition.x);
+    z = z * 0.25 + floor(viewPosition.z);
 
     vec2 uv = vec2(x, z) * 0.0001 + 0.5;
     float falloff = float(indexDis) * float(instanceCountSqrtMult * 2.0);
@@ -72,12 +72,13 @@ void main()
 	//if (GetSteepness(GenerateNoiseNormal(uv, noiseLayers, 0.001)) > 0.5) return ;
 
     //float y = GenerateNoise(uv, noiseLayers) * noiseHeight + 1.5;
-    float y = texture(heightMap, uv).r * heightMapHeight + 1.5;
+    float y = texture(heightMap, uv).r * heightMapHeight;
 
     vec3 pos = GetRandomVec3(float(x + z * instanceCountSqrt) * instanceMult);
+    pos.y = 0;
     //vec3 pos = vec3(0);
     vec3 position = vec3(x, y, z) + pos;
-    if (InView(position, 0.1) == 0) return ;
+    if (InView(position + vec3(0, 0.5, 0), 0.1) == 0) return ;
     index = atomicAdd(computeCount, 1);
     data[index].pos = position;
 	data[index].norm = norm;

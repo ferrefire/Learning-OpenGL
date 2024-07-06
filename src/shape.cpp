@@ -273,21 +273,62 @@ Shape::Shape(int preset)
     }
     else if (preset == BLADE)
     {
-        Shape base(QUAD);
-        base.Translate(glm::vec3(0.0f, -0.5f, 0.0));
-        Shape top(TRIANGLE);
-        top.Translate(glm::vec3(0.0f, 0.5f, 0.0));
+        name = std::string("blade");
+        vertexOnly = true;
 
-        Join(base);
-        Join(top);
+        const float BLADE_WIDTH = 0.05f;
+        const float BLADE_HEIGHT = 0.25f;
+
+        vertices.push_back(glm::vec3(-BLADE_WIDTH, BLADE_HEIGHT, 0.0f));
+        vertices.push_back(glm::vec3(BLADE_WIDTH, 0, 0.0f));
+        vertices.push_back(glm::vec3(-BLADE_WIDTH, 0, 0.0f));
+        vertices.push_back(glm::vec3(BLADE_WIDTH, BLADE_HEIGHT, 0.0f));
+        vertices.push_back(glm::vec3(-BLADE_WIDTH, BLADE_HEIGHT * 2, 0.0f));
+        vertices.push_back(glm::vec3(BLADE_WIDTH, BLADE_HEIGHT * 2, 0.0f));
+        vertices.push_back(glm::vec3(-BLADE_WIDTH, BLADE_HEIGHT * 3, 0.0f));
+        vertices.push_back(glm::vec3(BLADE_WIDTH, BLADE_HEIGHT * 3, 0.0f));
+        vertices.push_back(glm::vec3(0.0f, BLADE_HEIGHT * 4, 0.0f));
+
+        //uvs.push_back(glm::vec2(0.0f, 0.0f));
+        //uvs.push_back(glm::vec2(1.0f, 0.0f));
+        //uvs.push_back(glm::vec2(0.0f, 1.0f));
+        //uvs.push_back(glm::vec2(1.0f, 1.0f));
+
+        //normals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
+        //normals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
+        //normals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
+        //normals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
+
+        indices.push_back(0);
+        indices.push_back(1);
+        indices.push_back(2);
+
+        indices.push_back(0);
+        indices.push_back(3);
+        indices.push_back(1);
+
+        indices.push_back(4);
+        indices.push_back(3);
+        indices.push_back(0);
+
+        indices.push_back(4);
+        indices.push_back(5);
+        indices.push_back(3);
+
+        indices.push_back(6);
+        indices.push_back(5);
+        indices.push_back(4);
+
+        indices.push_back(6);
+        indices.push_back(7);
+        indices.push_back(5);
+
+        indices.push_back(8);
+        indices.push_back(7);
+        indices.push_back(6);
 
         vertexCount = vertices.size();
         indiceCount = indices.size();
-
-        for (int i = 0; i < vertexCount; i++)
-        {
-            uvs[i] = glm::vec2(vertices[i].x + 0.5f, (vertices[i].y + 1.0f) * 0.5f);
-        }
     }
 
     RecalculateData();
