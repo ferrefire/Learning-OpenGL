@@ -21,7 +21,6 @@ uniform vec4 color;
 uniform sampler2D heightMap;
 
 #include "variables.glsl"
-#include "noise.glsl"
 #include "LOD.glsl"
 #include "transformation.glsl"
 #include "heightmap.glsl"
@@ -39,7 +38,7 @@ void main()
     int lod = GetLodLevel(position.xyz, far);
 
     //position.y = GenerateNoise(fUV, lod) * noiseHeight;
-    position.y = texture(heightMap, fUV).r * noiseHeight;
+    position.y = texture(heightMap, fUV).r * heightMapHeight;
     //position.y = 0;
 
     fFragmentPosition = (model * position).xyz;

@@ -185,7 +185,7 @@ int main(int argc, char **argv)
 
 	Manager::heightMapResolution = 4096;
 	heightmapComputeShader.setFloat("resolution", Manager::heightMapResolution);
-	heightmapComputeShader.setFloat("scale", 4);
+	heightmapComputeShader.setFloat("scale", 1);
 	unsigned int texture;
 
     glGenTextures(1, &texture);

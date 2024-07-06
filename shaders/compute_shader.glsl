@@ -30,7 +30,6 @@ uniform sampler2D heightMap;
 
 #include "variables.glsl"
 #include "culling.glsl"
-#include "noise.glsl"
 #include "heightmap.glsl"
 
 float GetRandom(float x)
@@ -60,18 +59,20 @@ void main()
     vec2 uv = vec2(x, z) * 0.0001 + 0.5;
     float falloff = float(indexDis) * float(instanceCountSqrtMult * 2.0);
 	float ran = GetRandom(float(x + z * instanceCountSqrt) * instanceMult);
-	vec3 norm = SampleNormal(uv, 0.5);
+	vec3 norm = SampleNormal(uv, 0.25);
+    float steepness = GetSteepness(norm);
+    steepness = 1.0 - pow(1.0 - steepness, 15);
 	//vec3 norm = SampleNormalUnNorm(uv);
 	//vec3 steepnessNormal = norm;
 	//norm.xz *= 0.25;
 	//norm = normalize(norm);
 	//steepnessNormal.xz *= 0.5;
 	//steepnessNormal = normalize(steepnessNormal);
-    if (GetSteepness(norm) > 0.5 + (ran - 0.5) * 0.5 || falloff > pow(ran, 3)) return ;
+    if (steepness > 0.5 + (ran - 0.5) * 0.5 || falloff > pow(ran, 3)) return ;
 	//if (GetSteepness(GenerateNoiseNormal(uv, noiseLayers, 0.001)) > 0.5) return ;
 
     //float y = GenerateNoise(uv, noiseLayers) * noiseHeight + 1.5;
-    float y = texture(heightMap, uv).r * noiseHeight + 1.5;
+    float y = texture(heightMap, uv).r * heightMapHeight + 1.5;
 
     vec3 pos = GetRandomVec3(float(x + z * instanceCountSqrt) * instanceMult);
     //vec3 pos = vec3(0);

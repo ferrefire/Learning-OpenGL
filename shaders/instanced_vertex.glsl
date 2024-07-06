@@ -28,7 +28,6 @@ uniform mat4 model;
 uniform sampler2D heightMap;
 
 #include "variables.glsl"
-#include "noise.glsl"
 #include "heightmap.glsl"
 
 float random (vec2 st)

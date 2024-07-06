@@ -4,7 +4,7 @@
 uniform int noiseLayers;
 uniform float noiseScale;
 uniform float noiseHeight;
-uniform float noiseSampleDistance = 0.0025;
+uniform float noiseSampleDistance = 0.1;
 
 vec3 mod289(vec3 x)
 {
@@ -86,24 +86,39 @@ float GenerateNoise(vec2 uv, int layers)
 
     for (int i = 0; i < layers; i++)
     {
-        float mult = 1.0 / (i + 1);
+        //float mult = 1.0 / (i + 1);
         //float point = snoise(uv * noiseScale * scale + vec2(1000, 1000) * i) * weight;
-        float point = snoise(uv * noiseScale * scale + vec2(1000, 1000) * i) * weight;
-        float point1 = snoise((uv + vec2(noiseSampleDistance * 0.5, 0)) * noiseScale * scale + vec2(1000, 1000) * i) * weight;
-        float point2 = snoise((uv + vec2(0, noiseSampleDistance * 0.5)) * noiseScale * scale + vec2(1000, 1000) * i) * weight;
+        float point0 = snoise(uv * noiseScale * scale) * weight;
+        float point1 = snoise((uv + vec2(sizeMultiplier, 0)) * noiseScale * scale) * weight;
+        float point2 = snoise((uv + vec2(0, sizeMultiplier)) * noiseScale * scale) * weight;
+        //float left = snoise((uv + vec2(-sizeMultiplier, 0)) * noiseScale * scale) * weight;
+        //float right = snoise((uv + vec2(sizeMultiplier, 0)) * noiseScale * scale) * weight;
+        //float down = snoise((uv + vec2(0, -sizeMultiplier)) * noiseScale * scale) * weight;
+        //float up = snoise((uv + vec2(0, sizeMultiplier)) * noiseScale * scale) * weight;
 
-		vec2 derivative = vec2((point1 - point) / noiseSampleDistance * 0.5, (point2 - point) / noiseSampleDistance * 0.5);
-		erosion += (1.0 - length(derivative));
-		float erode = erosion / (i + 1);
-        noise += point * erode;
+        vec3 derivative = vec3((point1 - point0) / sizeMultiplier, 1.0, (point2 - point0) / sizeMultiplier);
+        //vec3 derivative = vec3((left - right) / (sizeMultiplier * 2), 1.0, (down - up) / (sizeMultiplier * 2));
+        //float steep = 1.0 - (dot(normalize(derivative), vec3(0, 1, 0)) * 0.5 + 0.5);
+        float steepness = length(derivative.xz);
+		//float erode = erosion / (i + 1);
+        
+        erosion += steepness;
+        float erodeSum = 1.0 / (1.0 + erosion * 0.25);
+        //float point = mix(point0, (left + right + down + up + point0) * 0.2, 1.0 - pow(1.0 - steep, 8));
+        //float erodeSum = 1.0 / pow(1.0 / erosion, 2);
 
-        //noise += point;
-        maxNoise += weight * erode;
-        weight *= 0.4;
+        noise += point0 * erodeSum;
+        //noise += point0;
+
+        //maxNoise += weight * steepness;
+        maxNoise += weight;
+
+        weight *= 0.6;
         //weight *= 0.4;
         scale *= 2.0;
     }
 
+    //noise = noise * noise;
     noise = InvLerp(0.0, maxNoise, noise);
     noise = noise * noise * noise;
     //noise = noise * noise * noise;
@@ -124,15 +139,5 @@ vec3 GenerateNoiseNormal(vec2 uv, int layers, float stepSize)
 
     return (normalize(normalTS).xzy);
 }
-
-float GetSteepness(vec3 normal)
-{
-    float steepness = dot(normal, vec3(0.0, 1.0, 0.0));
-    steepness = steepness * steepness;
-    steepness = 1.0 - steepness;
-
-    return steepness;
-}
-
 
 #endif

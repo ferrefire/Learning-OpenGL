@@ -2,7 +2,7 @@
 
 Camera::Camera()
 {
-    far = 10000;
+    far = 25000;
     projection = glm::perspective(glm::radians(FOV), (float)width / (float)height, near, far);
 	position.x = -2000;
 	position.z = 2000;

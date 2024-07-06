@@ -34,9 +34,10 @@ void Manager::SetShaderVariables(Shader *shader)
 	shader->setFloat("far", camera.far);
 	shader->setFloat("farMult", 1.0 / camera.far);
 	shader->setInt("noiseLayers", 8);
-	shader->setFloat("noiseScale", 0.5f);
-	shader->setFloat("noiseHeight", 2500.0f);
-	shader->setFloat("sizeMultiplier", 1.0 / float(heightMapResolution));
+	shader->setFloat("noiseScale", 1.0f);
+    shader->setFloat("noiseHeight", 2500.0f);
+    shader->setFloat("heightMapHeight", 7500.0f);
+    shader->setFloat("sizeMultiplier", 1.0 / float(heightMapResolution));
 	shader->setFloat("stepSizeMult", float(heightMapResolution) * 0.5);
 }
 

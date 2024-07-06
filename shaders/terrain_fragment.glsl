@@ -16,7 +16,6 @@ uniform mat4 model;
 uniform sampler2D heightMap;
 
 #include "variables.glsl"
-#include "noise.glsl"
 #include "depth.glsl"
 #include "LOD.glsl"
 #include "transformation.glsl"
@@ -44,16 +43,22 @@ void main()
     //	Color = mix(color, vec4(0.25, 0.25, 0.25, 1), steepness);
 	//}
 
-	//float power = mix(0.25, 1.0, depth);
-	//vec3 normal = SampleNormalUnNorm(fUV);
+	
+	vec3 normal = SampleNormal(fUV, 0.25);
+	float steepness = GetSteepness(normal);
+
+    float power = mix(0.25, 1.0, 1.0 - pow(1.0 - depth, 4));
+	normal = SampleNormalUnNorm(fUV);
 	//vec3 steepnessNormal = normal;
-	//normal.xz *= power;
-	//normal = normalize(normal);
+	normal.xz *= power;
+	normal = normalize(normal);
 	//steepnessNormal.xz *= 0.5;
 	//steepnessNormal = normalize(steepnessNormal);
-	vec3 normal = SampleNormal(fUV, 0.5);
-	float steepness = GetSteepness(normal);
-    steepness = pow(steepness, 2);
+
+    //oFragmentColor = vec4(vec3(steepness), 1.0);
+    //return ;
+
+    steepness = 1.0 - pow(1.0 - steepness, 15);
     vec4 Color = mix(color, vec4(0.25, 0.25, 0.25, 1), steepness);
 
     

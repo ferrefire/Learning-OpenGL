@@ -3,6 +3,7 @@
 
 uniform float sizeMultiplier;
 uniform float stepSizeMult;
+uniform float heightMapHeight;
 
 vec3 SampleNormal(vec2 uv, float power)
 {
@@ -28,6 +29,15 @@ vec3 SampleNormalUnNorm(vec2 uv)
     //normalTS.xy *= power;
 
     return (normalTS.xzy);
+}
+
+float GetSteepness(vec3 normal)
+{
+    float steepness = dot(normal, vec3(0.0, 1.0, 0.0));
+    //steepness = steepness * steepness;
+    steepness = 1.0 - steepness;
+
+    return steepness;
 }
 
 #endif
