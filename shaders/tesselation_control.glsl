@@ -32,7 +32,7 @@ float TessellationFactor (vec3 p0, vec3 p1)
     float edgeLength = distance(p0, p1);
     vec3 edgeCenter = (p0 + p1) * 0.5;
     float viewDistance = distance(edgeCenter, viewPosition);
-    return (edgeLength * 900.0 * (1.0 / (15.0 * viewDistance)));
+    return (edgeLength * 900.0 * (1.0 / (10.0 * viewDistance)));
 }
 
 void main()
@@ -45,7 +45,10 @@ void main()
 
     if (gl_InvocationID == 0)
     {
-        vec3 center = (gl_in[0].gl_Position + gl_in[1].gl_Position + gl_in[2].gl_Position).xyz * (1.0 / 3.0);
+        vec3 p0 = (model * gl_in[0].gl_Position).xyz;
+        vec3 p1 = (model * gl_in[1].gl_Position).xyz;
+        vec3 p2 = (model * gl_in[2].gl_Position).xyz;
+        vec3 center = (p0 + p1 + p2) * (1.0 / 3.0);
         //vec2 uv = (tUV[0] + tUV[1] + tUV[2]) * (1.0 / 3.0);
         //vec2 uv = UV[gl_InvocationID];
         float disSqr = dot(viewPosition - center, viewPosition - center);
@@ -54,9 +57,9 @@ void main()
 		//float angled = 1.0 - pow(1.0 - NormalToViewDot(viewDirection, normal), 3);
 		//float angled = PositionToViewDot(gl_in[0].gl_Position.xyz, gl_in[1].gl_Position.xyz, gl_in[2].gl_Position.xyz);
         if ((InView(center, tolerance) == 0 && 
-            InView(gl_in[0].gl_Position.xyz, tolerance) == 0 &&
-            InView(gl_in[1].gl_Position.xyz, tolerance) == 0 &&
-            InView(gl_in[2].gl_Position.xyz, tolerance) == 0))
+            InView(p0, tolerance) == 0 &&
+            InView(p1, tolerance) == 0 &&
+            InView(p2, tolerance) == 0))
         {
             gl_TessLevelOuter[0] = 0;
             gl_TessLevelOuter[1] = 0;
@@ -65,9 +68,9 @@ void main()
             return ;
         }
 
-        float tessLevel1 = TessellationFactor(gl_in[1].gl_Position.xyz, gl_in[2].gl_Position.xyz);
-        float tessLevel2 = TessellationFactor(gl_in[2].gl_Position.xyz, gl_in[0].gl_Position.xyz);
-        float tessLevel3 = TessellationFactor(gl_in[0].gl_Position.xyz, gl_in[1].gl_Position.xyz);
+        float tessLevel1 = TessellationFactor(p1, p2);
+        float tessLevel2 = TessellationFactor(p2, p0);
+        float tessLevel3 = TessellationFactor(p0, p1);
 
         gl_TessLevelOuter[0] = tessLevel1;
         gl_TessLevelOuter[1] = tessLevel2;

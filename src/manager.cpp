@@ -63,7 +63,8 @@ void Manager::NewFrame()
 
     size = objects.size();
     for (int i = 0; i < size; i++)
-    {      
+    {
+        objects[i]->GetMesh()->GetShader()->setMatrix4("model", objects[i]->Translation());
         renderObject(objects[i]);
     }
 

@@ -74,7 +74,7 @@ GLFWwindow *setupGLFW()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(width, height, "LearnOpenGL", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(width, height, "LearnOpenGL", glfwGetPrimaryMonitor(), NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -160,9 +160,7 @@ int main(int argc, char **argv)
 	setupSettings(argc, argv, window);
 
     //Texture brickTex((path + "/textures/brick.png").c_str());
-    //Texture stoneTex((path + "/textures/stone.png").c_str());
-
-    
+    //Texture stoneTex((path + "/textures/stone.png").c_str());    
 
     //Shader shader("default_vertex.glsl", "default_fragment.glsl");
     Shader terrainShader("terrain_vertex.glsl", "tesselation_control.glsl", "tesselation_evaluation.glsl", "terrain_fragment.glsl");
@@ -216,15 +214,19 @@ int main(int argc, char **argv)
     //Object object(&mesh);
     //object.Paint(glm::vec4(glm::vec3(0.25f), 1.0f));
     Object floor(&planeMesh);
+    Object floor2(&planeMesh);
+    floor2.Move(glm::vec3(10000.0, 0.0, 0.0));
     //floor.Paint(glm::vec4(60.0f, 160.0f, 20.0f, 255.0f) / 255.0f);
     floor.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
+    floor2.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
 
     //Manager::AddObject(&object);
 	Manager::AddShader(&terrainShader);
 	Manager::AddShader(&instanceShader);
 	Manager::AddShader(&computeShader);
 	Manager::AddShader(&heightmapComputeShader);
-	Manager::AddObject(&floor);
+    Manager::AddObject(&floor);
+    Manager::AddObject(&floor2);
     Manager::AddInstanceBatch(&instanceMesh, count);
 
     unsigned int buffer;
@@ -247,6 +249,7 @@ int main(int argc, char **argv)
 
 	glm::vec2 offset = glm::vec2(0, 0);
     heightmapComputeShader.useShader();
+    heightmapComputeShader.setFloat2("offset", offset);
 	glDispatchCompute(Manager::heightMapResolution / 4, Manager::heightMapResolution / 4, 1);
 
 	while (!glfwWindowShouldClose(window))
@@ -267,6 +270,14 @@ int main(int argc, char **argv)
 		//	//glMemoryBarrier(GL_ALL_BARRIER_BITS);
 		//	//Debug::DurationCheck();
 		//}
+
+        if (Input::GetKey(GLFW_KEY_G).pressed)
+        {
+            offset += glm::vec2(1, 1);
+            heightmapComputeShader.useShader();
+            heightmapComputeShader.setFloat2("offset", offset);
+            glDispatchCompute(Manager::heightMapResolution / 4, Manager::heightMapResolution / 4, 1);
+        }
 
         computeShader.useShader();
         glDispatchCompute(inssqrt / 4, inssqrt / 4, 1);
