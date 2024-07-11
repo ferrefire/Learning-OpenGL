@@ -58,6 +58,7 @@ bool Manager::wireframeActive = false;
 bool Manager::vSyncActive = true;
 bool Manager::mouseLocked = true;
 int Manager::heightMapResolution = 1024;
+int Manager::heightMapChunkResolution = 1024;
 Camera &Manager::camera = cam;
 GLFWwindow *Manager::window = NULL;
 
@@ -179,13 +180,25 @@ int main(int argc, char **argv)
 	computeShader.setFloat("instanceCountSqrtMult", 1.0 / float(sqrt(count)));
 
 	Shader heightmapComputeShader("heightmap_compute.glsl");
-    heightmapComputeShader.setInt("heightMap", 0);
+	heightmapComputeShader.setInt("heightMap", 0);
+	heightmapComputeShader.setInt("heightMapArray", 1);
 
-    terrainShader.setInt("heightMap", 0);
+	Shader heightmapArrayComputeShader("heightmapArray_compute.glsl");
+	heightmapArrayComputeShader.setInt("heightMap", 0);
+	heightmapArrayComputeShader.setInt("heightMapArray", 1);
+
+	terrainShader.setInt("heightMap", 0);
+	terrainShader.setInt("heightMapArray", 1);
 
 	Manager::heightMapResolution = 4096;
+	Manager::heightMapChunkResolution = 1024;
+
 	heightmapComputeShader.setFloat("resolution", Manager::heightMapResolution);
 	heightmapComputeShader.setFloat("scale", 1);
+
+	heightmapArrayComputeShader.setFloat("resolution", Manager::heightMapChunkResolution);
+	heightmapArrayComputeShader.setFloat("scale", 1);
+
 	unsigned int texture;
 
     glGenTextures(1, &texture);
@@ -198,6 +211,19 @@ int main(int argc, char **argv)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R16_SNORM, Manager::heightMapResolution, Manager::heightMapResolution, 0, GL_RED, GL_FLOAT, NULL);
 
 	glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16_SNORM);
+
+	unsigned int textureArray;
+
+	glGenTextures(1, &textureArray);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D_ARRAY, 0, GL_R16_SNORM, Manager::heightMapChunkResolution, Manager::heightMapChunkResolution, 0, GL_RED, GL_FLOAT, NULL);
+
+	glBindImageTexture(1, textureArray, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16_SNORM);
 
 	//Print(cam.far);
 
@@ -224,6 +250,7 @@ int main(int argc, char **argv)
 	Manager::AddShader(&instanceShader);
 	Manager::AddShader(&computeShader);
 	Manager::AddShader(&heightmapComputeShader);
+	Manager::AddShader(&heightmapArrayComputeShader);
 	Manager::AddObject(&floor);
     Manager::AddInstanceBatch(&instanceMesh, count);
 
@@ -248,6 +275,9 @@ int main(int argc, char **argv)
 	glm::vec2 offset = glm::vec2(0, 0);
     heightmapComputeShader.useShader();
 	glDispatchCompute(Manager::heightMapResolution / 4, Manager::heightMapResolution / 4, 1);
+
+	heightmapArrayComputeShader.useShader();
+	glDispatchCompute(Manager::heightMapChunkResolution / 4, Manager::heightMapChunkResolution / 4, 1);
 
 	while (!glfwWindowShouldClose(window))
     {

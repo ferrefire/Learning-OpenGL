@@ -38,7 +38,7 @@ void main()
     int lod = GetLodLevel(position.xyz, far);
 
     //position.y = GenerateNoise(fUV, lod) * noiseHeight;
-    position.y = texture(heightMap, fUV).r * heightMapHeight;
+    position.y = textureLod(heightMap, fUV, 0).r * heightMapHeight;
     //position.y = 0;
 
     fFragmentPosition = (model * position).xyz;

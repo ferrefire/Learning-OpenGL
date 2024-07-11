@@ -5,12 +5,30 @@ uniform float sizeMultiplier;
 uniform float stepSizeMult;
 uniform float heightMapHeight;
 
+uniform int chunksLength;
+uniform float chunksLengthMult;
+
+float SampleArray(vec2 uvPosition)
+{
+	//maybe covert to on line and operate on vector instead 
+	float x = ceil(uvPosition.x * chunksLength) * chunksLengthMult - chunksLengthMult * 0.5;
+	float y = ceil(uvPosition.y * chunksLength) * chunksLengthMult - chunksLengthMult * 0.5;
+
+	int ix = floor(x * chunksLength);
+	int iy = floor(y * chunksLength);
+
+	uvPosition -= vec2(x, y);
+	uvPosition = (uvPosition * chunksLength * 2.0) * 0.5 + 0.5; //+ uv offset
+
+	return textureLod(heightMapArray, uvPosition, ix * chunksLength * iy, 0);
+}
+
 vec3 SampleNormal(vec2 uv, float power)
 {
-    float left = texture(heightMap, uv - vec2(sizeMultiplier, 0)).r;
-    float right = texture(heightMap, uv + vec2(sizeMultiplier, 0)).r;
-    float down = texture(heightMap, uv - vec2(0, sizeMultiplier)).r;
-    float up = texture(heightMap, uv + vec2(0, sizeMultiplier)).r;
+    float left = textureLod(heightMap, uv - vec2(sizeMultiplier, 0), 0).r;
+    float right = textureLod(heightMap, uv + vec2(sizeMultiplier, 0), 0).r;
+    float down = textureLod(heightMap, uv - vec2(0, sizeMultiplier), 0).r;
+    float up = textureLod(heightMap, uv + vec2(0, sizeMultiplier), 0).r;
 
     vec3 normalTS = vec3((left - right) * stepSizeMult, (down - up) * stepSizeMult, 1);
     normalTS.xy *= power;
@@ -20,10 +38,10 @@ vec3 SampleNormal(vec2 uv, float power)
 
 vec3 SampleNormalUnNorm(vec2 uv)
 {
-    float left = texture(heightMap, uv - vec2(sizeMultiplier, 0)).r;
-    float right = texture(heightMap, uv + vec2(sizeMultiplier, 0)).r;
-    float down = texture(heightMap, uv - vec2(0, sizeMultiplier)).r;
-    float up = texture(heightMap, uv + vec2(0, sizeMultiplier)).r;
+    float left = textureLod(heightMap, uv - vec2(sizeMultiplier, 0), 0).r;
+    float right = textureLod(heightMap, uv + vec2(sizeMultiplier, 0), 0).r;
+    float down = textureLod(heightMap, uv - vec2(0, sizeMultiplier), 0).r;
+    float up = textureLod(heightMap, uv + vec2(0, sizeMultiplier), 0).r;
 
     vec3 normalTS = vec3((left - right) * stepSizeMult, (down - up) * stepSizeMult, 1);
     //normalTS.xy *= power;

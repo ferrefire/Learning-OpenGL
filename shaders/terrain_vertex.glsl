@@ -14,6 +14,7 @@ uniform mat4 model;
 uniform vec4 color;
 
 uniform sampler2D heightMap;
+uniform sampler2DArray heightMapArray;
 
 #include "variables.glsl"
 #include "LOD.glsl"
@@ -24,7 +25,7 @@ void main()
     UV = iPosition.xz * 0.0001 + 0.5;
     vec3 position = iPosition;
     //position.y = GenerateNoise(UV, 4) * noiseHeight;
-    position.y = texture(heightMap, UV).r * heightMapHeight;
+    position.y = textureLod(heightMap, UV, 0).r * heightMapHeight;
     //position.y = 0;
 
     gl_Position = vec4(position, 1.0);

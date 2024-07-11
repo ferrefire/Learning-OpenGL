@@ -31,6 +31,7 @@ class Manager
 		static bool mouseLocked;
 
 		static int heightMapResolution;
+		static int heightMapChunkResolution;
 
 		static void NewFrame();
 
