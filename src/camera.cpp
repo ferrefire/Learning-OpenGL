@@ -4,9 +4,12 @@ Camera::Camera()
 {
     far = 25000;
     projection = glm::perspective(glm::radians(FOV), (float)width / (float)height, near, far);
-	position.x = -2000;
-	position.z = 2000;
-	position.y = 1000;
+	//position.x = -2000;
+	//position.z = 2000;
+	//position.y = 1000;
+	position.x = 0;
+	position.z = 0;
+	position.y = 0;
 	Move(glm::vec3(0.0f));
     Rotate(glm::vec3(25.0f, -90.0f, 0.0f));
 }

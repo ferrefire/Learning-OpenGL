@@ -14,13 +14,13 @@ float SampleArray(vec2 uvPosition)
 	float x = ceil(uvPosition.x * chunksLength) * chunksLengthMult - chunksLengthMult * 0.5;
 	float y = ceil(uvPosition.y * chunksLength) * chunksLengthMult - chunksLengthMult * 0.5;
 
-	int ix = floor(x * chunksLength);
-	int iy = floor(y * chunksLength);
+	float ix = floor(x * chunksLength);
+	float iy = floor(y * chunksLength);
 
 	uvPosition -= vec2(x, y);
 	uvPosition = (uvPosition * chunksLength * 2.0) * 0.5 + 0.5; //+ uv offset
 
-	return textureLod(heightMapArray, uvPosition, ix * chunksLength * iy, 0);
+	return textureLod(heightMapArray, vec3(uvPosition, ix * chunksLength + iy), 0).r;
 }
 
 vec3 SampleNormal(vec2 uv, float power)

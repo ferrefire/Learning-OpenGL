@@ -38,8 +38,13 @@ void Manager::SetShaderVariables(Shader *shader)
 	shader->setFloat("noiseScale", 1.0f);
     shader->setFloat("noiseHeight", 2500.0f);
     shader->setFloat("heightMapHeight", 7500.0f);
-    shader->setFloat("sizeMultiplier", 1.0 / float(heightMapResolution));
-	shader->setFloat("stepSizeMult", float(heightMapResolution) * 0.5);
+	shader->setFloat("sizeMultiplier", 1.0 / float(heightMapChunkResolution));
+	//shader->setFloat("chunkSizeMultiplier", 1.0 / float(heightMapChunkResolution));
+	shader->setFloat("stepSizeMult", float(heightMapChunkResolution) * 0.5);
+	shader->setFloat("terrainSize", 30000.0);
+	shader->setFloat("terrainSizeMult", 1.0 / 30000.0);
+	shader->setInt("chunksLength", 3);
+	shader->setFloat("chunksLengthMult", 1.0 / 3.0);
 }
 
 void Manager::AddShader(Shader *shader)
@@ -63,7 +68,8 @@ void Manager::NewFrame()
 
     size = objects.size();
     for (int i = 0; i < size; i++)
-    {      
+    {
+        objects[i]->GetMesh()->GetShader()->setMatrix4("model", objects[i]->Translation());
         renderObject(objects[i]);
     }
 

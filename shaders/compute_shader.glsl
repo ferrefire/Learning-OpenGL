@@ -27,6 +27,7 @@ uniform int instanceCountSqrt;
 uniform float instanceCountSqrtMult;
 
 uniform sampler2D heightMap;
+uniform sampler2DArray heightMapArray;
 
 #include "variables.glsl"
 #include "culling.glsl"

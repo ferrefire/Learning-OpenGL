@@ -24,9 +24,8 @@ out vec3 TerrainNormal;
 out vec3 FragmentPosition;
 out vec4 Color;
 
-uniform mat4 model;
-
 uniform sampler2D heightMap;
+uniform sampler2DArray heightMapArray;
 
 #include "variables.glsl"
 #include "heightmap.glsl"

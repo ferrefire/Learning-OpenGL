@@ -10,10 +10,14 @@ uniform float farMult;
 
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 model = mat4(1.0);
 
 uniform vec3 viewPosition;
 uniform vec3 viewDirection;
 uniform vec3 lightPosition;
 uniform vec3 lightDirection;
+
+uniform float terrainSize;
+uniform float terrainSizeMult;
 
 #endif

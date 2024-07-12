@@ -11,9 +11,8 @@ out vec4 oFragmentColor;
 
 uniform vec4 color;
 
-uniform mat4 model;
-
 uniform sampler2D heightMap;
+uniform sampler2DArray heightMapArray;
 
 #include "variables.glsl"
 #include "depth.glsl"

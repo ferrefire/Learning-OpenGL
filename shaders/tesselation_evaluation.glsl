@@ -14,11 +14,10 @@ out vec2 fUV;
 out vec3 fFragmentPosition;
 //out vec4 fColor;
 
-uniform mat4 model;
-
 uniform vec4 color;
 
 uniform sampler2D heightMap;
+uniform sampler2DArray heightMapArray;
 
 #include "variables.glsl"
 #include "LOD.glsl"
@@ -35,11 +34,10 @@ void main()
     vec4 position = gl_in[0].gl_Position * gl_TessCoord[0] + gl_in[1].gl_Position * 
 		gl_TessCoord[1] + gl_in[2].gl_Position * gl_TessCoord[2];
     fUV = BARYCENTRIC_INTERPOLATE(tUV);
-    int lod = GetLodLevel(position.xyz, far);
+    //int lod = GetLodLevel(position.xyz, far);
 
-    //position.y = GenerateNoise(fUV, lod) * noiseHeight;
-    position.y = textureLod(heightMap, fUV, 0).r * heightMapHeight;
-    //position.y = 0;
+    //position.y = textureLod(heightMap, fUV, 0).r * heightMapHeight;
+	position.y = SampleArray(ObjectToUV(position.xyz)) * heightMapHeight;
 
     fFragmentPosition = (model * position).xyz;
 

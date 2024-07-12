@@ -10,8 +10,6 @@ in vec4 Color;
 
 out vec4 oFragmentColor;
 
-uniform sampler2D texture;
-
 #include "variables.glsl"
 #include "depth.glsl"
 

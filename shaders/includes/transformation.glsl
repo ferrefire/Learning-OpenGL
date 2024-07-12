@@ -17,9 +17,23 @@ vec3 WorldToClip(vec3 position)
     return (clipSpace);
 }
 
+vec3 ObjectToWorld(vec3 position)
+{
+    vec3 WorldSpace = (model * vec4(position, 1.0)).xyz;
+
+    return (WorldSpace);
+}
+
 vec2 WorldToUV(vec3 worldPosition)
 {
-	return (vec2(worldPosition.x, worldPosition.z) * terrainSizeMult + vec2(0.5, 0.5));
+	return ((vec2(worldPosition.x, worldPosition.z) + vec2(terrainSize) * 0.5) * terrainSizeMult);
+}
+
+vec2 ObjectToUV(vec3 objectPosition)
+{
+	vec3 worldPosition = ObjectToWorld(objectPosition);
+
+	return (worldPosition.xz * terrainSizeMult + 0.5);
 }
 
 #endif

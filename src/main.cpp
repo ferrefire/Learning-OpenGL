@@ -75,7 +75,7 @@ GLFWwindow *setupGLFW()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(width, height, "LearnOpenGL", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(width, height, "LearnOpenGL", glfwGetPrimaryMonitor(), NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -161,9 +161,7 @@ int main(int argc, char **argv)
 	setupSettings(argc, argv, window);
 
     //Texture brickTex((path + "/textures/brick.png").c_str());
-    //Texture stoneTex((path + "/textures/stone.png").c_str());
-
-    
+    //Texture stoneTex((path + "/textures/stone.png").c_str());    
 
     //Shader shader("default_vertex.glsl", "default_fragment.glsl");
     Shader terrainShader("terrain_vertex.glsl", "tesselation_control.glsl", "tesselation_evaluation.glsl", "terrain_fragment.glsl");
@@ -198,6 +196,7 @@ int main(int argc, char **argv)
 
 	heightmapArrayComputeShader.setFloat("resolution", Manager::heightMapChunkResolution);
 	heightmapArrayComputeShader.setFloat("scale", 1);
+	heightmapArrayComputeShader.setInt("chunksRadius", 1);
 
 	unsigned int texture;
 
@@ -217,13 +216,14 @@ int main(int argc, char **argv)
 	glGenTextures(1, &textureArray);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D_ARRAY, 0, GL_R16_SNORM, Manager::heightMapChunkResolution, Manager::heightMapChunkResolution, 0, GL_RED, GL_FLOAT, NULL);
+	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R16_SNORM, Manager::heightMapChunkResolution, Manager::heightMapChunkResolution, 
+		9, 0, GL_RED, GL_FLOAT, NULL);
 
-	glBindImageTexture(1, textureArray, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16_SNORM);
+	glBindImageTexture(1, textureArray, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R16_SNORM);
 
 	//Print(cam.far);
 
@@ -242,17 +242,26 @@ int main(int argc, char **argv)
     //Object object(&mesh);
     //object.Paint(glm::vec4(glm::vec3(0.25f), 1.0f));
     Object floor(&planeMesh);
-    //floor.Paint(glm::vec4(60.0f, 160.0f, 20.0f, 255.0f) / 255.0f);
+	Object floor2(&planeMesh);
+	Object floor3(&planeMesh);
+	//floor.Move(glm::vec3(0, 0, 0));
+	floor2.Move(glm::vec3(10000.0, 0.0, -10000.0));
+	floor3.Move(glm::vec3(0.0, 0.0, 10000.0));
+	//floor.Paint(glm::vec4(60.0f, 160.0f, 20.0f, 255.0f) / 255.0f);
     floor.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
+	floor2.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
+	floor3.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
 
-    //Manager::AddObject(&object);
+	//Manager::AddObject(&object);
 	Manager::AddShader(&terrainShader);
 	Manager::AddShader(&instanceShader);
 	Manager::AddShader(&computeShader);
 	Manager::AddShader(&heightmapComputeShader);
 	Manager::AddShader(&heightmapArrayComputeShader);
 	Manager::AddObject(&floor);
-    Manager::AddInstanceBatch(&instanceMesh, count);
+	Manager::AddObject(&floor2);
+	Manager::AddObject(&floor3);
+	Manager::AddInstanceBatch(&instanceMesh, count);
 
     unsigned int buffer;
     glGenBuffers(1, &buffer);
@@ -274,6 +283,7 @@ int main(int argc, char **argv)
 
 	glm::vec2 offset = glm::vec2(0, 0);
     heightmapComputeShader.useShader();
+    heightmapComputeShader.setFloat2("offset", offset);
 	glDispatchCompute(Manager::heightMapResolution / 4, Manager::heightMapResolution / 4, 1);
 
 	heightmapArrayComputeShader.useShader();
@@ -297,6 +307,14 @@ int main(int argc, char **argv)
 		//	//glMemoryBarrier(GL_ALL_BARRIER_BITS);
 		//	//Debug::DurationCheck();
 		//}
+
+        if (Input::GetKey(GLFW_KEY_G).pressed)
+        {
+            offset += glm::vec2(1, 1);
+            heightmapComputeShader.useShader();
+            heightmapComputeShader.setFloat2("offset", offset);
+            glDispatchCompute(Manager::heightMapResolution / 4, Manager::heightMapResolution / 4, 1);
+        }
 
         computeShader.useShader();
         glDispatchCompute(inssqrt / 4, inssqrt / 4, 1);
