@@ -11,9 +11,6 @@ out vec4 oFragmentColor;
 
 uniform vec4 color;
 
-uniform sampler2D heightMap;
-uniform sampler2DArray heightMapArray;
-
 #include "variables.glsl"
 #include "depth.glsl"
 #include "LOD.glsl"
@@ -43,11 +40,15 @@ void main()
 	//}
 
 	
-	vec3 normal = SampleNormal(fUV, 0.25);
-	float steepness = GetSteepness(normal);
+	//vec3 normal = SampleNormal(fUV, 0.25);
+	bool lod = IsLod(fFragmentPosition);
+	vec3 normal = SampleNormalDynamic(fFragmentPosition, lod ? 0.1 : 0.25);
+	//vec3 normal = SampleNormalDynamic(fFragmentPosition, 0.25);
+	float steepness = GetSteepnessDynamic(fFragmentPosition, normal);
 
-    float power = mix(0.25, 1.0, 1.0 - pow(1.0 - depth, 4));
-	normal = SampleNormalUnNorm(fUV);
+    float power = mix(0.25, lod ? 0.5 : 1.0, 1.0 - pow(1.0 - depth, 4));
+    //float power = mix(0.25, 1.0, 1.0 - pow(1.0 - depth, 4));
+	normal = SampleNormalUnNormDynamic(fFragmentPosition);
 	//vec3 steepnessNormal = normal;
 	normal.xz *= power;
 	normal = normalize(normal);
@@ -57,6 +58,7 @@ void main()
     //oFragmentColor = vec4(vec3(steepness), 1.0);
     //return ;
 
+	
     steepness = 1.0 - pow(1.0 - steepness, 15);
     vec4 Color = mix(color, vec4(0.25, 0.25, 0.25, 1), steepness);
 

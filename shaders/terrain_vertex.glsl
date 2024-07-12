@@ -11,20 +11,19 @@ out vec2 UV;
 
 uniform vec4 color;
 
-uniform sampler2D heightMap;
-uniform sampler2DArray heightMapArray;
-
 #include "variables.glsl"
+#include "transformation.glsl"
 #include "LOD.glsl"
 #include "heightmap.glsl"
 
 void main()
 {
-    UV = iPosition.xz * 0.0001 + 0.5;
+    UV = ObjectToUV(iPosition);
     vec3 position = iPosition;
 
     //position.y = textureLod(heightMap, UV, 0).r * heightMapHeight;
-	position.y = SampleArray(ObjectToUV(iPosition)) * heightMapHeight;
+	//position.y = SampleArray(UV) * heightMapHeight;
+	position.y = SampleDynamic(ObjectToWorld(position)) * heightMapHeight;
 
     gl_Position = vec4(position, 1.0);
 }

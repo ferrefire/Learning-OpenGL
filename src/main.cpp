@@ -25,6 +25,7 @@
 #include "camera.hpp"
 #include "input.hpp"
 #include "object.hpp"
+#include "terrain.hpp"
 
 const int width = 1600;
 const int height = 900;
@@ -57,10 +58,28 @@ std::vector<Shader *> Manager::shaders = std::vector<Shader *>();
 bool Manager::wireframeActive = false;
 bool Manager::vSyncActive = true;
 bool Manager::mouseLocked = true;
-int Manager::heightMapResolution = 1024;
-int Manager::heightMapChunkResolution = 1024;
 Camera &Manager::camera = cam;
 GLFWwindow *Manager::window = NULL;
+
+float Terrain::terrainSize = 30000.0;
+float Terrain::terrainChunkSize = 10000.0;
+int Terrain::terrainResolution = 4096;
+int Terrain::terrainChunkResolution = 1024;
+int Terrain::chunkRadius = 1;
+int Terrain::chunksLength = 3;
+int Terrain::chunkCount = 9;
+glm::vec2 Terrain::offset = glm::vec2(5, 5);
+unsigned int Terrain::heightMapTexture = 0;
+unsigned int Terrain::heightMapArrayTexture = 0;
+Shader *Terrain::terrainShader = NULL;
+Shader *Terrain::heightMapComputeShader = NULL;
+Shader *Terrain::heightMapArrayComputeShader = NULL;
+Object *Terrain::terrainObject = NULL;
+Object ***Terrain::terrainChunks = NULL;
+int Terrain::terrainRadius = 1;
+int Terrain::terrainLength = 3;
+int Terrain::terrainCount = 9;
+float Terrain::sampleStepSize = 0.0001;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -68,14 +87,14 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
     //printf("Window resized: width-%d height-%d\n", width, height);
 }
 
-GLFWwindow *setupGLFW()
+GLFWwindow *setupGLFW(bool fullScreen)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(width, height, "LearnOpenGL", glfwGetPrimaryMonitor(), NULL);
+    GLFWwindow *window = glfwCreateWindow(width, height, "LearnOpenGL", fullScreen ? glfwGetPrimaryMonitor() : NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -151,10 +170,16 @@ int main(int argc, char **argv)
             count = atoi(argv[1]);
         }
     }
+	bool fullScreen = false;
+	if (argc > 2)
+	{
+		std::string arg = argv[2];
+		if (Utilities::Contains(arg, "FULL")) fullScreen = true;
+	}
 
-    std::string path = std::filesystem::current_path();
+	std::string path = std::filesystem::current_path();
 
-    GLFWwindow *window = setupGLFW();
+    GLFWwindow *window = setupGLFW(fullScreen);
     if (window == NULL) return (quit(EXIT_FAILURE));
 	Manager::window = window;
 
@@ -164,8 +189,11 @@ int main(int argc, char **argv)
     //Texture stoneTex((path + "/textures/stone.png").c_str());    
 
     //Shader shader("default_vertex.glsl", "default_fragment.glsl");
-    Shader terrainShader("terrain_vertex.glsl", "tesselation_control.glsl", "tesselation_evaluation.glsl", "terrain_fragment.glsl");
-    Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
+    //Shader terrainShader("terrain_vertex.glsl", "tesselation_control.glsl", "tesselation_evaluation.glsl", "terrain_fragment.glsl");
+	//Terrain::sampleStepSize = 3.0 / 50000.0;
+	Terrain::CreateTerrain(30000, 10000, 4096, 1024, 1, 1);
+	//Terrain::CreateTerrain();
+	Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
     //shader.setInt("texture1", 0);
     //shader.setInt("texture2", 1);
     //brickTex.bindTexture(GL_TEXTURE0);
@@ -176,54 +204,56 @@ int main(int argc, char **argv)
 	computeShader.setFloat("instanceMult", 1.0 / float(count));
 	computeShader.setInt("instanceCountSqrt", sqrt(count));
 	computeShader.setFloat("instanceCountSqrtMult", 1.0 / float(sqrt(count)));
+	computeShader.setInt("heightMap", 0);
+	computeShader.setInt("heightMapArray", 1);
 
-	Shader heightmapComputeShader("heightmap_compute.glsl");
-	heightmapComputeShader.setInt("heightMap", 0);
-	heightmapComputeShader.setInt("heightMapArray", 1);
+	//Shader heightmapComputeShader("heightmap_compute.glsl");
+	//heightmapComputeShader.setInt("heightMap", 0);
+	//heightmapComputeShader.setInt("heightMapArray", 1);
 
-	Shader heightmapArrayComputeShader("heightmapArray_compute.glsl");
-	heightmapArrayComputeShader.setInt("heightMap", 0);
-	heightmapArrayComputeShader.setInt("heightMapArray", 1);
+	//Shader heightmapArrayComputeShader("heightmapArray_compute.glsl");
+	//heightmapArrayComputeShader.setInt("heightMap", 0);
+	//heightmapArrayComputeShader.setInt("heightMapArray", 1);
 
-	terrainShader.setInt("heightMap", 0);
-	terrainShader.setInt("heightMapArray", 1);
+	//terrainShader.setInt("heightMap", 0);
+	//terrainShader.setInt("heightMapArray", 1);
 
-	Manager::heightMapResolution = 4096;
-	Manager::heightMapChunkResolution = 1024;
+	//Manager::heightMapResolution = 4096;
+	//Manager::heightMapChunkResolution = 1024;
 
-	heightmapComputeShader.setFloat("resolution", Manager::heightMapResolution);
-	heightmapComputeShader.setFloat("scale", 1);
+	//heightmapComputeShader.setFloat("resolution", Manager::heightMapResolution);
+	//heightmapComputeShader.setFloat("scale", 1);
+//
+	//heightmapArrayComputeShader.setFloat("resolution", Manager::heightMapChunkResolution);
+	//heightmapArrayComputeShader.setFloat("scale", 1);
+	//heightmapArrayComputeShader.setInt("chunksRadius", 1);
 
-	heightmapArrayComputeShader.setFloat("resolution", Manager::heightMapChunkResolution);
-	heightmapArrayComputeShader.setFloat("scale", 1);
-	heightmapArrayComputeShader.setInt("chunksRadius", 1);
+	//unsigned int texture;
+//
+    //glGenTextures(1, &texture);
+    //glActiveTexture(GL_TEXTURE0);
+    //glBindTexture(GL_TEXTURE_2D, texture);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R16_SNORM, Manager::heightMapResolution, Manager::heightMapResolution, 0, GL_RED, GL_FLOAT, NULL);
+//
+	//glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16_SNORM);
 
-	unsigned int texture;
-
-    glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R16_SNORM, Manager::heightMapResolution, Manager::heightMapResolution, 0, GL_RED, GL_FLOAT, NULL);
-
-	glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16_SNORM);
-
-	unsigned int textureArray;
-
-	glGenTextures(1, &textureArray);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R16_SNORM, Manager::heightMapChunkResolution, Manager::heightMapChunkResolution, 
-		9, 0, GL_RED, GL_FLOAT, NULL);
-
-	glBindImageTexture(1, textureArray, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R16_SNORM);
+	//unsigned int textureArray;
+//
+	//glGenTextures(1, &textureArray);
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
+	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R16_SNORM, Manager::heightMapChunkResolution, Manager::heightMapChunkResolution, 
+	//	9, 0, GL_RED, GL_FLOAT, NULL);
+//
+	//glBindImageTexture(1, textureArray, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R16_SNORM);
 
 	//Print(cam.far);
 
@@ -232,35 +262,35 @@ int main(int argc, char **argv)
     //Shape shape(CUBE);
     Shape instanceShape(BLADE);
     //instanceShape.Scale(glm::vec3(0.25f, 2.0f, 1.0f));
-    Shape plane(PLANE);
-    plane.Scale(glm::vec3(10000.0f));
+    //Shape plane(PLANE);
+    //plane.Scale(glm::vec3(10000.0f));
 
     //Mesh mesh(&shape, &shader);
     Mesh instanceMesh(&instanceShape, &instanceShader);
-    Mesh planeMesh(&plane, &terrainShader);
+    //Mesh planeMesh(&plane, &terrainShader);
 
     //Object object(&mesh);
     //object.Paint(glm::vec4(glm::vec3(0.25f), 1.0f));
-    Object floor(&planeMesh);
-	Object floor2(&planeMesh);
-	Object floor3(&planeMesh);
-	//floor.Move(glm::vec3(0, 0, 0));
-	floor2.Move(glm::vec3(10000.0, 0.0, -10000.0));
-	floor3.Move(glm::vec3(0.0, 0.0, 10000.0));
-	//floor.Paint(glm::vec4(60.0f, 160.0f, 20.0f, 255.0f) / 255.0f);
-    floor.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
-	floor2.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
-	floor3.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
+    //Object floor(&planeMesh);
+	//Object floor2(&planeMesh);
+	//Object floor3(&planeMesh);
+//
+	//floor2.Move(glm::vec3(10000.0, 0.0, -10000.0));
+	//floor3.Move(glm::vec3(0.0, 0.0, 10000.0));
+//
+    //floor.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
+	//floor2.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
+	//floor3.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
 
 	//Manager::AddObject(&object);
-	Manager::AddShader(&terrainShader);
+	//Manager::AddShader(&terrainShader);
 	Manager::AddShader(&instanceShader);
 	Manager::AddShader(&computeShader);
-	Manager::AddShader(&heightmapComputeShader);
-	Manager::AddShader(&heightmapArrayComputeShader);
-	Manager::AddObject(&floor);
-	Manager::AddObject(&floor2);
-	Manager::AddObject(&floor3);
+	//Manager::AddShader(&heightmapComputeShader);
+	//Manager::AddShader(&heightmapArrayComputeShader);
+	//Manager::AddObject(&floor);
+	//Manager::AddObject(&floor2);
+	//Manager::AddObject(&floor3);
 	Manager::AddInstanceBatch(&instanceMesh, count);
 
     unsigned int buffer;
@@ -281,13 +311,13 @@ int main(int argc, char **argv)
     Print(count);
     Print(inssqrt);
 
-	glm::vec2 offset = glm::vec2(0, 0);
-    heightmapComputeShader.useShader();
-    heightmapComputeShader.setFloat2("offset", offset);
-	glDispatchCompute(Manager::heightMapResolution / 4, Manager::heightMapResolution / 4, 1);
+	//glm::vec2 offset = glm::vec2(0, 0);
+	//heightmapComputeShader.setFloat2("offset", offset);
+	//heightmapComputeShader.useShader();
+	//glDispatchCompute(Manager::heightMapResolution / 4, Manager::heightMapResolution / 4, 1);
 
-	heightmapArrayComputeShader.useShader();
-	glDispatchCompute(Manager::heightMapChunkResolution / 4, Manager::heightMapChunkResolution / 4, 1);
+	//heightmapArrayComputeShader.useShader();
+	//glDispatchCompute(Manager::heightMapChunkResolution / 4, Manager::heightMapChunkResolution / 4, 1);
 
 	while (!glfwWindowShouldClose(window))
     {
@@ -310,11 +340,12 @@ int main(int argc, char **argv)
 
         if (Input::GetKey(GLFW_KEY_G).pressed)
         {
-            offset += glm::vec2(1, 1);
-            heightmapComputeShader.useShader();
-            heightmapComputeShader.setFloat2("offset", offset);
-            glDispatchCompute(Manager::heightMapResolution / 4, Manager::heightMapResolution / 4, 1);
-        }
+            Terrain::offset += glm::vec2(1, 1);
+			Terrain::heightMapComputeShader->setFloat2("offset", Terrain::offset);
+			Terrain::heightMapArrayComputeShader->setFloat2("offset", Terrain::offset);
+			Terrain::GenerateHeightMap();
+			Terrain::GenerateHeightMapArray();
+		}
 
         computeShader.useShader();
         glDispatchCompute(inssqrt / 4, inssqrt / 4, 1);

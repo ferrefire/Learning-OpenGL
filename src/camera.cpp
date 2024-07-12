@@ -1,4 +1,6 @@
 #include "camera.hpp"
+#include "time.hpp"
+#include "utilities.hpp"
 
 Camera::Camera()
 {

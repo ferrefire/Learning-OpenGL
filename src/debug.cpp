@@ -1,4 +1,10 @@
 #include "debug.hpp"
+#include <iostream>
+#include "glad.h"
+#include <GLFW/glfw3.h>
+#include "time.hpp"
+#include "input.hpp"
+#include "manager.hpp"
 
 void Debug::NewFrame()
 {

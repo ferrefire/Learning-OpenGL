@@ -26,9 +26,6 @@ uniform float instanceMult;
 uniform int instanceCountSqrt;
 uniform float instanceCountSqrtMult;
 
-uniform sampler2D heightMap;
-uniform sampler2DArray heightMapArray;
-
 #include "variables.glsl"
 #include "culling.glsl"
 #include "heightmap.glsl"
@@ -60,7 +57,7 @@ void main()
     vec2 uv = vec2(x, z) * 0.0001 + 0.5;
     float falloff = float(indexDis) * float(instanceCountSqrtMult * 2.0);
 	float ran = GetRandom(float(x + z * instanceCountSqrt) * instanceMult);
-	vec3 norm = SampleNormal(uv, 0.25);
+	vec3 norm = SampleNormalDynamic(vec3(x, 0, z), 0.25);
     float steepness = GetSteepness(norm);
     steepness = 1.0 - pow(1.0 - steepness, 15);
 	//vec3 norm = SampleNormalUnNorm(uv);
@@ -73,7 +70,7 @@ void main()
 	//if (GetSteepness(GenerateNoiseNormal(uv, noiseLayers, 0.001)) > 0.5) return ;
 
     //float y = GenerateNoise(uv, noiseLayers) * noiseHeight + 1.5;
-    float y = texture(heightMap, uv).r * heightMapHeight;
+    float y = SampleDynamic(vec3(x, 0, z)) * heightMapHeight;
 
     vec3 pos = GetRandomVec3(float(x + z * instanceCountSqrt) * instanceMult);
     pos.y = 0;

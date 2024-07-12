@@ -1,4 +1,7 @@
 #include "manager.hpp"
+#include "rendering.hpp"
+#include "time.hpp"
+#include "terrain.hpp"
 
 void Manager::AddObject(Object *object)
 {
@@ -37,14 +40,21 @@ void Manager::SetShaderVariables(Shader *shader)
 	shader->setInt("noiseLayers", 8);
 	shader->setFloat("noiseScale", 1.0f);
     shader->setFloat("noiseHeight", 2500.0f);
-    shader->setFloat("heightMapHeight", 7500.0f);
-	shader->setFloat("sizeMultiplier", 1.0 / float(heightMapChunkResolution));
+    shader->setFloat("heightMapHeight", 10000.0f);
+	shader->setFloat("sizeMultiplier", 1.0 / float(Terrain::terrainResolution));
+	shader->setFloat("arraySizeMultiplier", 1.0 / float(Terrain::terrainChunkResolution));
 	//shader->setFloat("chunkSizeMultiplier", 1.0 / float(heightMapChunkResolution));
-	shader->setFloat("stepSizeMult", float(heightMapChunkResolution) * 0.5);
-	shader->setFloat("terrainSize", 30000.0);
-	shader->setFloat("terrainSizeMult", 1.0 / 30000.0);
-	shader->setInt("chunksLength", 3);
-	shader->setFloat("chunksLengthMult", 1.0 / 3.0);
+	shader->setFloat("sampleStepSize", Terrain::sampleStepSize);
+	shader->setFloat("sampleStepSizeMult", (1.0 / Terrain::sampleStepSize) * 0.5);
+	shader->setFloat("sampleArrayStepSize", Terrain::sampleStepSize);
+	shader->setFloat("sampleArrayStepSizeMult", (1.0 / (Terrain::sampleStepSize)) * 0.5);
+	shader->setFloat("stepSizeMult", float(Terrain::terrainResolution) * 0.5);
+	shader->setFloat("terrainSize", Terrain::terrainSize);
+	shader->setFloat("terrainSizeMult", 1.0 / Terrain::terrainSize);
+	shader->setFloat("terrainChunkSize", Terrain::terrainChunkSize);
+	shader->setFloat("terrainChunkSizeMult", 1.0 / Terrain::terrainChunkSize);
+	shader->setInt("chunksLength", Terrain::chunksLength);
+	shader->setFloat("chunksLengthMult", 1.0 / Terrain::chunksLength);
 }
 
 void Manager::AddShader(Shader *shader)

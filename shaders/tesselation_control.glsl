@@ -14,8 +14,6 @@ out vec2 tUV[];
 //out vec3 tFragmentPosition[];
 //out vec4 tColor[];
 
-uniform sampler2D heightMap;
-
 #include "variables.glsl"
 #include "culling.glsl"
 

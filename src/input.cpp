@@ -1,4 +1,6 @@
 #include "input.hpp"
+#include <glm/glm.hpp>
+#include "manager.hpp"
 
 void Input::AddKey(int keyCode)
 {

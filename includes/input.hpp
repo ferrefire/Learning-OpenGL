@@ -3,10 +3,8 @@
 
 #include "glad.h"
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
 #include <map>
 #include "camera.hpp"
-#include "manager.hpp"
 
 class Input
 {

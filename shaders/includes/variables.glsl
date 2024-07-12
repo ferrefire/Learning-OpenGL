@@ -19,5 +19,7 @@ uniform vec3 lightDirection;
 
 uniform float terrainSize;
 uniform float terrainSizeMult;
+uniform float terrainChunkSize;
+uniform float terrainChunkSizeMult;
 
 #endif

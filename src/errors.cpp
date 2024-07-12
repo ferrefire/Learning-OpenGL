@@ -1,4 +1,7 @@
 #include "errors.hpp"
+#include <iostream>
+#include "glad.h"
+#include <GLFW/glfw3.h>
 
 int quit(int exitCode)
 {

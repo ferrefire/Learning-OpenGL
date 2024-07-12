@@ -1,13 +1,13 @@
 #ifndef MANAGER_HPP
 #define MANAGER_HPP
 
+#include "glad.h"
+#include <GLFW/glfw3.h>
 #include <vector>
 #include "shader.hpp"
 #include "mesh.hpp"
 #include "object.hpp"
-#include "time.hpp"
 #include "camera.hpp"
-#include "rendering.hpp"
 
 class Manager
 {
@@ -30,8 +30,8 @@ class Manager
 		static bool vSyncActive;
 		static bool mouseLocked;
 
-		static int heightMapResolution;
-		static int heightMapChunkResolution;
+		//static int heightMapResolution;
+		//static int heightMapChunkResolution;
 
 		static void NewFrame();
 

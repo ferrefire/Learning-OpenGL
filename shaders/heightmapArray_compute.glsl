@@ -9,7 +9,7 @@ layout(r16_snorm, binding = 1) uniform image2DArray heightMapArray;
 uniform vec2 offset = vec2(5, 5);
 uniform float resolution = 1024;
 uniform float scale = 4;
-uniform float sizeMultiplier;
+uniform float arraySizeMultiplier;
 
 uniform int chunksRadius;
 
@@ -25,7 +25,7 @@ void main()
 		for (int yi = -chunksRadius; yi <= chunksRadius; yi++)
 		{
 			imageStore(heightMapArray, ivec3(texCoord, index), 
-				vec4(GenerateNoise((vec2(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y) * sizeMultiplier + vec2(xi, yi)) * scale + 
+				vec4(GenerateNoise((vec2(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y) * arraySizeMultiplier + vec2(xi, yi)) * scale + 
 				offset, 10)));
 
 			index++;

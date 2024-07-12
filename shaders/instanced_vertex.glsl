@@ -24,11 +24,7 @@ out vec3 TerrainNormal;
 out vec3 FragmentPosition;
 out vec4 Color;
 
-uniform sampler2D heightMap;
-uniform sampler2DArray heightMapArray;
-
 #include "variables.glsl"
-#include "heightmap.glsl"
 
 float random (vec2 st)
 {
