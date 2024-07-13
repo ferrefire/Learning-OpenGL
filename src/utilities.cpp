@@ -13,11 +13,12 @@ void Utilities::PrintVec3(glm::vec3 vec)
 	std::cout << vec.x << ", " << vec.y << ", " << vec.z << std::endl;
 }
 
-glm::vec3 Utilities::RotateVec3(glm::vec3 vec, float angle, glm::vec3 axis)
+glm::vec3 Utilities::RotateVec3(glm::vec3 &vec, float angle, glm::vec3 axis)
 {
     glm::mat4 rotation = glm::mat4(1.0f);
-    glm::rotate(rotation, angle, axis);
-    return (rotation * glm::vec4(vec, 0.0f));
+    rotation = glm::rotate(rotation, glm::radians(angle), axis);
+    vec = rotation * glm::vec4(vec, 0.0f);
+	return (vec);
 }
 
 void Utilities::Replace(std::string &str, const std::string &from, const std::string &to)

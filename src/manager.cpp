@@ -32,7 +32,7 @@ void Manager::SetShaderVariables(Shader *shader)
 	shader->setFloat3("viewDirection", camera.Front());
 	shader->setMatrix4("projection", camera.Projection());
     shader->setFloat3("lightPosition", 25000.0f, 25000.0f, 50000.0f);
-    shader->setFloat3("lightDirection", 0.5f, 0.25f, 0.5f);
+    shader->setFloat3("lightDirection", Manager::sunDirection);
     shader->setFloat("near", camera.near);
 	shader->setFloat("nearMult", 1.0 / camera.near);
 	shader->setFloat("far", camera.far);

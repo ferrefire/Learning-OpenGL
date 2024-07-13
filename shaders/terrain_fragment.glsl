@@ -39,12 +39,15 @@ void main()
 	//float diffuse = dot(normal, lightDirection);
 	//diffuse = diffuse * 0.5 + 0.5;
     //diffuse = diffuse * diffuse;
-    vec3 diffuse = vec3(max(dot(normal, lightDirection), 0.0));
+
+	float diffuseStrength = max(dot(normal, lightDirection), 0.0);
+    vec3 diffuse = vec3(diffuseStrength);
+	diffuse += vec3(max(dot(normal, vec3(0, 1, 0)), 0.0) * (1.0 - diffuseStrength) * 0.25);
 
     //vec3 viewDirection = normalize(viewPosition - worldPosition);
     //vec3 reflectDirection = reflect(-lightDirection, normal);
     //float specular = pow(max(dot(viewDirection, reflectDirection), 0.0), 128);
     //vec3 specularColor = vec3(1.0, 0.75, 0.0) * (0.1 * specular);
 
-    fragmentColor = mix(vec4(Color.xyz * (vec3(0.25) + diffuse), 1.0), vec4(1.0), depth);
+    fragmentColor = mix(vec4(Color.xyz * diffuse, 1.0), vec4(1.0), depth);
 }

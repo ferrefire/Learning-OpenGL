@@ -31,6 +31,9 @@ class Manager
 		static bool mouseLocked;
 		static bool fullScreen;
 
+		static glm::vec3 sunDirection;
+		static glm::vec2 sunAngles;
+
 		//static int heightMapResolution;
 		//static int heightMapChunkResolution;
 

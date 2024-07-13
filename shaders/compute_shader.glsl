@@ -30,18 +30,9 @@ uniform float instanceCountSqrtMult;
 #include "culling.glsl"
 #include "heightmap.glsl"
 
-float GetRandom(float x)
+float random(vec2 st)
 {
-    return (fract(sin(x * 10000)*100000.0));
-}
-
-vec3 GetRandomVec3(float i)
-{
-    float x = GetRandom(i);
-    float y = GetRandom(x);
-    float z = GetRandom(y);
-
-    return (vec3(x, y, z));
+    return fract(sin(dot(st.xy * 0.001, vec2(12.9898,78.233))) * 43758.5453123);
 }
 
 void main()
@@ -54,9 +45,11 @@ void main()
     x = x * 0.25 + floor(viewPosition.x);
     z = z * 0.25 + floor(viewPosition.z);
 
-    vec2 uv = vec2(x, z) * 0.0001 + 0.5;
-    float falloff = float(indexDis) * float(instanceCountSqrtMult * 2.0);
-	float ran = GetRandom(float(x + z * instanceCountSqrt) * instanceMult);
+    //vec2 uv = vec2(x, z) * 0.0001 + 0.5;
+    float falloff = indexDis * (instanceCountSqrtMult * 2);
+	falloff = falloff * 1.25 - 0.25;
+	//float ran = random(float(x + z * instanceCountSqrt) * instanceMult);
+	float ran = random(vec2(x, z));
 	vec3 norm = SampleNormalDynamic(vec2(x, z), 0.25);
     float steepness = GetSteepness(norm);
     steepness = 1.0 - pow(1.0 - steepness, 15);
@@ -66,16 +59,16 @@ void main()
 	//norm = normalize(norm);
 	//steepnessNormal.xz *= 0.5;
 	//steepnessNormal = normalize(steepnessNormal);
-    if (steepness > 0.5 + (ran - 0.5) * 0.5 || falloff > pow(ran, 3)) return ;
+    if (steepness > 0.125 + (ran - 0.5) * 0.25 || falloff > pow(ran, 3)) return ;
 	//if (GetSteepness(GenerateNoiseNormal(uv, noiseLayers, 0.001)) > 0.5) return ;
 
     //float y = GenerateNoise(uv, noiseLayers) * noiseHeight + 1.5;
-    float y = SampleDynamic(vec2(x, z)) * heightMapHeight;
 
-    vec3 pos = GetRandomVec3(float(x + z * instanceCountSqrt) * instanceMult);
-    pos.y = 0;
-    //vec3 pos = vec3(0);
-    vec3 position = vec3(x, y, z) + pos;
+    vec3 position = vec3(x, 0, z);
+	position.x += random(vec2(x + ran, z + ran)) - 0.5;
+	position.z += random(vec2(x + ran, z + ran)) - 0.5;
+	position.y = SampleDynamic(position.xz) * heightMapHeight;
+    
     if (InView(position + vec3(0, 0.5, 0), 0.1) == 0) return ;
     index = atomicAdd(computeCount, 1);
     data[index].pos = position;

@@ -24,17 +24,20 @@ void main()
 	//float diffuse = dot(terrainNormal, lightDirection);
 	//diffuse = diffuse * 0.5f + 0.5f;
     //diffuse = diffuse * diffuse;
-    vec3 diffuse = vec3(max(dot(normal, lightDirection), 0.0));
+	float diffuseStrength = max(dot(terrainNormal, lightDirection), 0.0);
+    vec3 diffuse = vec3(diffuseStrength);
+	diffuse += vec3(max(dot(terrainNormal, vec3(0, 1, 0)), 0.0) * (1.0 - diffuseStrength) * 0.25);
 
     vec3 viewDirection = normalize(viewPosition - worldPosition);
     vec3 reflectDirection = reflect(-lightDirection, normal);
     vec3 terrainReflectDirection = reflect(-lightDirection, terrainNormal);
     float specular = pow(max(dot(viewDirection, reflectDirection), 0.0), 4);
-    float terrainSpecular = pow(max(dot(viewDirection, terrainReflectDirection), 0.0), 128);
-    vec3 specularColor = vec3(1.0, 0.75, 0.0) * (1 * (specular * terrainSpecular));
+    float terrainSpecular = pow(max(dot(viewDirection, terrainReflectDirection), 0.0), 512);
+    //vec3 specularColor = vec3(1.0, 0.75, 0.0) * (1 * (specular * terrainSpecular));
+    vec3 specularColor = vec3(1.0) * (1 * (specular * terrainSpecular));
     vec3 bladeColor = mix(Color.xyz * 0.5, Color.xyz, UV.y);
     
 
-    fragmentColor = mix(vec4(bladeColor * (vec3(0.25) + diffuse) + specularColor, 1.0), vec4(1.0), GetDepth(gl_FragCoord.z, near, far));
+    fragmentColor = mix(vec4(bladeColor * diffuse + specularColor, 1.0), vec4(1.0), GetDepth(gl_FragCoord.z, near, far));
 	//oFragmentColor = vec4(bladeColor * (vec3(0.25) + diffuse + specularColor), 1.0);
 }

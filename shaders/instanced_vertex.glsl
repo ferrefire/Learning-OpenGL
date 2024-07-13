@@ -26,10 +26,11 @@ out vec4 Color;
 
 #include "variables.glsl"
 #include "transformation.glsl"
+#include "functions.glsl"
 
 float random (vec2 st)
 {
-    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+    return fract(sin(dot(st.xy * 0.001, vec2(12.9898,78.233))) * 43758.5453123);
 }
 
 mat4 rotationMatrix(vec3 axis, float angle)
@@ -48,10 +49,14 @@ mat4 rotationMatrix(vec3 axis, float angle)
 void main()
 {
     normal = vec3(0, 0, -1);
-    mat4 rotation = rotationMatrix(vec3(1.0, 0.0, 0.0), radians(random(data[gl_InstanceID].pos.xz) * 45.0 * (iPosition.y + 1)));
-    vec3 position = (rotation * vec4(iPosition, 1.0)).xyz;
+	float ran = random(data[gl_InstanceID].pos.xz + vec2(data[gl_InstanceID].pos.y, -data[gl_InstanceID].pos.y));
+    mat4 rotation = rotationMatrix(vec3(1.0, 0.0, 0.0), radians(ran * 60.0 * (iPosition.y)));
+	float scale = 1.0 - pow(clamp(SquaredDistanceToViewPosition(data[gl_InstanceID].pos), 0.0, 10000.0) * 0.0001, 3);
+	vec3 position = iPosition * scale;
+    position = (rotation * vec4(position, 1.0)).xyz;
     normal = (rotation * vec4(normal, 0.0)).xyz;
-    rotation = rotationMatrix(vec3(0.0, 1.0, 0.0), radians(random(data[gl_InstanceID].pos.xz + data[gl_InstanceID].pos.y) * 360.0));
+	ran = random(vec2(data[gl_InstanceID].pos.xz + vec2(data[gl_InstanceID].pos.y + ran * 10, -data[gl_InstanceID].pos.y + ran * 10)));
+    rotation = rotationMatrix(vec3(0.0, 1.0, 0.0), radians(ran * 360.0));
     position = (rotation * vec4(position, 1.0)).xyz + data[gl_InstanceID].pos;
     normal = (rotation * vec4(normal, 0.0)).xyz;
 

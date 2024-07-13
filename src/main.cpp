@@ -59,6 +59,8 @@ bool Manager::wireframeActive = false;
 bool Manager::vSyncActive = true;
 bool Manager::mouseLocked = true;
 bool Manager::fullScreen = false;
+glm::vec3 Manager::sunDirection = glm::vec3(0.375, 0.25, 0.375);
+glm::vec2 Manager::sunAngles = glm::vec2(0, 0);
 Camera &Manager::camera = cam;
 GLFWwindow *Manager::window = NULL;
 
@@ -172,15 +174,17 @@ int main(int argc, char **argv)
     if (window == NULL) return (quit(EXIT_FAILURE));
 	Manager::window = window;
 	setupSettings(argc, argv, window);
-	Terrain::CreateTerrain(30000, 10000, 2500, 4096, 1024, 1, 1);
+	Terrain::CreateTerrain(70000, 10000, 2500, 4096, 1024, 3, 3);
 	//Terrain::CreateTerrain();
 	Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
 
+	int count = 1048576;
+
     Shader computeShader("compute_shader.glsl");
-	computeShader.setInt("instanceCount", 16);
-	computeShader.setFloat("instanceMult", 1.0 / float(16));
-	computeShader.setInt("instanceCountSqrt", sqrt(16));
-	computeShader.setFloat("instanceCountSqrtMult", 1.0 / float(sqrt(16)));
+	computeShader.setInt("instanceCount", count);
+	computeShader.setFloat("instanceMult", 1.0 / float(count));
+	computeShader.setInt("instanceCountSqrt", sqrt(count));
+	computeShader.setFloat("instanceCountSqrtMult", 1.0 / float(sqrt(count)));
 	computeShader.setInt("heightMap", 0);
 	computeShader.setInt("heightMapArray", 1);
 
@@ -190,12 +194,12 @@ int main(int argc, char **argv)
 
 	Manager::AddShader(&instanceShader);
 	Manager::AddShader(&computeShader);
-	Manager::AddInstanceBatch(&instanceMesh, 16);
+	Manager::AddInstanceBatch(&instanceMesh, count);
 
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, 16 * sizeof(float) * 8, NULL, GL_STATIC_COPY);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, count * sizeof(float) * 8, NULL, GL_STATIC_COPY);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, buffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -206,8 +210,8 @@ int main(int argc, char **argv)
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, computeCount);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-    int inssqrt = sqrt(16);
-    Print(16);
+    int inssqrt = sqrt(count);
+    Print(count);
     Print(inssqrt);
 
 	while (!glfwWindowShouldClose(window))
@@ -233,6 +237,36 @@ int main(int argc, char **argv)
 			Terrain::heightMapArrayComputeShader->setFloat2("seed", Terrain::seed);
 			Terrain::GenerateHeightMap();
 			Terrain::GenerateHeightMapArray();
+		}
+
+		bool sunMoved = false;
+		if (Input::GetKey(GLFW_KEY_DOWN).down)
+		{
+			Manager::sunAngles.y -= Time::deltaTime * 0.25;
+			sunMoved = true;
+		}
+		if (Input::GetKey(GLFW_KEY_UP).down)
+		{
+			Manager::sunAngles.y += Time::deltaTime * 0.25;
+			sunMoved = true;
+		}
+		if (Input::GetKey(GLFW_KEY_RIGHT).down) 
+		{
+			Manager::sunAngles.x += Time::deltaTime * 0.25;
+			sunMoved = true;
+		}
+		if (Input::GetKey(GLFW_KEY_LEFT).down)
+		{
+			Manager::sunAngles.x -= Time::deltaTime * 0.25;
+			sunMoved = true;
+		}
+		if (sunMoved)
+		{
+			Manager::sunDirection = glm::vec3(0.375, 0.25, 0.375);
+			Manager::sunDirection = Utilities::RotateVec3(Manager::sunDirection, Manager::sunAngles.y * 360.0, glm::vec3(1, 0, 0));
+			Manager::sunDirection = Utilities::RotateVec3(Manager::sunDirection, Manager::sunAngles.x * 360.0, glm::vec3(0, 1, 0));
+			Manager::sunDirection = glm::normalize(Manager::sunDirection);
+			Shader::setFloat3Global("lightDirection", Manager::sunDirection);
 		}
 
 		computeShader.useShader();
