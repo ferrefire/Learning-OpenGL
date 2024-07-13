@@ -4,18 +4,19 @@
 
 layout (vertices = 3) out;
 
-in vec2 UV[];
+//in vec2 UV[];
 //in vec3 Normal[];
 //in vec3 FragmentPosition[];
 //in vec4 Color[];
 
-out vec2 tUV[];
+//out vec2 tUV[];
 //out vec3 tNormal[];
 //out vec3 tFragmentPosition[];
 //out vec4 tColor[];
 
 #include "variables.glsl"
 #include "culling.glsl"
+#include "heightmap.glsl"
 
 float NegativePow(float val)
 {
@@ -33,16 +34,19 @@ float TessellationFactor (vec3 p0, vec3 p1)
 void main()
 {
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
-    tUV[gl_InvocationID] = UV[gl_InvocationID];
+    //tUV[gl_InvocationID] = UV[gl_InvocationID];
     //tNormal[gl_InvocationID] = Normal[gl_InvocationID];
     //tFragmentPosition[gl_InvocationID] = FragmentPosition[gl_InvocationID];
     //tColor[gl_InvocationID] = Color[gl_InvocationID];
 
     if (gl_InvocationID == 0)
     {
-        vec3 p0 = (model * gl_in[0].gl_Position).xyz;
-        vec3 p1 = (model * gl_in[1].gl_Position).xyz;
-        vec3 p2 = (model * gl_in[2].gl_Position).xyz;
+        vec3 p0 = (gl_in[0].gl_Position).xyz;
+        vec3 p1 = (gl_in[1].gl_Position).xyz;
+        vec3 p2 = (gl_in[2].gl_Position).xyz;
+		//p0.y = SampleDynamic(p0.xz);
+		//p1.y = SampleDynamic(p1.xz);
+		//p2.y = SampleDynamic(p2.xz);
         vec3 center = (p0 + p1 + p2) * (1.0 / 3.0);
         //vec2 uv = (tUV[0] + tUV[1] + tUV[2]) * (1.0 / 3.0);
         //vec2 uv = UV[gl_InvocationID];

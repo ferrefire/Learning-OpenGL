@@ -29,6 +29,7 @@ class Manager
 		static bool wireframeActive;
 		static bool vSyncActive;
 		static bool mouseLocked;
+		static bool fullScreen;
 
 		//static int heightMapResolution;
 		//static int heightMapChunkResolution;
@@ -40,6 +41,8 @@ class Manager
         static void AddInstanceBatch(Mesh *mesh, int count);
         static void AddShader(Shader *shader);
 		static void SetShaderVariables(Shader *shader);
+		static void Close();
+		static void Quit(int exitCode = EXIT_SUCCESS);
 };
 
 #endif

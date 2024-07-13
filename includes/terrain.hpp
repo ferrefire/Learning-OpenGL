@@ -13,9 +13,12 @@ class Terrain
 	public:
 		static float terrainSize;
 		static float terrainChunkSize;
+		static float terrainHeight;
 
 		static int terrainResolution;
 		static int terrainChunkResolution;
+		static float terrainScale;
+		static int terrainLayers;
 
 		static int chunkRadius;
 		static int chunksLength;
@@ -26,24 +29,22 @@ class Terrain
 		static int terrainCount;
 
 		static glm::vec2 offset;
+		static glm::vec2 seed;
 
 		static unsigned int heightMapTexture;
 		static unsigned int heightMapArrayTexture;
 
-		static float sampleStepSize;
-		static float worldSampleStepSize;
+		static float worldSampleDistance;
 
 		static Shader *terrainShader;
 
 		static Shader *heightMapComputeShader;
 		static Shader *heightMapArrayComputeShader;
 
-		static Object *terrainObject;
 		static Object ***terrainChunks;
 
-		static void CreateTerrain(float terrainSize, float terrainChunkSize, int terrainResolution, int terrainChunkResolution, 
-			int chunkRadius, int terrainRadius);
-		static void CreateTerrain();
+		static void CreateTerrain(float terrainSize = -1, float terrainChunkSize = -1, float terrainHeight = -1, 
+			int terrainResolution = -1, int terrainChunkResolution = -1, int chunkRadius = -1, int terrainRadius = -1);
 
 		static void CreateHeightMaps();
 		static void CreateChunks();

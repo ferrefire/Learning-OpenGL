@@ -4,14 +4,14 @@
 
 layout (triangles, fractional_odd_spacing, ccw) in;
 
-in vec2 tUV[];
+//in vec2 tUV[];
 //in vec3 tNormal[];
 //in vec3 tFragmentPosition[];
 //in vec4 tColor[];
 
-out vec2 fUV;
+//out vec2 fUV;
 //out vec3 fNormal;
-out vec3 fFragmentPosition;
+out vec3 worldPosition;
 //out vec4 fColor;
 
 uniform vec4 color;
@@ -28,39 +28,11 @@ uniform vec4 color;
 
 void main()
 {
-    vec4 position = gl_in[0].gl_Position * gl_TessCoord[0] + gl_in[1].gl_Position * 
-		gl_TessCoord[1] + gl_in[2].gl_Position * gl_TessCoord[2];
-    fUV = BARYCENTRIC_INTERPOLATE(tUV);
+    vec4 position = gl_in[0].gl_Position * gl_TessCoord[0] + gl_in[1].gl_Position * gl_TessCoord[1] + gl_in[2].gl_Position * gl_TessCoord[2];
+    //fUV = BARYCENTRIC_INTERPOLATE(tUV);
 
-    //position.y = textureLod(heightMap, fUV, 0).r * heightMapHeight;
-	//position.y = SampleArray(fUV) * heightMapHeight;
-	vec3 worldPos = ObjectToWorld(position.xyz);
-	position.y = SampleDynamic(worldPos.xz) * heightMapHeight;
+	worldPosition = position.xyz;
+	worldPosition.y = SampleDynamic(worldPosition.xz) * heightMapHeight;
 
-    fFragmentPosition = worldPos;
-
-    //fNormal = GenerateNoiseNormal(fUV, lod, 0.0025);
-	gl_Position = projection * view * model * position;
-	//float dis = gl_Position.z * farMult;
-	//if (false && dis < 0.1)
-	//{
-	//	fNormal = SampleNormal(fUV, 1);
-    //	float steepness = GetSteepness(fNormal);
-    //	steepness = pow(steepness, 2);
-    //	fColor = mix(color, vec4(0.25, 0.25, 0.25, 1), steepness);
-	//}
-	//else
-	//{
-	//	fNormal = vec3(0);
-    //	float steepness = 0;
-    //	//steepness = pow(steepness, 2);
-    //	fColor = vec4(0);
-	//}
-    
-    //fColor = vec4(vec3(gl_Position.z / far), 1);
-
-    //fNormal = vec3(0);
-    //fColor = vec4(0);
-    
-    
+	gl_Position = projection * view * vec4(worldPosition, 1.0);
 }

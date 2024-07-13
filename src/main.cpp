@@ -58,10 +58,14 @@ std::vector<Shader *> Manager::shaders = std::vector<Shader *>();
 bool Manager::wireframeActive = false;
 bool Manager::vSyncActive = true;
 bool Manager::mouseLocked = true;
+bool Manager::fullScreen = false;
 Camera &Manager::camera = cam;
 GLFWwindow *Manager::window = NULL;
 
 float Terrain::terrainSize = 30000.0;
+float Terrain::terrainHeight = 10000.0;
+float Terrain::terrainScale = 1;
+int Terrain::terrainLayers = 8;
 float Terrain::terrainChunkSize = 10000.0;
 int Terrain::terrainResolution = 4096;
 int Terrain::terrainChunkResolution = 1024;
@@ -69,18 +73,17 @@ int Terrain::chunkRadius = 1;
 int Terrain::chunksLength = 3;
 int Terrain::chunkCount = 9;
 glm::vec2 Terrain::offset = glm::vec2(0.0, 0.0);
+glm::vec2 Terrain::seed = glm::vec2(0.0, 0.0);
 unsigned int Terrain::heightMapTexture = 0;
 unsigned int Terrain::heightMapArrayTexture = 0;
 Shader *Terrain::terrainShader = NULL;
 Shader *Terrain::heightMapComputeShader = NULL;
 Shader *Terrain::heightMapArrayComputeShader = NULL;
-Object *Terrain::terrainObject = NULL;
 Object ***Terrain::terrainChunks = NULL;
 int Terrain::terrainRadius = 1;
 int Terrain::terrainLength = 3;
 int Terrain::terrainCount = 9;
-float Terrain::sampleStepSize = 0.0001;
-float Terrain::worldSampleStepSize = 1;
+float Terrain::worldSampleDistance = 1;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -88,14 +91,14 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
     //printf("Window resized: width-%d height-%d\n", width, height);
 }
 
-GLFWwindow *setupGLFW(bool fullScreen)
+GLFWwindow *setupGLFW()
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(width, height, "LearnOpenGL", fullScreen ? glfwGetPrimaryMonitor() : NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(width, height, "LearnOpenGL", Manager::fullScreen ? glfwGetPrimaryMonitor() : NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -116,33 +119,43 @@ GLFWwindow *setupGLFW(bool fullScreen)
 
 void setupSettings(int argc, char **argv, GLFWwindow *window)
 {
-    //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    //if (argc > 1 && strlen(argv[1]) == 1 && isdigit(*argv[1]) && *argv[1] - '0' == 1)
-    //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     stbi_set_flip_vertically_on_load(true);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glPatchParameteri(GL_PATCH_VERTICES, 3);
     glfwSwapInterval(1);
-    //glEnable(GL_PROGRAM_POINT_SIZE);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    cam.speed = 10.0f;
+    cam.speed = 100.0f;
     glfwSetCursorPosCallback(window, Input::mouse_callback);
     glfwSetScrollCallback(window, Input::scroll_callback);
 }
 
+void GetArguments(int argc, char **argv)
+{
+	for (int i = 1; i < argc; i++)
+	{
+		std::string arg = argv[i];
+		if (Utilities::Contains(arg, "FULL")) Manager::fullScreen = true;
+		else if (Utilities::Contains(arg, "TERRAIN_RES=")) Terrain::terrainResolution = std::stof(argv[i] + arg.find('=') + 1);
+		else if (Utilities::Contains(arg, "TERRAIN_CHUNK_RES=")) Terrain::terrainChunkResolution = std::stof(argv[i] + arg.find('=') + 1);
+		else if (Utilities::Contains(arg, "TERRAIN_HEIGHT=")) Terrain::terrainHeight = std::stof(argv[i] + arg.find('=') + 1);
+		else if (Utilities::Contains(arg, "TERRAIN_SCALE=")) Terrain::terrainScale = std::stof(argv[i] + arg.find('=') + 1);
+		else if (Utilities::Contains(arg, "TERRAIN_LAYERS=")) Terrain::terrainLayers = std::stof(argv[i] + arg.find('=') + 1);
+	}
+}
+
 float GetRandom01()
 {
-    return (float(rand() % 1000) / 1000.0f);
+	int ran = rand();
+    return (float(rand() % ran) / float(ran));
 }
 
 float GetRandom11()
 {
-    return (((float(rand() % 1000) / 1000.0f) - 0.5f) * 2.0f);
+	return (((float(rand() % 100000) / 100000.0) - 0.5f) * 2.0f);
 }
 
 void Print(int val)
@@ -152,48 +165,22 @@ void Print(int val)
 
 int main(int argc, char **argv)
 {
-    int count = 16;
-
-    if (argc > 1)
-    {
-        int i = 0;
-        while (i >= 0 && argv[1][i])
-        {
-            if (!isdigit(argv[1][i]))
-            {
-                i = -1;
-                break;
-            }
-            i++;
-        }
-        if (i > 0)
-        {
-            count = atoi(argv[1]);
-        }
-    }
-	bool fullScreen = false;
-	if (argc > 2)
-	{
-		std::string arg = argv[2];
-		if (Utilities::Contains(arg, "FULL")) fullScreen = true;
-	}
-
 	std::string path = std::filesystem::current_path();
 
-    GLFWwindow *window = setupGLFW(fullScreen);
+	GetArguments(argc, argv);
+	GLFWwindow *window = setupGLFW();
     if (window == NULL) return (quit(EXIT_FAILURE));
 	Manager::window = window;
-
 	setupSettings(argc, argv, window);
-	Terrain::CreateTerrain(30000, 10000, 4096, 1024, 1, 1); 
+	Terrain::CreateTerrain(30000, 10000, 2500, 4096, 1024, 1, 1);
 	//Terrain::CreateTerrain();
 	Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
 
     Shader computeShader("compute_shader.glsl");
-	computeShader.setInt("instanceCount", count);
-	computeShader.setFloat("instanceMult", 1.0 / float(count));
-	computeShader.setInt("instanceCountSqrt", sqrt(count));
-	computeShader.setFloat("instanceCountSqrtMult", 1.0 / float(sqrt(count)));
+	computeShader.setInt("instanceCount", 16);
+	computeShader.setFloat("instanceMult", 1.0 / float(16));
+	computeShader.setInt("instanceCountSqrt", sqrt(16));
+	computeShader.setFloat("instanceCountSqrtMult", 1.0 / float(sqrt(16)));
 	computeShader.setInt("heightMap", 0);
 	computeShader.setInt("heightMapArray", 1);
 
@@ -203,12 +190,12 @@ int main(int argc, char **argv)
 
 	Manager::AddShader(&instanceShader);
 	Manager::AddShader(&computeShader);
-	Manager::AddInstanceBatch(&instanceMesh, count);
+	Manager::AddInstanceBatch(&instanceMesh, 16);
 
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, count * sizeof(float) * 8, NULL, GL_STATIC_COPY);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, 16 * sizeof(float) * 8, NULL, GL_STATIC_COPY);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, buffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -219,8 +206,8 @@ int main(int argc, char **argv)
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, computeCount);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-    int inssqrt = sqrt(count);
-    Print(count);
+    int inssqrt = sqrt(16);
+    Print(16);
     Print(inssqrt);
 
 	while (!glfwWindowShouldClose(window))
@@ -233,19 +220,22 @@ int main(int argc, char **argv)
 
         if (Input::GetKey(GLFW_KEY_G).pressed)
         {
-            //Terrain::offset += glm::vec2(1, 1);
-			//Terrain::heightMapComputeShader->setFloat2("offset", Terrain::offset);
-			//Terrain::heightMapArrayComputeShader->setFloat2("offset", Terrain::offset);
-			//Terrain::GenerateHeightMap();
-			//Terrain::GenerateHeightMapArray();
-
 			Terrain::offset = glm::vec2(Manager::camera.Position().x, Manager::camera.Position().z) / Terrain::terrainChunkSize;
 			Shader::setFloat2Global("terrainOffset", Terrain::offset * Terrain::terrainChunkSize);
 			Terrain::heightMapComputeShader->setFloat2("offset", Terrain::offset);
 			Terrain::GenerateHeightMap();
 		}
 
-        computeShader.useShader();
+		if (Input::GetKey(GLFW_KEY_H).pressed)
+		{
+			Terrain::seed = glm::vec2(GetRandom11() * 100, GetRandom11() * 100);
+			Terrain::heightMapComputeShader->setFloat2("seed", Terrain::seed);
+			Terrain::heightMapArrayComputeShader->setFloat2("seed", Terrain::seed);
+			Terrain::GenerateHeightMap();
+			Terrain::GenerateHeightMapArray();
+		}
+
+		computeShader.useShader();
         glDispatchCompute(inssqrt / 4, inssqrt / 4, 1);
         //glMemoryBarrier(GL_ALL_BARRIER_BITS);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, computeCount);
@@ -266,6 +256,6 @@ int main(int argc, char **argv)
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    
-    quit(EXIT_SUCCESS);
+
+    Manager::Quit();
 }

@@ -3,25 +3,28 @@
 #include "shape.hpp"
 #include "mesh.hpp"
 
-void Terrain::CreateTerrain(float terrainSize, float terrainChunkSize, int terrainResolution, int terrainChunkResolution, 
-	int chunkRadius, int terrainRadius)
+void Terrain::CreateTerrain(float terrainSize, float terrainChunkSize, float terrainHeight,
+	int terrainResolution, int terrainChunkResolution, int chunkRadius, int terrainRadius)
 {
-	Terrain::terrainSize = terrainSize;
-	Terrain::terrainChunkSize = terrainChunkSize;
-	Terrain::terrainResolution = terrainResolution;
-	Terrain::terrainChunkResolution = terrainChunkResolution;
-	Terrain::chunkRadius = chunkRadius;
-	Terrain::chunksLength = Terrain::chunkRadius * 2 + 1;
-	Terrain::chunkCount = Terrain::chunksLength * Terrain::chunksLength;
-	Terrain::terrainRadius = terrainRadius;
-	Terrain::terrainLength = terrainRadius * 2 + 1;
-	Terrain::terrainCount = Terrain::terrainLength * Terrain::terrainLength;
+	if (terrainSize != -1) Terrain::terrainSize = terrainSize;
+	if (terrainChunkSize != -1) Terrain::terrainChunkSize = terrainChunkSize;
+	if (terrainResolution != -1) Terrain::terrainResolution = terrainResolution;
+	if (terrainChunkResolution != -1) Terrain::terrainChunkResolution = terrainChunkResolution;
+	if (chunkRadius != -1)
+	{
+		Terrain::chunkRadius = chunkRadius;
+		Terrain::chunksLength = Terrain::chunkRadius * 2 + 1;
+		Terrain::chunkCount = Terrain::chunksLength * Terrain::chunksLength;
+	}
+	if (terrainRadius != -1) 
+	{
+		Terrain::terrainRadius = terrainRadius;
+		Terrain::terrainLength = terrainRadius * 2 + 1;
+		Terrain::terrainCount = Terrain::terrainLength * Terrain::terrainLength;
+	}
 
-	CreateTerrain();
-}
+	//Terrain::worldSampleDistance *= Terrain::terrainScale;
 
-void Terrain::CreateTerrain()
-{
 	CreateHeightMaps();
 	CreateChunks();
 }
@@ -36,11 +39,11 @@ void Terrain::CreateHeightMaps()
 
 	Terrain::heightMapComputeShader->setInt("heightMap", 0);
 	Terrain::heightMapComputeShader->setFloat("resolution", Terrain::terrainResolution);
-	//Terrain::heightMapComputeShader->setFloat("scale", 1);
+	Terrain::heightMapComputeShader->setFloat("resolutionMult", 1.0 / float(Terrain::terrainResolution));
 
 	Terrain::heightMapArrayComputeShader->setInt("heightMapArray", 1);
 	Terrain::heightMapArrayComputeShader->setFloat("resolution", Terrain::terrainChunkResolution);
-	//Terrain::heightMapArrayComputeShader->setFloat("scale", 1);
+	Terrain::heightMapArrayComputeShader->setFloat("resolutionMult", 1.0 / float(Terrain::terrainChunkResolution));
 	Terrain::heightMapArrayComputeShader->setInt("chunksRadius", Terrain::chunkRadius);
 
 	glGenTextures(1, &Terrain::heightMapTexture);
@@ -100,19 +103,7 @@ void Terrain::CreateChunks()
 		}
 	}
 
-	//Terrain::terrainObject = new Object(planeMesh);
-	//Object terrainObject2(&planeMesh);
-	//Object terrainObject3(&planeMesh);
-
-	//terrainObject2.Move(glm::vec3(10000.0, 0.0, -10000.0));
-	//terrainObject3.Move(glm::vec3(0.0, 0.0, 10000.0));
-
-	//Terrain::terrainObject->Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
-	//terrainObject2.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
-	//terrainObject3.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
-
 	Manager::AddShader(Terrain::terrainShader);
-	//Manager::AddObject(Terrain::terrainObject);
 }
 
 void Terrain::GenerateHeightMap()

@@ -57,7 +57,7 @@ void main()
     vec2 uv = vec2(x, z) * 0.0001 + 0.5;
     float falloff = float(indexDis) * float(instanceCountSqrtMult * 2.0);
 	float ran = GetRandom(float(x + z * instanceCountSqrt) * instanceMult);
-	vec3 norm = SampleNormalDynamic(vec3(x, 0, z), 0.25);
+	vec3 norm = SampleNormalDynamic(vec2(x, z), 0.25);
     float steepness = GetSteepness(norm);
     steepness = 1.0 - pow(1.0 - steepness, 15);
 	//vec3 norm = SampleNormalUnNorm(uv);

@@ -1,4 +1,5 @@
 #include "texture.hpp"
+#include "manager.hpp"
 
 Texture::Texture(const char *path)
 {
@@ -7,8 +8,8 @@ Texture::Texture(const char *path)
     if (!data)
     {
         std::cout << "ERROR::TEXTURE::LOADING_FAILED path: " << path << std::endl;
-        quit(EXIT_FAILURE);
-    }
+		Manager::Quit(EXIT_FAILURE);
+	}
 
     glGenTextures(1, &ID);
     glBindTexture(GL_TEXTURE_2D, ID);

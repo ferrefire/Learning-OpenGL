@@ -37,26 +37,21 @@ void Manager::SetShaderVariables(Shader *shader)
 	shader->setFloat("nearMult", 1.0 / camera.near);
 	shader->setFloat("far", camera.far);
 	shader->setFloat("farMult", 1.0 / camera.far);
-	shader->setInt("noiseLayers", 8);
-	shader->setFloat("noiseScale", 1.0f);
-    shader->setFloat("noiseHeight", 2500.0f);
-    shader->setFloat("heightMapHeight", 10000.0f);
-	shader->setFloat("sizeMultiplier", 1.0 / float(Terrain::terrainResolution));
-	shader->setFloat("arraySizeMultiplier", 1.0 / float(Terrain::terrainChunkResolution));
-	//shader->setFloat("chunkSizeMultiplier", 1.0 / float(heightMapChunkResolution));
-	shader->setFloat("sampleStepSize", Terrain::sampleStepSize);
-	shader->setFloat("sampleStepSizeMult", (1.0 / Terrain::sampleStepSize) * 0.5);
-	shader->setFloat("sampleArrayStepSize", Terrain::sampleStepSize);
-	shader->setFloat("sampleArrayStepSizeMult", (1.0 / (Terrain::sampleStepSize)) * 0.5);
-	shader->setFloat("stepSizeMult", float(Terrain::terrainResolution) * 0.5);
+	shader->setInt("noiseLayers", Terrain::terrainLayers);
+	shader->setFloat("noiseScale", Terrain::terrainScale);
+    shader->setFloat("heightMapHeight", Terrain::terrainHeight);
 	shader->setFloat("terrainSize", Terrain::terrainSize);
 	shader->setFloat("terrainSizeMult", 1.0 / Terrain::terrainSize);
 	shader->setFloat("terrainChunkSize", Terrain::terrainChunkSize);
 	shader->setFloat("terrainChunkSizeMult", 1.0 / Terrain::terrainChunkSize);
 	shader->setInt("chunksLength", Terrain::chunksLength);
 	shader->setFloat("chunksLengthMult", 1.0 / Terrain::chunksLength);
-	shader->setFloat("worldSampleSize", Terrain::worldSampleStepSize);
-	shader->setFloat("worldSampleSizeMult", (Terrain::worldSampleStepSize * 2) / (Terrain::terrainChunkSize * Terrain::worldSampleStepSize));
+	shader->setFloat("worldSampleDistance", Terrain::worldSampleDistance);
+	shader->setFloat("worldSampleDistanceMult", (Terrain::worldSampleDistance * 2) / (Terrain::terrainChunkSize * Terrain::worldSampleDistance));
+	shader->setFloat("noiseSampleDistance", 0.0003);
+	shader->setFloat("noiseSampleDistanceMult", 1.0 / (0.0003));
+	shader->setFloat2("offset", 0.0, 0.0);
+	shader->setFloat2("seed", 0.0, 0.0);
 }
 
 void Manager::AddShader(Shader *shader)
@@ -92,4 +87,15 @@ void Manager::NewFrame()
     {
         renderMeshInstanced(*instanceBatches[i].mesh, instanceBatches[i].count);
     }
+}
+
+void Manager::Close()
+{
+	glfwSetWindowShouldClose(Manager::window, true);
+}
+
+void Manager::Quit(int exitCode)
+{
+	glfwTerminate();
+	exit(exitCode);
 }

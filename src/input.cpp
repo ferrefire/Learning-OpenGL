@@ -23,8 +23,7 @@ void Input::processInput(GLFWwindow *window)
 {
     SetKeyStatus(window);
 
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+	if (GetKey(GLFW_KEY_Q).pressed) Manager::Quit();
 
     //if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
     //{

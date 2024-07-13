@@ -1,4 +1,5 @@
 #include "shaders.hpp"
+#include "manager.hpp"
 
 //"/home/ferrefire/Projects/OpenGL/LearningOpenGL/shaders/simple_fragment.glsl"
 
@@ -49,7 +50,7 @@ long compileShader(int type, const char *path)
     {
         glGetShaderInfoLog(shader, 512, NULL, infoLog);
         std::cout << path << "::ERROR::SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
-        quit(EXIT_FAILURE);
+        Manager::Quit(EXIT_FAILURE);
     }
 
     return (shader);
@@ -75,8 +76,8 @@ unsigned int createShaderProgram(unsigned int vertexShader, unsigned int fragmen
     {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER_PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-        quit(EXIT_FAILURE);
-    }
+		Manager::Quit(EXIT_FAILURE);
+	}
 
     return (shaderProgram);
 }
@@ -98,10 +99,9 @@ unsigned int createShaderProgram(unsigned int computeShader)
     if (!success)
     {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER_PROGRAM::LINKING_FAILED\n"
-                  << infoLog << std::endl;
-        quit(EXIT_FAILURE);
-    }
+        std::cout << "ERROR::SHADER_PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+		Manager::Quit(EXIT_FAILURE);
+	}
 
     return (shaderProgram);
 }
@@ -129,10 +129,9 @@ unsigned int createShaderProgram(unsigned int vertexShader, unsigned int tessela
     if (!success)
     {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER_PROGRAM::LINKING_FAILED\n"
-                  << infoLog << std::endl;
-        quit(EXIT_FAILURE);
-    }
+        std::cout << "ERROR::SHADER_PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+		Manager::Quit(EXIT_FAILURE);
+	}
 
     return (shaderProgram);
 }

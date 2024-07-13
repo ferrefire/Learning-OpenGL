@@ -4,26 +4,20 @@
 
 layout (location = 0) in vec3 iPosition;
 
-out vec2 UV;
+//out vec2 UV;
 //out vec3 Normal;
 //out vec3 FragmentPosition;
 //out vec4 Color;
 
-uniform vec4 color;
-
-#include "variables.glsl"
 #include "transformation.glsl"
-#include "LOD.glsl"
 #include "heightmap.glsl"
 
 void main()
 {
-    UV = vec2(ObjectToUV(iPosition));
-    vec3 position = iPosition;
+    //UV = vec2(ObjectToUV(iPosition));
 
-    //position.y = textureLod(heightMap, UV, 0).r * heightMapHeight;
-	//position.y = SampleArray(UV) * heightMapHeight;
-	position.y = SampleDynamic(ObjectToWorld(position).xz) * heightMapHeight;
+	vec3 worldPosition = ObjectToWorld(iPosition);
+	worldPosition.y = SampleDynamic(worldPosition.xz) * heightMapHeight;
 
-    gl_Position = vec4(position, 1.0);
+    gl_Position = vec4(worldPosition, 1.0);
 }

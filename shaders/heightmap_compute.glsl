@@ -6,19 +6,17 @@ layout (local_size_x = 4, local_size_y = 4) in;
 
 layout(r16_snorm, binding = 0) uniform image2D heightMap;
 
-uniform vec2 offset = vec2(0, 0);
-uniform float resolution = 1024;
-uniform float scale = 1;
-uniform float sizeMultiplier;
+uniform vec2 offset;
+uniform vec2 seed;
+uniform int resolution;
+uniform float resolutionMult;
 
 #include "noise.glsl"
 
 void main()
 {
-    ivec2 texCoord = ivec2(gl_GlobalInvocationID.xy);
+	//if (gl_GlobalInvocationID.x > resolution || gl_GlobalInvocationID.y > resolution) return ;
 
-    //imageStore(heightMap, ivec2(0, 0), vec4(1));
-    //imageStore(heightMap, texCoord, vec4(GenerateNoise(vec2(gl_GlobalInvocationID.xy) / 1024.0, 7)));
-    imageStore(heightMap, texCoord, vec4(GenerateNoise(vec2(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y) * 
-		sizeMultiplier * scale + offset, 10)));
+    imageStore(heightMap, ivec2(gl_GlobalInvocationID.xy), vec4(GenerateNoise(vec2(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y) * 
+		resolutionMult + offset + seed, noiseLayers)));
 }
