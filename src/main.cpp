@@ -185,7 +185,7 @@ int main(int argc, char **argv)
 	Manager::window = window;
 
 	setupSettings(argc, argv, window);
-	Terrain::CreateTerrain(30000, 10000, 4096, 1024, 1, 1);
+	Terrain::CreateTerrain(30000, 10000, 4096, 1024, 1, 1); 
 	//Terrain::CreateTerrain();
 	Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
 
