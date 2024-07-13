@@ -36,11 +36,11 @@ void Terrain::CreateHeightMaps()
 
 	Terrain::heightMapComputeShader->setInt("heightMap", 0);
 	Terrain::heightMapComputeShader->setFloat("resolution", Terrain::terrainResolution);
-	Terrain::heightMapComputeShader->setFloat("scale", 1);
+	//Terrain::heightMapComputeShader->setFloat("scale", 1);
 
 	Terrain::heightMapArrayComputeShader->setInt("heightMapArray", 1);
 	Terrain::heightMapArrayComputeShader->setFloat("resolution", Terrain::terrainChunkResolution);
-	Terrain::heightMapArrayComputeShader->setFloat("scale", 1);
+	//Terrain::heightMapArrayComputeShader->setFloat("scale", 1);
 	Terrain::heightMapArrayComputeShader->setInt("chunksRadius", Terrain::chunkRadius);
 
 	glGenTextures(1, &Terrain::heightMapTexture);

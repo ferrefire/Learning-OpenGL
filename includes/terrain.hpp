@@ -31,6 +31,7 @@ class Terrain
 		static unsigned int heightMapArrayTexture;
 
 		static float sampleStepSize;
+		static float worldSampleStepSize;
 
 		static Shader *terrainShader;
 

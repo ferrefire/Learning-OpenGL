@@ -18,12 +18,12 @@ uniform vec4 color;
 
 void main()
 {
-    UV = ObjectToUV(iPosition);
+    UV = vec2(ObjectToUV(iPosition));
     vec3 position = iPosition;
 
     //position.y = textureLod(heightMap, UV, 0).r * heightMapHeight;
 	//position.y = SampleArray(UV) * heightMapHeight;
-	position.y = SampleDynamic(ObjectToWorld(position)) * heightMapHeight;
+	position.y = SampleDynamic(ObjectToWorld(position).xz) * heightMapHeight;
 
     gl_Position = vec4(position, 1.0);
 }

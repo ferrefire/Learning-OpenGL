@@ -68,7 +68,7 @@ int Terrain::terrainChunkResolution = 1024;
 int Terrain::chunkRadius = 1;
 int Terrain::chunksLength = 3;
 int Terrain::chunkCount = 9;
-glm::vec2 Terrain::offset = glm::vec2(5, 5);
+glm::vec2 Terrain::offset = glm::vec2(0.0, 0.0);
 unsigned int Terrain::heightMapTexture = 0;
 unsigned int Terrain::heightMapArrayTexture = 0;
 Shader *Terrain::terrainShader = NULL;
@@ -80,6 +80,7 @@ int Terrain::terrainRadius = 1;
 int Terrain::terrainLength = 3;
 int Terrain::terrainCount = 9;
 float Terrain::sampleStepSize = 0.0001;
+float Terrain::worldSampleStepSize = 1;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -184,20 +185,9 @@ int main(int argc, char **argv)
 	Manager::window = window;
 
 	setupSettings(argc, argv, window);
-
-    //Texture brickTex((path + "/textures/brick.png").c_str());
-    //Texture stoneTex((path + "/textures/stone.png").c_str());    
-
-    //Shader shader("default_vertex.glsl", "default_fragment.glsl");
-    //Shader terrainShader("terrain_vertex.glsl", "tesselation_control.glsl", "tesselation_evaluation.glsl", "terrain_fragment.glsl");
-	//Terrain::sampleStepSize = 3.0 / 50000.0;
 	Terrain::CreateTerrain(30000, 10000, 4096, 1024, 1, 1);
 	//Terrain::CreateTerrain();
 	Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
-    //shader.setInt("texture1", 0);
-    //shader.setInt("texture2", 1);
-    //brickTex.bindTexture(GL_TEXTURE0);
-    //stoneTex.bindTexture(GL_TEXTURE1);
 
     Shader computeShader("compute_shader.glsl");
 	computeShader.setInt("instanceCount", count);
@@ -207,90 +197,12 @@ int main(int argc, char **argv)
 	computeShader.setInt("heightMap", 0);
 	computeShader.setInt("heightMapArray", 1);
 
-	//Shader heightmapComputeShader("heightmap_compute.glsl");
-	//heightmapComputeShader.setInt("heightMap", 0);
-	//heightmapComputeShader.setInt("heightMapArray", 1);
-
-	//Shader heightmapArrayComputeShader("heightmapArray_compute.glsl");
-	//heightmapArrayComputeShader.setInt("heightMap", 0);
-	//heightmapArrayComputeShader.setInt("heightMapArray", 1);
-
-	//terrainShader.setInt("heightMap", 0);
-	//terrainShader.setInt("heightMapArray", 1);
-
-	//Manager::heightMapResolution = 4096;
-	//Manager::heightMapChunkResolution = 1024;
-
-	//heightmapComputeShader.setFloat("resolution", Manager::heightMapResolution);
-	//heightmapComputeShader.setFloat("scale", 1);
-//
-	//heightmapArrayComputeShader.setFloat("resolution", Manager::heightMapChunkResolution);
-	//heightmapArrayComputeShader.setFloat("scale", 1);
-	//heightmapArrayComputeShader.setInt("chunksRadius", 1);
-
-	//unsigned int texture;
-//
-    //glGenTextures(1, &texture);
-    //glActiveTexture(GL_TEXTURE0);
-    //glBindTexture(GL_TEXTURE_2D, texture);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R16_SNORM, Manager::heightMapResolution, Manager::heightMapResolution, 0, GL_RED, GL_FLOAT, NULL);
-//
-	//glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16_SNORM);
-
-	//unsigned int textureArray;
-//
-	//glGenTextures(1, &textureArray);
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
-	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R16_SNORM, Manager::heightMapChunkResolution, Manager::heightMapChunkResolution, 
-	//	9, 0, GL_RED, GL_FLOAT, NULL);
-//
-	//glBindImageTexture(1, textureArray, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R16_SNORM);
-
-	//Print(cam.far);
-
-    //Manager::AddShader(&shader);
-
-    //Shape shape(CUBE);
     Shape instanceShape(BLADE);
-    //instanceShape.Scale(glm::vec3(0.25f, 2.0f, 1.0f));
-    //Shape plane(PLANE);
-    //plane.Scale(glm::vec3(10000.0f));
 
-    //Mesh mesh(&shape, &shader);
     Mesh instanceMesh(&instanceShape, &instanceShader);
-    //Mesh planeMesh(&plane, &terrainShader);
 
-    //Object object(&mesh);
-    //object.Paint(glm::vec4(glm::vec3(0.25f), 1.0f));
-    //Object floor(&planeMesh);
-	//Object floor2(&planeMesh);
-	//Object floor3(&planeMesh);
-//
-	//floor2.Move(glm::vec3(10000.0, 0.0, -10000.0));
-	//floor3.Move(glm::vec3(0.0, 0.0, 10000.0));
-//
-    //floor.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
-	//floor2.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
-	//floor3.Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
-
-	//Manager::AddObject(&object);
-	//Manager::AddShader(&terrainShader);
 	Manager::AddShader(&instanceShader);
 	Manager::AddShader(&computeShader);
-	//Manager::AddShader(&heightmapComputeShader);
-	//Manager::AddShader(&heightmapArrayComputeShader);
-	//Manager::AddObject(&floor);
-	//Manager::AddObject(&floor2);
-	//Manager::AddObject(&floor3);
 	Manager::AddInstanceBatch(&instanceMesh, count);
 
     unsigned int buffer;
@@ -311,14 +223,6 @@ int main(int argc, char **argv)
     Print(count);
     Print(inssqrt);
 
-	//glm::vec2 offset = glm::vec2(0, 0);
-	//heightmapComputeShader.setFloat2("offset", offset);
-	//heightmapComputeShader.useShader();
-	//glDispatchCompute(Manager::heightMapResolution / 4, Manager::heightMapResolution / 4, 1);
-
-	//heightmapArrayComputeShader.useShader();
-	//glDispatchCompute(Manager::heightMapChunkResolution / 4, Manager::heightMapChunkResolution / 4, 1);
-
 	while (!glfwWindowShouldClose(window))
     {
         Time::NewFrame();
@@ -327,24 +231,18 @@ int main(int argc, char **argv)
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//if (Time::newSecond)
-		//{
-		//	Debug::DurationCheck();
-		//	heightmapComputeShader.useShader();
-		//	offset += glm::vec2(0.1, 0.1);
-		//	heightmapComputeShader.setFloat2("offset", offset);
-		//	glDispatchCompute(Manager::heightMapResolution / 4, Manager::heightMapResolution / 4, 1);
-		//	//glMemoryBarrier(GL_ALL_BARRIER_BITS);
-		//	//Debug::DurationCheck();
-		//}
-
         if (Input::GetKey(GLFW_KEY_G).pressed)
         {
-            Terrain::offset += glm::vec2(1, 1);
+            //Terrain::offset += glm::vec2(1, 1);
+			//Terrain::heightMapComputeShader->setFloat2("offset", Terrain::offset);
+			//Terrain::heightMapArrayComputeShader->setFloat2("offset", Terrain::offset);
+			//Terrain::GenerateHeightMap();
+			//Terrain::GenerateHeightMapArray();
+
+			Terrain::offset = glm::vec2(Manager::camera.Position().x, Manager::camera.Position().z) / Terrain::terrainChunkSize;
+			Shader::setFloat2Global("terrainOffset", Terrain::offset * Terrain::terrainChunkSize);
 			Terrain::heightMapComputeShader->setFloat2("offset", Terrain::offset);
-			Terrain::heightMapArrayComputeShader->setFloat2("offset", Terrain::offset);
 			Terrain::GenerateHeightMap();
-			Terrain::GenerateHeightMapArray();
 		}
 
         computeShader.useShader();

@@ -34,9 +34,10 @@ void main()
 
     //position.y = textureLod(heightMap, fUV, 0).r * heightMapHeight;
 	//position.y = SampleArray(fUV) * heightMapHeight;
-	position.y = SampleDynamic(ObjectToWorld(position.xyz)) * heightMapHeight;
+	vec3 worldPos = ObjectToWorld(position.xyz);
+	position.y = SampleDynamic(worldPos.xz) * heightMapHeight;
 
-    fFragmentPosition = ObjectToWorld(position.xyz);
+    fFragmentPosition = worldPos;
 
     //fNormal = GenerateNoiseNormal(fUV, lod, 0.0025);
 	gl_Position = projection * view * model * position;

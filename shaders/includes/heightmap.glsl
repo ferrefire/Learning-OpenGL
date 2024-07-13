@@ -15,6 +15,10 @@ uniform float sampleStepSize;
 uniform float sampleStepSizeMult;
 uniform float sampleArrayStepSize;
 uniform float sampleArrayStepSizeMult;
+uniform float worldSampleSize;
+uniform float worldSampleSizeMult;
+
+uniform vec2 terrainOffset;
 
 float SampleArray(vec2 uvPosition)
 {
@@ -88,15 +92,15 @@ vec3 SampleNormalUnNorm(vec2 uv)
     return (normalTS.xzy);
 }
 
-float SampleDynamic(vec3 worldPosition)
+float SampleDynamic(vec2 worldPosition)
 {
-	if (abs(worldPosition.x) <= terrainChunkSize * 0.5 && abs(worldPosition.z) <= terrainChunkSize * 0.5)
+	if (abs(worldPosition.x - terrainOffset.x) <= terrainChunkSize * 0.5 && abs(worldPosition.y - terrainOffset.y) <= terrainChunkSize * 0.5)
 	{
-		return (Sample(worldPosition.xz * terrainChunkSizeMult + 0.5));
+		return (Sample((worldPosition - terrainOffset) * terrainChunkSizeMult + 0.5));
 	}
 	else
 	{
-		return (SampleArray(worldPosition.xz * terrainSizeMult + 0.5));
+		return (SampleArray(worldPosition * terrainSizeMult + 0.5));
 	}
 }
 
@@ -122,6 +126,19 @@ vec3 SampleNormalUnNormDynamic(vec3 worldPosition)
 	{
 		return (SampleArrayNormalUnNorm(worldPosition.xz * terrainSizeMult + 0.5));
 	}
+}
+
+vec3 SampleNormalV2(vec2 worldPosition, float power)
+{
+	float left = SampleDynamic(worldPosition - vec2(worldSampleSize, 0));
+    float right = SampleDynamic(worldPosition + vec2(worldSampleSize, 0));
+    float down = SampleDynamic(worldPosition - vec2(0, worldSampleSize));
+    float up = SampleDynamic(worldPosition + vec2(0, worldSampleSize));
+
+    vec3 normalTS = vec3((left - right) / worldSampleSizeMult, 1, (down - up) / worldSampleSizeMult);
+    normalTS.xz *= power;
+
+    return (normalize(normalTS));
 }
 
 float GetSteepness(vec3 normal)

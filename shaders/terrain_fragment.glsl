@@ -42,16 +42,20 @@ void main()
 	
 	//vec3 normal = SampleNormal(fUV, 0.25);
 	bool lod = IsLod(fFragmentPosition);
-	vec3 normal = SampleNormalDynamic(fFragmentPosition, lod ? 0.1 : 0.25);
+	//vec3 normal = SampleNormalDynamic(fFragmentPosition, lod ? 0.1 : 0.25);
+	vec3 normal = SampleNormalV2(fFragmentPosition.xz, 0.25);
+	//vec3 normal = SampleArrayNormal(fUV, lod ? 0.1 : 0.25);
+	//vec3 normal = SampleArrayNormal(fUV, 0.1);
 	//vec3 normal = SampleNormalDynamic(fFragmentPosition, 0.25);
 	float steepness = GetSteepnessDynamic(fFragmentPosition, normal);
 
-    float power = mix(0.25, lod ? 0.5 : 1.0, 1.0 - pow(1.0 - depth, 4));
-    //float power = mix(0.25, 1.0, 1.0 - pow(1.0 - depth, 4));
-	normal = SampleNormalUnNormDynamic(fFragmentPosition);
+    //float power = mix(0.25, lod ? 0.5 : 1.0, 1.0 - pow(1.0 - depth, 4));
+    float power = mix(0.25, 1.0, 1.0 - pow(1.0 - depth, 4));
+	normal = SampleNormalV2(fFragmentPosition.xz, power);
+	//normal = SampleArrayNormalUnNorm(fUV);
 	//vec3 steepnessNormal = normal;
-	normal.xz *= power;
-	normal = normalize(normal);
+	//normal.xz *= power;
+	//normal = normalize(normal);
 	//steepnessNormal.xz *= 0.5;
 	//steepnessNormal = normalize(steepnessNormal);
 

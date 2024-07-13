@@ -55,6 +55,8 @@ void Manager::SetShaderVariables(Shader *shader)
 	shader->setFloat("terrainChunkSizeMult", 1.0 / Terrain::terrainChunkSize);
 	shader->setInt("chunksLength", Terrain::chunksLength);
 	shader->setFloat("chunksLengthMult", 1.0 / Terrain::chunksLength);
+	shader->setFloat("worldSampleSize", Terrain::worldSampleStepSize);
+	shader->setFloat("worldSampleSizeMult", (Terrain::worldSampleStepSize * 2) / (Terrain::terrainChunkSize * Terrain::worldSampleStepSize));
 }
 
 void Manager::AddShader(Shader *shader)

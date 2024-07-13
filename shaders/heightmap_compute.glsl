@@ -6,9 +6,9 @@ layout (local_size_x = 4, local_size_y = 4) in;
 
 layout(r16_snorm, binding = 0) uniform image2D heightMap;
 
-uniform vec2 offset = vec2(5, 5);
+uniform vec2 offset = vec2(0, 0);
 uniform float resolution = 1024;
-uniform float scale = 4;
+uniform float scale = 1;
 uniform float sizeMultiplier;
 
 #include "noise.glsl"

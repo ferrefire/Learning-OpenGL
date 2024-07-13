@@ -70,7 +70,7 @@ void main()
 	//if (GetSteepness(GenerateNoiseNormal(uv, noiseLayers, 0.001)) > 0.5) return ;
 
     //float y = GenerateNoise(uv, noiseLayers) * noiseHeight + 1.5;
-    float y = SampleDynamic(vec3(x, 0, z)) * heightMapHeight;
+    float y = SampleDynamic(vec2(x, z)) * heightMapHeight;
 
     vec3 pos = GetRandomVec3(float(x + z * instanceCountSqrt) * instanceMult);
     pos.y = 0;

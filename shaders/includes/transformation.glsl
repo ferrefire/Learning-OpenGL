@@ -33,7 +33,7 @@ vec2 ObjectToUV(vec3 objectPosition)
 {
 	vec3 worldPosition = ObjectToWorld(objectPosition);
 
-	return (worldPosition.xz * terrainSizeMult + 0.5);
+	return vec2(worldPosition.xz * terrainSizeMult + 0.5);
 }
 
 #endif
