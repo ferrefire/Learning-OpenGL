@@ -31,8 +31,8 @@ void main()
     vec3 viewDirection = normalize(viewPosition - worldPosition);
     vec3 reflectDirection = reflect(-lightDirection, normal);
     vec3 terrainReflectDirection = reflect(-lightDirection, terrainNormal);
-    float specular = pow(max(dot(viewDirection, reflectDirection), 0.0), 4);
-    float terrainSpecular = pow(max(dot(viewDirection, terrainReflectDirection), 0.0), 512);
+    float specular = pow(max(dot(viewDirection, reflectDirection), 0.0), 8);
+    float terrainSpecular = pow(max(dot(viewDirection, terrainReflectDirection), 0.0), 64);
     //vec3 specularColor = vec3(1.0, 0.75, 0.0) * (1 * (specular * terrainSpecular));
     vec3 specularColor = vec3(1.0) * (1 * (specular * terrainSpecular));
     vec3 bladeColor = mix(Color.xyz * 0.5, Color.xyz, UV.y);

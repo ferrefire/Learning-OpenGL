@@ -7,8 +7,8 @@ layout (local_size_x = 4, local_size_y = 4) in;
 struct datastruct
 {
     vec3 pos;
-    //vec4 col;
 	vec3 norm;
+    vec2 rot;
 };
 
 layout(std430, binding = 3) buffer iColors
@@ -73,6 +73,15 @@ void main()
     index = atomicAdd(computeCount, 1);
     data[index].pos = position;
 	data[index].norm = norm;
+    vec2 rotations = vec2(0);
+    float wave = sin(time * 2 + (x + z) * 0.1) * 0.5 + 0.5;
+    ran = random(position.xz + vec2(position.y, -position.y));
+    rotations.x = mix(ran, (ran * 0.5 + 2.0) * 0.5, wave);
+    ran = random(vec2(position.xz + vec2(position.y + ran * 10, -position.y + ran * 10)));
+    rotations.y = mix(ran, (ran * 0.5 + 1.8) * 0.5, wave);
+    rotations.x *= 45.0;
+    rotations.y *= 360.0;
+	data[index].rot = rotations;
     //data[index].col = vec4(0.25, 0.6, 0.1, 1.0);
     
 }

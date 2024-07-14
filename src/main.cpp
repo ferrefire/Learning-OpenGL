@@ -178,7 +178,8 @@ int main(int argc, char **argv)
 	//Terrain::CreateTerrain();
 	Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
 
-	int count = 1048576;
+    //int count = 1048576;
+    int count = 4194304;
 
     Shader computeShader("compute_shader.glsl");
 	computeShader.setInt("instanceCount", count);

@@ -9,8 +9,8 @@ layout (location = 0) in vec3 iPosition;
 struct datastruct
 {
     vec3 pos;
-    //vec4 col;
 	vec3 norm;
+    vec2 rot;
 };
 
 layout(std430, binding = 3) buffer iColors
@@ -48,15 +48,15 @@ mat4 rotationMatrix(vec3 axis, float angle)
 
 void main()
 {
-    normal = vec3(0, 0, -1);
-	float ran = random(data[gl_InstanceID].pos.xz + vec2(data[gl_InstanceID].pos.y, -data[gl_InstanceID].pos.y));
-    mat4 rotation = rotationMatrix(vec3(1.0, 0.0, 0.0), radians(ran * 60.0 * (iPosition.y)));
-	float scale = 1.0 - pow(clamp(SquaredDistanceToViewPosition(data[gl_InstanceID].pos), 0.0, 10000.0) * 0.0001, 3);
+    normal = normalize(mix(vec3(0, 0, -1), vec3(sign(iPosition.x) * 0.1, 0, 0), clamp(abs(iPosition.x) * 10, 0.0, 1.0)));
+	float ran = data[gl_InstanceID].rot.x;
+    mat4 rotation = rotationMatrix(vec3(1.0, 0.0, 0.0), radians(ran * (iPosition.y + 0.25)));
+	float scale = 1.0 - pow(clamp(SquaredDistanceToViewPosition(data[gl_InstanceID].pos), 0.0, 50000.0) * 0.00002, 3);
 	vec3 position = iPosition * scale;
     position = (rotation * vec4(position, 1.0)).xyz;
     normal = (rotation * vec4(normal, 0.0)).xyz;
-	ran = random(vec2(data[gl_InstanceID].pos.xz + vec2(data[gl_InstanceID].pos.y + ran * 10, -data[gl_InstanceID].pos.y + ran * 10)));
-    rotation = rotationMatrix(vec3(0.0, 1.0, 0.0), radians(ran * 360.0));
+	ran = data[gl_InstanceID].rot.y;
+    rotation = rotationMatrix(vec3(0.0, 1.0, 0.0), radians(ran));
     position = (rotation * vec4(position, 1.0)).xyz + data[gl_InstanceID].pos;
     normal = (rotation * vec4(normal, 0.0)).xyz;
 
