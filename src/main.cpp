@@ -182,7 +182,7 @@ int main(int argc, char **argv)
 	const GLubyte *renderer = glGetString(GL_RENDERER);
 	printf("%s\n", (char *)renderer);
 
-	Terrain::CreateTerrain(70000, 10000, 2500, 4096, 1024, 3, 3);
+	Terrain::CreateTerrain(90000, 10000, 2500, 4096, 1024, 4, 4);
 	//Terrain::CreateTerrain();
 	Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
 

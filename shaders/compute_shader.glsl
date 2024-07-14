@@ -48,17 +48,18 @@ void main()
     float indexDis = max(abs(x), abs(z));
     x = x * spacing + floor(viewPosition.x);
     z = z * spacing + floor(viewPosition.z);
-
+    float y = SampleDynamic(vec2(x, z)) * heightMapHeight;
+    if (InView(vec3(x, y, z) + vec3(0, 0.5, 0), 0.0) == 0) return ;
     //vec2 uv = vec2(x, z) * 0.0001 + 0.5;
     //float falloff = indexDis * (instanceCountSqrtMult * 2);
-    float falloff = SquaredDistanceToViewPosition(vec3(x, viewPosition.y, z)) * pow(instanceCountSqrtMult * 2.0 * spacingMult, 2);
+    float falloff = SquaredDistanceToViewPosition(vec3(x, y, z)) * pow(instanceCountSqrtMult * 2.0 * spacingMult, 2);
 	//falloff = falloff * 1.0625 - 0.0625;
     falloff = pow(falloff, 0.25);
 	//float ran = random(float(x + z * instanceCountSqrt) * instanceMult);
 	
-	vec3 norm = SampleNormalDynamic(vec2(x, z), 0.25);
-    float steepness = GetSteepness(norm);
-    steepness = 1.0 - pow(1.0 - steepness, 15);
+	//vec3 norm = SampleNormalDynamic(vec2(x, z), 0.25);
+    //float steepness = GetSteepness(norm);
+    //steepness = 1.0 - pow(1.0 - steepness, 15);
     float ranMult = 1.0 - (abs(x) + abs(z)) * terrainSizeMult * 0.5;
     float ran = random(vec2(x, z) * ranMult);
 
@@ -68,19 +69,25 @@ void main()
 	//norm = normalize(norm);
 	//steepnessNormal.xz *= 0.5;
 	//steepnessNormal = normalize(steepnessNormal);
-    if (steepness > 0.125 + (ran - 0.5) * 0.25 || falloff > pow(ran, 1)) return ;
+    //if (steepness > 0.125 + (ran - 0.5) * 0.25 || falloff > pow(ran, 1)) return ;
+    if (falloff > ran) return ;
 	//if (GetSteepness(GenerateNoiseNormal(uv, noiseLayers, 0.001)) > 0.5) return ;
 
     //float y = GenerateNoise(uv, noiseLayers) * noiseHeight + 1.5;
 
-    vec3 position = vec3(x, 0, z);
+    vec3 position = vec3(x, y, z);
     ran = random(vec2(ran * 100, ran * 200));
 	position.x += ran - 0.5;
     ran = random(vec2(ran * 200, ran * 100));
 	position.z += ran - 0.5;
 	position.y = SampleDynamic(position.xz) * heightMapHeight;
+    vec3 norm = SampleNormalDynamic(position.xz, 0.25);
+
+    float steepness = GetSteepness(norm);
+    steepness = 1.0 - pow(1.0 - steepness, 15);
+    if (steepness > 0.125 + (ran - 0.5) * 0.25) return ;
     
-    if (InView(position + vec3(0, 0.5, 0), 0.1) == 0) return ;
+    //if (InView(position + vec3(0, 0.5, 0), 0.1) == 0) return ;
     index = atomicAdd(computeCount, 1);
     data[index].pos = position;
 	data[index].norm = norm;
