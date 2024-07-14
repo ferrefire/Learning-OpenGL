@@ -61,10 +61,10 @@ void main()
     normal = (rotation * vec4(normal, 0.0)).xyz;
 	ran = data[gl_InstanceID].rot.y;
     rotation = rotationMatrix(vec3(0.0, 1.0, 0.0), radians(ran));
-    position = (rotation * vec4(position, 1.0)).xyz + data[gl_InstanceID].pos;
+    position = (rotation * vec4(position, 1.0)).xyz;
     normal = (rotation * vec4(normal, 0.0)).xyz;
 
-	worldPosition = ObjectToWorld(position);
+	worldPosition = ObjectToWorld(position) + data[gl_InstanceID].pos;
     gl_Position = projection * view * vec4(worldPosition, 1.0);
 
 	UV = vec2(iPosition.x * 10 + 0.5, iPosition.y);

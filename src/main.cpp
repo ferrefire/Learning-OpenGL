@@ -182,7 +182,7 @@ int main(int argc, char **argv)
 	const GLubyte *renderer = glGetString(GL_RENDERER);
 	printf("%s\n", (char *)renderer);
 
-	Terrain::CreateTerrain(90000, 10000, 2500, 4096, 1024, 4, 4);
+	Terrain::CreateTerrain(30000, 10000, 2500, 4096, 1024, 1, 1);
 	//Terrain::CreateTerrain();
 	Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
 
@@ -196,6 +196,7 @@ int main(int argc, char **argv)
 	computeShader.setFloat("instanceCountSqrtMult", 1.0 / float(sqrt(count)));
 	computeShader.setInt("heightMap", 0);
 	computeShader.setInt("heightMapArray", 1);
+	//computeShader.setInt("frameBuffer", 2);
 
 	//glBindTexture(GL_TEXTURE_2D, 0);
 	//glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
@@ -227,6 +228,7 @@ int main(int argc, char **argv)
 //
 	//unsigned int depthTexture;
 	//glGenTextures(1, &depthTexture);
+	//glActiveTexture(GL_TEXTURE2);
 	//glBindTexture(GL_TEXTURE_2D, depthTexture);
 	////Change color type
 	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Input::width, Input::height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);

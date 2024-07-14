@@ -53,7 +53,7 @@ void main()
     //vec2 uv = vec2(x, z) * 0.0001 + 0.5;
     //float falloff = indexDis * (instanceCountSqrtMult * 2);
     float falloff = SquaredDistanceToViewPosition(vec3(x, y, z)) * pow(instanceCountSqrtMult * 2.0 * spacingMult, 2);
-	//falloff = falloff * 1.0625 - 0.0625;
+	falloff = falloff * 1.025 - 0.025;
     falloff = pow(falloff, 0.25);
 	//float ran = random(float(x + z * instanceCountSqrt) * instanceMult);
 	
@@ -92,8 +92,8 @@ void main()
     data[index].pos = position;
 	data[index].norm = norm;
     vec2 rotations = vec2(0);
-    float wave = sin(time * 2 + (x + z) * 0.1) * 0.5 + 0.5;
-    //float wave = 0;
+    //float wave = sin(time * 2 + (x + z) * 0.1) * 0.5 + 0.5;
+    float wave = 0;
     ran = random(position.xz * ranMult + vec2(position.y, -position.y) * 0.01);
     rotations.x = mix(ran, (ran * 0.5 + 2.0) * 0.5, wave);
     ran = random(vec2(position.xz * ranMult + vec2(position.y + ran * 10, -position.y + ran * 10) * 0.01));
