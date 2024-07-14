@@ -30,6 +30,11 @@ glm::vec4 Object::Color()
     return (color);
 }
 
+glm::vec3 &Object::GetPosition()
+{
+	return (position);
+}
+
 glm::mat4 Object::Translation()
 {
     glm::mat4 translation = glm::mat4(1.0f);

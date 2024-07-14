@@ -1,19 +1,26 @@
 #include "camera.hpp"
 #include "time.hpp"
 #include "utilities.hpp"
+#include "input.hpp"
+#include "shader.hpp"
 
 Camera::Camera()
 {
     far = 25000;
-    projection = glm::perspective(glm::radians(FOV), (float)width / (float)height, near, far);
-	//position.x = -2000;
-	//position.z = 2000;
-	//position.y = 1000;
+    UpdateProjection();
 	position.x = 0;
 	position.z = 0;
 	position.y = 0;
 	Move(glm::vec3(0.0f));
     Rotate(glm::vec3(25.0f, -90.0f, 0.0f));
+}
+
+void Camera::UpdateProjection()
+{
+	projection = glm::perspective(glm::radians(FOV), Input::width / Input::height, near, far);
+	Shader::setFloatGlobal("width", Input::width);
+	Shader::setFloatGlobal("height", Input::height);
+	Shader::setMatrix4Global("projection", projection);
 }
 
 void Camera::Move(glm::vec3 amount)

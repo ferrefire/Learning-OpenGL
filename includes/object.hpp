@@ -27,7 +27,9 @@ class Object
         glm::vec3 Scale();
         glm::vec4 Color();
 
-        glm::mat4 Translation();
+		glm::vec3 &GetPosition();
+
+		glm::mat4 Translation();
         Mesh *GetMesh();
 
         void Move(glm::vec3 amount);

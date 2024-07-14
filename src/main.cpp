@@ -27,9 +27,6 @@
 #include "object.hpp"
 #include "terrain.hpp"
 
-const int width = 1600;
-const int height = 900;
-
 unsigned int Debug::totalFramesThisSecond = 0;
 double Debug::start = -1;
 
@@ -42,13 +39,12 @@ float Time::lastFrame = 0.0f;
 double Time::timeLastSecond = 0;
 bool Time::newSecond = false;
 
-Camera cam = Camera();
-
-float Input::height = (float)height;
-float Input::width = (float)width;
-float Input::lastX = width * 0.5f;
-float Input::lastY = height * 0.5f;
+float Input::height = 900.0;
+float Input::width = 1600.0;
+float Input::lastX = Input::width * 0.5f;
+float Input::lastY = Input::height * 0.5f;
 float Input::sensitivity = 0.1f;
+Camera cam = Camera();
 Camera &Input::camera = cam;
 std::map<int, Input::KeyStatus> Input::keys = std::map<int, Input::KeyStatus>();
 
@@ -59,6 +55,8 @@ bool Manager::wireframeActive = false;
 bool Manager::vSyncActive = true;
 bool Manager::mouseLocked = true;
 bool Manager::fullScreen = false;
+bool Manager::cullingActive = true;
+unsigned int Manager::depthBuffer = 0;
 glm::vec3 Manager::sunDirection = glm::vec3(0.375, 0.25, 0.375);
 glm::vec2 Manager::sunAngles = glm::vec2(0, 0);
 Camera &Manager::camera = cam;
@@ -81,6 +79,8 @@ unsigned int Terrain::heightMapArrayTexture = 0;
 Shader *Terrain::terrainShader = NULL;
 Shader *Terrain::heightMapComputeShader = NULL;
 Shader *Terrain::heightMapArrayComputeShader = NULL;
+Mesh *Terrain::terrainMesh = NULL;
+Mesh *Terrain::terrainLodMesh = NULL;
 Object ***Terrain::terrainChunks = NULL;
 int Terrain::terrainRadius = 1;
 int Terrain::terrainLength = 3;
@@ -89,6 +89,9 @@ float Terrain::worldSampleDistance = 1;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
+	Input::width = width;
+	Input::height = height;
+	cam.UpdateProjection();
     glViewport(0, 0, width, height);
     //printf("Window resized: width-%d height-%d\n", width, height);
 }
@@ -100,7 +103,8 @@ GLFWwindow *setupGLFW()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window = glfwCreateWindow(width, height, "LearnOpenGL", Manager::fullScreen ? glfwGetPrimaryMonitor() : NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(Input::width, Input::height, "LearnOpenGL", Manager::fullScreen ? glfwGetPrimaryMonitor() : NULL, NULL);
+
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -130,9 +134,9 @@ void setupSettings(int argc, char **argv, GLFWwindow *window)
     glPatchParameteri(GL_PATCH_VERTICES, 3);
     glfwSwapInterval(1);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    cam.speed = 100.0f;
     glfwSetCursorPosCallback(window, Input::mouse_callback);
     glfwSetScrollCallback(window, Input::scroll_callback);
+	cam.speed = 100.0f;
 }
 
 void GetArguments(int argc, char **argv)
@@ -174,6 +178,10 @@ int main(int argc, char **argv)
     if (window == NULL) return (quit(EXIT_FAILURE));
 	Manager::window = window;
 	setupSettings(argc, argv, window);
+
+	const GLubyte *renderer = glGetString(GL_RENDERER);
+	printf("%s\n", (char *)renderer);
+
 	Terrain::CreateTerrain(70000, 10000, 2500, 4096, 1024, 3, 3);
 	//Terrain::CreateTerrain();
 	Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
@@ -189,7 +197,10 @@ int main(int argc, char **argv)
 	computeShader.setInt("heightMap", 0);
 	computeShader.setInt("heightMapArray", 1);
 
-    Shape instanceShape(BLADE);
+	//glBindTexture(GL_TEXTURE_2D, 0);
+	//glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+
+	Shape instanceShape(BLADE);
 
     Mesh instanceMesh(&instanceShape, &instanceShader);
 
@@ -211,7 +222,24 @@ int main(int argc, char **argv)
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, computeCount);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-    int inssqrt = sqrt(count);
+	//glGenFramebuffers(1, &Manager::depthBuffer);
+	//glBindFramebuffer(GL_FRAMEBUFFER, Manager::depthBuffer);
+//
+	//unsigned int depthTexture;
+	//glGenTextures(1, &depthTexture);
+	//glBindTexture(GL_TEXTURE_2D, depthTexture);
+	////Change color type
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Input::width, Input::height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glBindTexture(GL_TEXTURE_2D, 0);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, depthTexture, 0);
+//
+	//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	//	std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	int inssqrt = sqrt(count);
     Print(count);
     Print(inssqrt);
 
@@ -220,6 +248,7 @@ int main(int argc, char **argv)
         Time::NewFrame();
 		Debug::NewFrame();
         Input::processInput(window);
+		Manager::SetShaderFrameVariables();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -269,6 +298,8 @@ int main(int argc, char **argv)
 			Manager::sunDirection = glm::normalize(Manager::sunDirection);
 			Shader::setFloat3Global("lightDirection", Manager::sunDirection);
 		}
+
+		Terrain::RenderTerrain();
 
 		computeShader.useShader();
         glDispatchCompute(inssqrt / 4, inssqrt / 4, 1);

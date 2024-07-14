@@ -17,7 +17,7 @@ void main()
     //UV = vec2(ObjectToUV(iPosition));
 
 	vec3 worldPosition = ObjectToWorld(iPosition);
-	worldPosition.y = SampleDynamic(worldPosition.xz) * heightMapHeight;
+	worldPosition.y += SampleDynamic(worldPosition.xz) * heightMapHeight;
 
     gl_Position = vec4(worldPosition, 1.0);
 }

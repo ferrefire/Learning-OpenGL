@@ -28,7 +28,7 @@ float TessellationFactor (vec3 p0, vec3 p1)
     float edgeLength = distance(p0, p1);
     vec3 edgeCenter = (p0 + p1) * 0.5;
     float viewDistance = distance(edgeCenter, viewPosition);
-    return (edgeLength * 900.0 * (1.0 / (10.0 * viewDistance)));
+    return (edgeLength * height * (1.0 / (10.0 * viewDistance)));
 }
 
 void main()

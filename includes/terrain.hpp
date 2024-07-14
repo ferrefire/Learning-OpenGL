@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include "object.hpp"
 #include <vector>
+#include "mesh.hpp"
 
 class Terrain
 {
@@ -41,6 +42,9 @@ class Terrain
 		static Shader *heightMapComputeShader;
 		static Shader *heightMapArrayComputeShader;
 
+		static Mesh *terrainMesh;
+		static Mesh *terrainLodMesh;
+
 		static Object ***terrainChunks;
 
 		static void CreateTerrain(float terrainSize = -1, float terrainChunkSize = -1, float terrainHeight = -1, 
@@ -51,6 +55,8 @@ class Terrain
 
 		static void GenerateHeightMap();
 		static void GenerateHeightMapArray();
+
+		static void RenderTerrain();
 };
 
 #endif

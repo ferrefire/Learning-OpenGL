@@ -26,13 +26,17 @@ class Manager
 
 		static Camera &camera;
 		static GLFWwindow *window;
+
 		static bool wireframeActive;
 		static bool vSyncActive;
 		static bool mouseLocked;
 		static bool fullScreen;
+		static bool cullingActive;
 
 		static glm::vec3 sunDirection;
 		static glm::vec2 sunAngles;
+
+		static unsigned int depthBuffer;
 
 		//static int heightMapResolution;
 		//static int heightMapChunkResolution;
@@ -43,7 +47,12 @@ class Manager
         static void AddInstanceBatch(InstanceBatch instanceBatch);
         static void AddInstanceBatch(Mesh *mesh, int count);
         static void AddShader(Shader *shader);
+
 		static void SetShaderVariables(Shader *shader);
+		static void SetShaderFrameVariables();
+
+		static void EnableCulling(bool mode);
+
 		static void Close();
 		static void Quit(int exitCode = EXIT_SUCCESS);
 };

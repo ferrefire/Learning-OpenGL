@@ -21,8 +21,6 @@ class Camera
     public:
         Camera();
 
-        int width = 1600;
-        int height = 900;
         float near = 0.1f;
         float far = 1000.0f;
         float FOV = 45.0f;
@@ -30,6 +28,7 @@ class Camera
 
         void Move(glm::vec3 amount);
         void Rotate(glm::vec3 angles);
+		void UpdateProjection();
 
         glm::vec3 Position();
         glm::vec3 Front();

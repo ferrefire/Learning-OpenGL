@@ -32,7 +32,7 @@ void main()
     //fUV = BARYCENTRIC_INTERPOLATE(tUV);
 
 	worldPosition = position.xyz;
-	worldPosition.y = SampleDynamic(worldPosition.xz) * heightMapHeight;
+	worldPosition.y = ObjectToWorld(vec3(0)).y + SampleDynamic(worldPosition.xz) * heightMapHeight;
 
 	gl_Position = projection * view * vec4(worldPosition, 1.0);
 }

@@ -8,6 +8,9 @@ uniform float nearMult;
 uniform float far;
 uniform float farMult;
 
+uniform float width;
+uniform float height;
+
 uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 model = mat4(1.0);

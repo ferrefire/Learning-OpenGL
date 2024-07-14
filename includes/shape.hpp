@@ -32,8 +32,7 @@ class Shape
 
     public:
         Shape();
-        Shape(int preset);
-        Shape(int preset, float scale);
+        Shape(int preset, int resolution = 10);
 
         float * GetData();
         unsigned int * GetIndices();

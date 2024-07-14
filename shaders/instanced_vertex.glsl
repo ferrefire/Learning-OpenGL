@@ -13,7 +13,7 @@ struct datastruct
     vec2 rot;
 };
 
-layout(std430, binding = 3) buffer iColors
+layout(std430, binding = 3) buffer iData
 {
     datastruct data[];
 };
@@ -51,7 +51,7 @@ void main()
     normal = normalize(mix(vec3(0, 0, -1), vec3(sign(iPosition.x) * 0.1, 0, 0), clamp(abs(iPosition.x) * 10, 0.0, 1.0)));
 	float ran = data[gl_InstanceID].rot.x;
     mat4 rotation = rotationMatrix(vec3(1.0, 0.0, 0.0), radians(ran * (iPosition.y + 0.25)));
-	float scale = 1.0 - pow(clamp(SquaredDistanceToViewPosition(data[gl_InstanceID].pos), 0.0, 50000.0) * 0.00002, 3);
+	float scale = 1.0 - pow(clamp(SquaredDistanceToViewPosition(data[gl_InstanceID].pos), 0.0, 100000.0) * 0.00001, 3);
 	vec3 position = iPosition * scale;
     position = (rotation * vec4(position, 1.0)).xyz;
     normal = (rotation * vec4(normal, 0.0)).xyz;

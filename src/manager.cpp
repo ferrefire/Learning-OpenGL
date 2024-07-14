@@ -2,6 +2,7 @@
 #include "rendering.hpp"
 #include "time.hpp"
 #include "terrain.hpp"
+#include "input.hpp"
 
 void Manager::AddObject(Object *object)
 {
@@ -37,6 +38,8 @@ void Manager::SetShaderVariables(Shader *shader)
 	shader->setFloat("nearMult", 1.0 / camera.near);
 	shader->setFloat("far", camera.far);
 	shader->setFloat("farMult", 1.0 / camera.far);
+	shader->setFloat("width", Input::width);
+	shader->setFloat("height", Input::height);
 	shader->setInt("noiseLayers", Terrain::terrainLayers);
 	shader->setFloat("noiseScale", Terrain::terrainScale);
     shader->setFloat("heightMapHeight", Terrain::terrainHeight);
@@ -60,33 +63,43 @@ void Manager::AddShader(Shader *shader)
 	SetShaderVariables(shader);
 }
 
-void Manager::NewFrame()
+void Manager::SetShaderFrameVariables()
 {
-    int size = shaders.size();
-    for (int i = 0; i < size; i++)
-    {
+	int size = shaders.size();
+	for (int i = 0; i < size; i++)
+	{
 		shaders[i]->setFloat("time", glfwGetTime());
 		shaders[i]->setMatrix4("view", camera.View());
 		shaders[i]->setFloat3("viewPosition", camera.Position());
 		shaders[i]->setFloat3("viewDirection", camera.Front());
 	}
+}
 
-    glEnable(GL_CULL_FACE);
-
-    size = objects.size();
+void Manager::NewFrame()
+{
+    int size = objects.size();
     for (int i = 0; i < size; i++)
     {
         objects[i]->GetMesh()->GetShader()->setMatrix4("model", objects[i]->Translation());
         renderObject(objects[i]);
     }
 
-    glDisable(GL_CULL_FACE);
+	EnableCulling(false);
 
     size = instanceBatches.size();
     for (int i = 0; i < size; i++)
     {
         renderMeshInstanced(*instanceBatches[i].mesh, instanceBatches[i].count);
     }
+}
+
+void Manager::EnableCulling(bool mode)
+{
+	if (Manager::cullingActive == mode) return ;
+
+	Manager::cullingActive = mode;
+	if (mode) glEnable(GL_CULL_FACE);
+	else glDisable(GL_CULL_FACE);
 }
 
 void Manager::Close()
