@@ -26,9 +26,13 @@ uniform float instanceMult;
 uniform int instanceCountSqrt;
 uniform float instanceCountSqrtMult;
 
+float spacing = 0.25;
+float spacingMult = 4;
+
 #include "variables.glsl"
 #include "culling.glsl"
 #include "heightmap.glsl"
+#include "functions.glsl"
 
 float random(vec2 st)
 {
@@ -42,31 +46,38 @@ void main()
     float x = float(gl_GlobalInvocationID.x) - instanceCountSqrt * 0.5;
     float z = float(gl_GlobalInvocationID.y) - instanceCountSqrt * 0.5;
     float indexDis = max(abs(x), abs(z));
-    x = x * 0.25 + floor(viewPosition.x);
-    z = z * 0.25 + floor(viewPosition.z);
+    x = x * spacing + floor(viewPosition.x);
+    z = z * spacing + floor(viewPosition.z);
 
     //vec2 uv = vec2(x, z) * 0.0001 + 0.5;
-    float falloff = indexDis * (instanceCountSqrtMult * 2);
-	falloff = falloff * 1.25 - 0.25;
+    //float falloff = indexDis * (instanceCountSqrtMult * 2);
+    float falloff = SquaredDistanceToViewPosition(vec3(x, viewPosition.y, z)) * pow(instanceCountSqrtMult * 2.0 * spacingMult, 2);
+	//falloff = falloff * 1.0625 - 0.0625;
+    falloff = pow(falloff, 0.25);
 	//float ran = random(float(x + z * instanceCountSqrt) * instanceMult);
-	float ran = random(vec2(x, z));
+	
 	vec3 norm = SampleNormalDynamic(vec2(x, z), 0.25);
     float steepness = GetSteepness(norm);
     steepness = 1.0 - pow(1.0 - steepness, 15);
+    float ranMult = 1.0 - (abs(x) + abs(z)) * terrainSizeMult * 0.5;
+    float ran = random(vec2(x, z) * ranMult);
+
 	//vec3 norm = SampleNormalUnNorm(uv);
 	//vec3 steepnessNormal = norm;
 	//norm.xz *= 0.25;
 	//norm = normalize(norm);
 	//steepnessNormal.xz *= 0.5;
 	//steepnessNormal = normalize(steepnessNormal);
-    if (steepness > 0.125 + (ran - 0.5) * 0.25 || falloff > pow(ran, 3)) return ;
+    if (steepness > 0.125 + (ran - 0.5) * 0.25 || falloff > pow(ran, 1)) return ;
 	//if (GetSteepness(GenerateNoiseNormal(uv, noiseLayers, 0.001)) > 0.5) return ;
 
     //float y = GenerateNoise(uv, noiseLayers) * noiseHeight + 1.5;
 
     vec3 position = vec3(x, 0, z);
-	position.x += random(vec2(x + ran, z + ran)) - 0.5;
-	position.z += random(vec2(x + ran, z + ran)) - 0.5;
+    ran = random(vec2(ran * 100, ran * 200));
+	position.x += ran - 0.5;
+    ran = random(vec2(ran * 200, ran * 100));
+	position.z += ran - 0.5;
 	position.y = SampleDynamic(position.xz) * heightMapHeight;
     
     if (InView(position + vec3(0, 0.5, 0), 0.1) == 0) return ;
@@ -75,9 +86,10 @@ void main()
 	data[index].norm = norm;
     vec2 rotations = vec2(0);
     float wave = sin(time * 2 + (x + z) * 0.1) * 0.5 + 0.5;
-    ran = random(position.xz + vec2(position.y, -position.y));
+    //float wave = 0;
+    ran = random(position.xz * ranMult + vec2(position.y, -position.y) * 0.01);
     rotations.x = mix(ran, (ran * 0.5 + 2.0) * 0.5, wave);
-    ran = random(vec2(position.xz + vec2(position.y + ran * 10, -position.y + ran * 10)));
+    ran = random(vec2(position.xz * ranMult + vec2(position.y + ran * 10, -position.y + ran * 10) * 0.01));
     rotations.y = mix(ran, (ran * 0.5 + 1.8) * 0.5, wave);
     rotations.x *= 45.0;
     rotations.y *= 360.0;
