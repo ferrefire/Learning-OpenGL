@@ -18,6 +18,8 @@ uniform vec4 color;
 #include "heightmap.glsl"
 #include "lighting.glsl"
 
+//uniform sampler2D occlusionMap;
+
 void main()
 {
     float depth = GetDepth(gl_FragCoord.z, near, far);
@@ -49,6 +51,10 @@ void main()
     //vec3 reflectDirection = reflect(-lightDirection, normal);
     //float specular = pow(max(dot(viewDirection, reflectDirection), 0.0), 128);
     //vec3 specularColor = vec3(1.0, 0.75, 0.0) * (0.1 * specular);
+
+	//terrainColor = vec4(textureLod(occlusionMap, WorldToUV(worldPosition), 0).r);
+	//fragmentColor = vec4(terrainColor.xyz, 1);
+	//return ;
 
 	vec3 diffuse = DiffuseLighting(normal, terrainColor.xyz);
 	vec3 endColor = Fog(diffuse, depth);

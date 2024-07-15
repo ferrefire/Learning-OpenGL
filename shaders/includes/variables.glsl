@@ -27,5 +27,9 @@ uniform float terrainSize;
 uniform float terrainSizeMult;
 uniform float terrainChunkSize;
 uniform float terrainChunkSizeMult;
+uniform float terrainHeight;
+uniform float terrainHeightMult;
+uniform float terrainOccludeSize;
+uniform float terrainOccludeSizeMult;
 
 #endif

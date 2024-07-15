@@ -1,7 +1,12 @@
 #ifndef CULLING_INCLUDED
 #define CULLING_INCLUDED
 
+#include "variables.glsl"
 #include "transformation.glsl"
+#include "heightmap.glsl"
+#include "functions.glsl"
+
+uniform sampler2D occlusionMap;
 
 int InView(vec3 position, float tolerance)
 {
@@ -19,6 +24,34 @@ int InView(vec3 position, float tolerance)
     return (clipSpace.x < -tolerance || clipSpace.x > 1.0f + tolerance ||
         clipSpace.y < -tolerance || clipSpace.y > 1.0f + tolerance ||
         clipSpace.z <= -(tolerance * 0.5f)) ? 0 : 1;
+}
+
+float MapOccluded(vec3 position)
+{
+	vec2 uv = (position.xz - viewPosition.xz) * terrainOccludeSizeMult + 0.5;
+	return textureLod(occlusionMap, uv, 0).r;
+}
+
+int RayOccluded(vec3 position)
+{
+	//vec3 rayPosition = viewPosition;
+	//vec3 direction = (position - viewPosition) * 0.1;
+	vec3 rayPosition;
+	float i = 0;
+	int occluded = 0;
+
+	//int iterations = 0;
+
+	while (i <= 0.95 && occluded == 0)
+	{
+		//rayPosition += direction;
+		i += 0.05;
+		rayPosition = mix(position, viewPosition, i);
+		if (SampleDynamic(rayPosition.xz) * terrainHeight >= rayPosition.y) occluded = 1; 
+		//iterations++;
+	}
+
+	return occluded;
 }
 
 float NormalToViewDot(vec3 viewDirection, vec3 normal)

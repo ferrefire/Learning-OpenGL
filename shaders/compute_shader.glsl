@@ -45,36 +45,30 @@ void main()
     uint index = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * instanceCountSqrt;
     float x = float(gl_GlobalInvocationID.x) - instanceCountSqrt * 0.5;
     float z = float(gl_GlobalInvocationID.y) - instanceCountSqrt * 0.5;
-    float indexDis = max(abs(x), abs(z));
+
     x = x * spacing + floor(viewPosition.x);
     z = z * spacing + floor(viewPosition.z);
+
+	//if (MapOccluded(vec3(x, 0, z)) == 1) return ;
+
     float y = SampleDynamic(vec2(x, z)) * heightMapHeight;
     
-    //vec2 uv = vec2(x, z) * 0.0001 + 0.5;
-    //float falloff = indexDis * (instanceCountSqrtMult * 2);
     float falloff = SquaredDistanceToViewPosition(vec3(x, y, z)) * pow(instanceCountSqrtMult * 2.0 * spacingMult, 2);
 	if (InView(vec3(x, y, z) + vec3(0, 0.5, 0), pow(1.0 - falloff, 2) * 0.5) == 0) return ;
 	falloff = falloff * 1.025 - 0.025;
-    falloff = pow(falloff, 0.25);
-	//float ran = random(float(x + z * instanceCountSqrt) * instanceMult);
+    falloff = pow(falloff, 0.175);
+
 	
 	//vec3 norm = SampleNormalDynamic(vec2(x, z), 0.25);
     //float steepness = GetSteepness(norm);
     //steepness = 1.0 - pow(1.0 - steepness, 15);
+
     float ranMult = 1.0 - (abs(x) + abs(z)) * terrainSizeMult * 0.5;
     float ran = random(vec2(x, z) * ranMult);
 
-	//vec3 norm = SampleNormalUnNorm(uv);
-	//vec3 steepnessNormal = norm;
-	//norm.xz *= 0.25;
-	//norm = normalize(norm);
-	//steepnessNormal.xz *= 0.5;
-	//steepnessNormal = normalize(steepnessNormal);
-    //if (steepness > 0.125 + (ran - 0.5) * 0.25 || falloff > pow(ran, 1)) return ;
     if (falloff > ran) return ;
-	//if (GetSteepness(GenerateNoiseNormal(uv, noiseLayers, 0.001)) > 0.5) return ;
-
-    //float y = GenerateNoise(uv, noiseLayers) * noiseHeight + 1.5;
+	
+	if (RayOccluded(vec3(x, y, z)) == 1) return ;
 
     vec3 position = vec3(x, y, z);
     ran = random(vec2(ran * 100, ran * 200));
@@ -103,7 +97,5 @@ void main()
     rotations.y = mix(ran, (ran * 0.5 + 1.8) * 0.5, wave);
     rotations.x *= 60.0;
     rotations.y *= 360.0;
-	data[index].rot = rotations;
-    //data[index].col = vec4(0.25, 0.6, 0.1, 1.0);
-    
+	data[index].rot = rotations;  
 }

@@ -55,10 +55,11 @@ void main()
 		//vec3 normal = SampleNormal(uv, 1);
 		//float angled = 1.0 - pow(1.0 - NormalToViewDot(viewDirection, normal), 3);
 		//float angled = PositionToViewDot(gl_in[0].gl_Position.xyz, gl_in[1].gl_Position.xyz, gl_in[2].gl_Position.xyz);
-        if (disSqr > 10000 && (InView(center, tolerance) == 0 && 
+        if (disSqr > 10000 && (
+			(InView(center, tolerance) == 0 && 
             InView(p0, tolerance) == 0 &&
             InView(p1, tolerance) == 0 &&
-            InView(p2, tolerance) == 0))
+            InView(p2, tolerance) == 0)))
         {
             gl_TessLevelOuter[0] = 0;
             gl_TessLevelOuter[1] = 0;

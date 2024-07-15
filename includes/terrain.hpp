@@ -13,11 +13,13 @@ class Terrain
 		
 	public:
 		static float terrainSize;
+		static float terrainOccludeSize;
 		static float terrainChunkSize;
 		static float terrainHeight;
 
 		static int terrainResolution;
 		static int terrainChunkResolution;
+		static int terrainOcclusionResolution;
 		static float terrainScale;
 		static int terrainLayers;
 
@@ -34,6 +36,7 @@ class Terrain
 
 		static unsigned int heightMapTexture;
 		static unsigned int heightMapArrayTexture;
+		static unsigned int occlusionMapTexture;
 
 		static float worldSampleDistance;
 
@@ -41,6 +44,7 @@ class Terrain
 
 		static Shader *heightMapComputeShader;
 		static Shader *heightMapArrayComputeShader;
+		static Shader *occlusionMapComputeShader;
 
 		static Mesh *terrainMesh;
 		static Mesh *terrainLodMesh;
@@ -55,6 +59,7 @@ class Terrain
 
 		static void GenerateHeightMap();
 		static void GenerateHeightMapArray();
+		static void GenerateOcclusionMap();
 
 		static void RenderTerrain();
 };

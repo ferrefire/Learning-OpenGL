@@ -38,14 +38,23 @@ void Terrain::CreateHeightMaps()
 	Terrain::heightMapArrayComputeShader = new Shader("heightmapArray_compute.glsl");
 	Manager::AddShader(Terrain::heightMapArrayComputeShader);
 
-	Terrain::heightMapComputeShader->setInt("heightMap", 0);
+	Terrain::occlusionMapComputeShader = new Shader("occlusion_compute.glsl");
+	Manager::AddShader(Terrain::occlusionMapComputeShader);
+
+	//Terrain::heightMapComputeShader->setInt("heightMap", 0);
 	Terrain::heightMapComputeShader->setFloat("resolution", Terrain::terrainResolution);
 	Terrain::heightMapComputeShader->setFloat("resolutionMult", 1.0 / float(Terrain::terrainResolution));
 
-	Terrain::heightMapArrayComputeShader->setInt("heightMapArray", 1);
+	//Terrain::heightMapArrayComputeShader->setInt("heightMapArray", 1);
 	Terrain::heightMapArrayComputeShader->setFloat("resolution", Terrain::terrainChunkResolution);
 	Terrain::heightMapArrayComputeShader->setFloat("resolutionMult", 1.0 / float(Terrain::terrainChunkResolution));
 	Terrain::heightMapArrayComputeShader->setInt("chunksRadius", Terrain::chunkRadius);
+
+	Terrain::occlusionMapComputeShader->setInt("heightMap", 0);
+	Terrain::occlusionMapComputeShader->setInt("heightMapArray", 1);
+	//Terrain::occlusionMapComputeShader->setInt("occlusionMap", 2);
+	Terrain::occlusionMapComputeShader->setFloat("resolution", Terrain::terrainOcclusionResolution);
+	Terrain::occlusionMapComputeShader->setFloat("resolutionMult", 1.0 / float(Terrain::terrainOcclusionResolution));
 
 	glGenTextures(1, &Terrain::heightMapTexture);
 	glActiveTexture(GL_TEXTURE0);
@@ -73,11 +82,23 @@ void Terrain::CreateHeightMaps()
 
 	glBindImageTexture(1, Terrain::heightMapArrayTexture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R16_SNORM);
 
-	glActiveTexture(0);
+	glGenTextures(1, &Terrain::occlusionMapTexture);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, Terrain::occlusionMapTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8_SNORM, Terrain::terrainOcclusionResolution, Terrain::terrainOcclusionResolution, 0, GL_RED, GL_FLOAT, NULL);
+	
+	glBindImageTexture(2, Terrain::occlusionMapTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R8_SNORM);
+
+	//glActiveTexture(0);
 	//glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
 	GenerateHeightMap();
 	GenerateHeightMapArray();
+	GenerateOcclusionMap();
 }
 
 void Terrain::CreateChunks()
@@ -85,6 +106,7 @@ void Terrain::CreateChunks()
 	Terrain::terrainShader = new Shader("terrain_vertex.glsl", "tesselation_control.glsl", "tesselation_evaluation.glsl", "terrain_fragment.glsl");
 	Terrain::terrainShader->setInt("heightMap", 0);
 	Terrain::terrainShader->setInt("heightMapArray", 1);
+	Terrain::terrainShader->setInt("occlusionMap", 2);
 
 	Shape *plane = new Shape(PLANE, 100);
 	Shape *lodPlane = new Shape(PLANE, 10);
@@ -124,6 +146,12 @@ void Terrain::GenerateHeightMapArray()
 {
 	Terrain::heightMapArrayComputeShader->useShader();
 	glDispatchCompute(Terrain::terrainChunkResolution / 4, Terrain::terrainChunkResolution / 4, 1);
+}
+
+void Terrain::GenerateOcclusionMap()
+{
+	Terrain::occlusionMapComputeShader->useShader();
+	glDispatchCompute(Terrain::terrainOcclusionResolution / 4, Terrain::terrainOcclusionResolution / 4, 1);
 }
 
 bool InView(glm::vec3 position, float tolerance, glm::mat4 projection, glm::mat4 view)

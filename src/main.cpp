@@ -37,7 +37,11 @@ float Time::deltaTime = 0.0f;
 float Time::currentFrame = 0.0f;
 float Time::lastFrame = 0.0f;
 double Time::timeLastSecond = 0;
+double Time::timeLastTick = 0;
+double Time::timeLastSubTick = 0;
 bool Time::newSecond = false;
+bool Time::newTick = false;
+bool Time::newSubTick = false;
 
 float Input::height = 900.0;
 float Input::width = 1600.0;
@@ -63,11 +67,13 @@ Camera &Manager::camera = cam;
 GLFWwindow *Manager::window = NULL;
 
 float Terrain::terrainSize = 30000.0;
+float Terrain::terrainOccludeSize = 1000.0;
 float Terrain::terrainHeight = 10000.0;
 float Terrain::terrainScale = 1;
 int Terrain::terrainLayers = 8;
 float Terrain::terrainChunkSize = 10000.0;
 int Terrain::terrainResolution = 4096;
+int Terrain::terrainOcclusionResolution = 1024;
 int Terrain::terrainChunkResolution = 1024;
 int Terrain::chunkRadius = 1;
 int Terrain::chunksLength = 3;
@@ -75,9 +81,11 @@ int Terrain::chunkCount = 9;
 glm::vec2 Terrain::offset = glm::vec2(0.0, 0.0);
 glm::vec2 Terrain::seed = glm::vec2(0.0, 0.0);
 unsigned int Terrain::heightMapTexture = 0;
+unsigned int Terrain::occlusionMapTexture = 0;
 unsigned int Terrain::heightMapArrayTexture = 0;
 Shader *Terrain::terrainShader = NULL;
 Shader *Terrain::heightMapComputeShader = NULL;
+Shader *Terrain::occlusionMapComputeShader = NULL;
 Shader *Terrain::heightMapArrayComputeShader = NULL;
 Mesh *Terrain::terrainMesh = NULL;
 Mesh *Terrain::terrainLodMesh = NULL;
@@ -182,7 +190,7 @@ int main(int argc, char **argv)
 	const GLubyte *renderer = glGetString(GL_RENDERER);
 	printf("%s\n", (char *)renderer);
 
-	Terrain::CreateTerrain(30000, 10000, 2500, 4096, 1024, 1, 1);
+	Terrain::CreateTerrain(90000, 10000, 2500, 4096, 1024, 4, 4);
 	//Terrain::CreateTerrain();
 	Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
 
@@ -196,6 +204,7 @@ int main(int argc, char **argv)
 	computeShader.setFloat("instanceCountSqrtMult", 1.0 / float(sqrt(count)));
 	computeShader.setInt("heightMap", 0);
 	computeShader.setInt("heightMapArray", 1);
+	computeShader.setInt("occlusionMap", 2);
 	//computeShader.setInt("frameBuffer", 2);
 
 	//glBindTexture(GL_TEXTURE_2D, 0);
@@ -301,7 +310,13 @@ int main(int argc, char **argv)
 			Shader::setFloat3Global("lightDirection", Manager::sunDirection);
 		}
 
+		if (Time::newTick)
+		{
+			//Terrain::GenerateOcclusionMap();
+		}
+		
 		Terrain::RenderTerrain();
+		
 
 		computeShader.useShader();
         glDispatchCompute(inssqrt / 4, inssqrt / 4, 1);

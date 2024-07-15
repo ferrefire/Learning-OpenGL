@@ -5,6 +5,7 @@
 #include "time.hpp"
 #include "input.hpp"
 #include "manager.hpp"
+#include "utilities.hpp"
 
 void Debug::NewFrame()
 {
@@ -13,6 +14,7 @@ void Debug::NewFrame()
 	if (Time::newSecond)
 	{
 		std::cout << "FPS: " << totalFramesThisSecond << std::endl;
+		//Utilities::PrintVec3(Manager::camera.Position());
 		totalFramesThisSecond = 0;
 	}
 
