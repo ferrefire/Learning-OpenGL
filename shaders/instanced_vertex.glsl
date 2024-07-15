@@ -51,11 +51,12 @@ mat4 rotationMatrix(vec3 axis, float angle)
 
 void main()
 {
-    normal = normalize(mix(vec3(0, 0, -1), vec3(sign(iPosition.x) * 0.1, 0, 0), clamp(abs(iPosition.x) * 10, 0.0, 1.0)));
+    normal = normalize(mix(vec3(0, 0, -1), vec3(sign(iPosition.x) * 0.5, 0, 0), clamp(abs(iPosition.x) * 10, 0.0, 1.0)));
 	float ran = data[gl_InstanceID].rot.x;
     mat4 rotation = rotationMatrix(vec3(1.0, 0.0, 0.0), radians(ran * (iPosition.y + 0.25)));
 	//float scale = 1.0 - pow(clamp(SquaredDistanceToViewPosition(data[gl_InstanceID].pos), 0.0, 1000000) * 0.000001, 3);
-	float scale = 1.0 + clamp(SquaredDistanceToViewPosition(data[gl_InstanceID].pos), 0.0, pow(2048 * 0.5 * spacing, 2)) * pow(0.000488281 * 2.0 * spacingMult, 2);
+	float scale = clamp(SquaredDistanceToViewPosition(data[gl_InstanceID].pos), 0.0, pow(2048 * 0.5 * spacing, 2)) * pow(0.000488281 * 2.0 * spacingMult, 2);
+	scale = 1 + scale * 2;
 	vec3 position = iPosition * scale;
     position = (rotation * vec4(position, 1.0)).xyz;
     normal = (rotation * vec4(normal, 0.0)).xyz;

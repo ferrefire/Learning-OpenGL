@@ -49,10 +49,11 @@ void main()
     x = x * spacing + floor(viewPosition.x);
     z = z * spacing + floor(viewPosition.z);
     float y = SampleDynamic(vec2(x, z)) * heightMapHeight;
-    if (InView(vec3(x, y, z) + vec3(0, 0.5, 0), 0.0) == 0) return ;
+    
     //vec2 uv = vec2(x, z) * 0.0001 + 0.5;
     //float falloff = indexDis * (instanceCountSqrtMult * 2);
     float falloff = SquaredDistanceToViewPosition(vec3(x, y, z)) * pow(instanceCountSqrtMult * 2.0 * spacingMult, 2);
+	if (InView(vec3(x, y, z) + vec3(0, 0.5, 0), pow(1.0 - falloff, 2) * 0.5) == 0) return ;
 	falloff = falloff * 1.025 - 0.025;
     falloff = pow(falloff, 0.25);
 	//float ran = random(float(x + z * instanceCountSqrt) * instanceMult);
@@ -92,13 +93,15 @@ void main()
     data[index].pos = position;
 	data[index].norm = norm;
     vec2 rotations = vec2(0);
-    //float wave = sin(time * 2 + (x + z) * 0.1) * 0.5 + 0.5;
-    float wave = 0;
+    float wave = sin(time * 2 + (x + z) * 0.1) * 0.5 + 0.5;
+    //float wave = 0;
     ran = random(position.xz * ranMult + vec2(position.y, -position.y) * 0.01);
-    rotations.x = mix(ran, (ran * 0.5 + 2.0) * 0.5, wave);
+    //rotations.x = mix(ran, (ran * 0.5 + 2.0) * 0.5, wave);
+    rotations.x = mix(0.25, 1.0, ran);
+	rotations.x = mix(rotations.x, 1.0 + (ran - 0.5) * 0.25, wave);
     ran = random(vec2(position.xz * ranMult + vec2(position.y + ran * 10, -position.y + ran * 10) * 0.01));
     rotations.y = mix(ran, (ran * 0.5 + 1.8) * 0.5, wave);
-    rotations.x *= 45.0;
+    rotations.x *= 60.0;
     rotations.y *= 360.0;
 	data[index].rot = rotations;
     //data[index].col = vec4(0.25, 0.6, 0.1, 1.0);

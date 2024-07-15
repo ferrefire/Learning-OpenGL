@@ -16,6 +16,7 @@ uniform vec4 color;
 #include "LOD.glsl"
 #include "transformation.glsl"
 #include "heightmap.glsl"
+#include "lighting.glsl"
 
 void main()
 {
@@ -30,24 +31,27 @@ void main()
 	normal = SampleNormalDynamic(worldPosition.xz, power);
 
     steepness = 1.0 - pow(1.0 - steepness, 15);
-    vec4 Color = mix(color, vec4(0.25, 0.25, 0.25, 1), steepness);
+    vec4 terrainColor = mix(color, vec4(0.25, 0.25, 0.25, 1), steepness);
     
     //vec3 lightDirection = normalize(lightPosition - worldPosition);
-    vec3 lightDirection = normalize(lightDirection);
+    //vec3 lightDirection = normalize(lightDirection);
     
 
 	//float diffuse = dot(normal, lightDirection);
 	//diffuse = diffuse * 0.5 + 0.5;
     //diffuse = diffuse * diffuse;
 
-	float diffuseStrength = max(dot(normal, lightDirection), 0.0);
-    vec3 diffuse = vec3(diffuseStrength);
-	diffuse += vec3(max(dot(normal, vec3(0, 1, 0)), 0.0) * (1.0 - diffuseStrength) * 0.25);
+	//float diffuseStrength = max(dot(normal, lightDirection), 0.0);
+    //vec3 diffuse = vec3(diffuseStrength);
+	//diffuse += vec3(max(dot(normal, vec3(0, 1, 0)), 0.0) * (1.0 - diffuseStrength) * 0.25);
 
     //vec3 viewDirection = normalize(viewPosition - worldPosition);
     //vec3 reflectDirection = reflect(-lightDirection, normal);
     //float specular = pow(max(dot(viewDirection, reflectDirection), 0.0), 128);
     //vec3 specularColor = vec3(1.0, 0.75, 0.0) * (0.1 * specular);
 
-    fragmentColor = mix(vec4(Color.xyz * diffuse, 1.0), vec4(1.0), depth);
+	vec3 diffuse = DiffuseLighting(normal, terrainColor.xyz);
+	vec3 endColor = Fog(diffuse, depth);
+
+    fragmentColor = vec4(endColor, 1);
 }
