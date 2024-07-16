@@ -24,6 +24,8 @@ class Utilities
         static std::string FileToString(const char *path);
         static void Upper(std::string &str);
         static bool Contains(const std::string &str, const std::string &find);
+		static float Random11();
+		static float Random01();
 };
 
 #endif

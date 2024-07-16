@@ -10,6 +10,11 @@ Object::Object(Mesh *mesh)
     color = glm::vec4(1.0f);
 }
 
+Object::~Object()
+{
+	
+}
+
 glm::vec3 Object::Position()
 {
     return (position);

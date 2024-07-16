@@ -33,9 +33,10 @@ class Shape
     public:
         Shape();
         Shape(int preset, int resolution = 10);
+		~Shape();
 
-        float * GetData();
-        unsigned int * GetIndices();
+        float *GetData();
+        unsigned int *GetIndices();
 
         std::vector<glm::vec3> Vertices();
 		std::vector<glm::vec2> Uvs();

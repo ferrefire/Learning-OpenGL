@@ -33,7 +33,7 @@ void Manager::SetShaderVariables(Shader *shader)
 	shader->setFloat3("viewDirection", camera.Front());
 	shader->setMatrix4("projection", camera.Projection());
     shader->setFloat3("lightPosition", 25000.0f, 25000.0f, 50000.0f);
-	shader->setFloat3("lightDirection", glm::normalize(Manager::sunDirection));
+	shader->setFloat3("lightDirection", sunDirection);
 	shader->setFloat3("lightColor", glm::vec3(1, 1, 1));
 	shader->setFloat("lightStrength", 1);
 	shader->setFloat("near", camera.near);
@@ -69,6 +69,16 @@ void Manager::AddShader(Shader *shader)
 	SetShaderVariables(shader);
 }
 
+void Manager::AddShape(Shape *shape)
+{
+	shapes.push_back(shape);
+}
+
+void Manager::AddMesh(Mesh *mesh)
+{
+	meshes.push_back(mesh);
+}
+
 void Manager::SetShaderFrameVariables()
 {
 	int size = shaders.size();
@@ -83,16 +93,16 @@ void Manager::SetShaderFrameVariables()
 
 void Manager::NewFrame()
 {
-    int size = objects.size();
-    for (int i = 0; i < size; i++)
-    {
-        objects[i]->GetMesh()->GetShader()->setMatrix4("model", objects[i]->Translation());
-        renderObject(objects[i]);
-    }
+    //int size = objects.size();
+    //for (int i = 0; i < size; i++)
+    //{
+    //    objects[i]->GetMesh()->GetShader()->setMatrix4("model", objects[i]->Translation());
+    //    renderObject(objects[i]);
+    //}
 
 	EnableCulling(false);
 
-    size = instanceBatches.size();
+    int size = instanceBatches.size();
     for (int i = 0; i < size; i++)
     {
         renderMeshInstanced(*instanceBatches[i].mesh, instanceBatches[i].count);
@@ -101,20 +111,44 @@ void Manager::NewFrame()
 
 void Manager::EnableCulling(bool mode)
 {
-	if (Manager::cullingActive == mode) return ;
+	if (cullingActive == mode) return ;
 
-	Manager::cullingActive = mode;
+	cullingActive = mode;
 	if (mode) glEnable(GL_CULL_FACE);
 	else glDisable(GL_CULL_FACE);
 }
 
 void Manager::Close()
 {
-	glfwSetWindowShouldClose(Manager::window, true);
+	glfwSetWindowShouldClose(window, true);
+}
+
+void Manager::Clean()
+{
+	for (const Shader *shader : shaders)
+	{
+		delete shader;
+	}
+
+	for (const Shape *shape : shapes)
+	{
+		delete shape;
+	}
+
+	for (const Mesh *mesh : meshes)
+	{
+		delete mesh;
+	}
+
+	for (const Object *object : objects)
+	{
+		delete object;
+	}
 }
 
 void Manager::Quit(int exitCode)
 {
+	Clean();
 	glfwTerminate();
 	exit(exitCode);
 }

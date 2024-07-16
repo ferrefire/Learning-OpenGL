@@ -36,6 +36,11 @@ Mesh::Mesh(Shape *shape, Shader *shader)
     }
 }
 
+Mesh::~Mesh()
+{
+	
+}
+
 unsigned int Mesh::GetVAO()
 {
     return (VAO);

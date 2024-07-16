@@ -1,8 +1,14 @@
 #include "shape.hpp"
+#include <iostream>
 
 Shape::Shape()
 {
 
+}
+
+Shape::~Shape()
+{
+	
 }
 
 Shape::Shape(int preset, int resolution)
@@ -115,161 +121,10 @@ Shape::Shape(int preset, int resolution)
             }
         }
 
-        /*for (int i = 2; i < 4; i++)
-        {
-            for (int j = 0; j < i; j++)
-            {
-                vertices.push_back(glm::vec3(j, 0.0f, i));
-            }
-            for (int j = 0; j < i; j++)
-            {
-                vertices.push_back(glm::vec3(i, 0.0f, j));
-            }
-            vertices.push_back(glm::vec3(i, 0.0f, i));
-        }
-
-        //----------------------------------- 1
-        vertices.push_back(glm::vec3(0.0f, 0.0f, 1.0f)); // 0 0 i
-        vertices.push_back(glm::vec3(1.0f, 0.0f, 0.0f)); // i 0 0
-        vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f)); // 0 0 0
-        vertices.push_back(glm::vec3(1.0f, 0.0f, 1.0f)); // i 0 i
-        //-----------------------------------
-
-        //----------------------------------- 2
-        vertices.push_back(glm::vec3(0.0f, 0.0f, 2.0f)); // 0 0 i
-        vertices.push_back(glm::vec3(1.0f, 0.0f, 2.0f)); // 1 0 i
-
-        vertices.push_back(glm::vec3(2.0f, 0.0f, 0.0f)); // i 0 0
-        vertices.push_back(glm::vec3(2.0f, 0.0f, 1.0f)); // i 0 1
-
-        vertices.push_back(glm::vec3(2.0f, 0.0f, 2.0f)); // i 0 i
-        //-----------------------------------
-
-        //----------------------------------- 3
-        vertices.push_back(glm::vec3(0.0f, 0.0f, 3.0f)); // 0 0 i
-        vertices.push_back(glm::vec3(1.0f, 0.0f, 3.0f)); // 1 0 i
-
-        vertices.push_back(glm::vec3(2.0f, 0.0f, 3.0f)); // 2 0 i
-
-        vertices.push_back(glm::vec3(3.0f, 0.0f, 0.0f)); // i 0 0
-        vertices.push_back(glm::vec3(3.0f, 0.0f, 1.0f)); // i 0 1
-
-        vertices.push_back(glm::vec3(3.0f, 0.0f, 2.0f)); // i 0 2
-
-        vertices.push_back(glm::vec3(3.0f, 0.0f, 3.0f)); // i 0 i
-        //-----------------------------------
-
-        //----------------------------------- 1
-        indices.push_back(0); // 1
-        indices.push_back(1); // 2
-        indices.push_back(2); // 3
-        indices.push_back(0); // 1
-        indices.push_back(3); // 4
-        indices.push_back(1); // 2
-        //-----------------------------------
-
-        //----------------------------------- 2
-        indices.push_back(4); // 1 m+1
-        indices.push_back(3); // 2 
-        indices.push_back(0); // 3 pc-4
-        indices.push_back(4); // 1 pc-1
-        indices.push_back(5); // 4 pc-1
-        indices.push_back(3); // 2 pc-3
-
-        indices.push_back(3); // 1 p4
-        indices.push_back(6); // 2 m+1
-        indices.push_back(1); // 3 p2
-        indices.push_back(3); // 1 
-        indices.push_back(7); // 4 m+2
-        indices.push_back(6); // 2
-
-        indices.push_back(5); // 1 
-        indices.push_back(7); // 2
-        indices.push_back(3); // 3
-        indices.push_back(5); // 1
-        indices.push_back(8); // 4
-        indices.push_back(7); // 2
-        //-----------------------------------
-
-        //----------------------------------- 3
-        indices.push_back(9); // 1 m+1
-        indices.push_back(5); // 2 pn-4
-        indices.push_back(4); // 3 1-1
-        indices.push_back(9); // 1
-        indices.push_back(10);// 4 m+2
-        indices.push_back(5); // 2
-
-        indices.push_back(10);// 1 p4
-        indices.push_back(8); // 2 pm
-        indices.push_back(5); // 3 
-        indices.push_back(10);// 1
-        indices.push_back(11);// 4
-        indices.push_back(8); // 2
-
-        indices.push_back(7); // 1 p4
-        indices.push_back(12);// 2 m+1
-        indices.push_back(6); // 3 p2
-        indices.push_back(7); // 1
-        indices.push_back(13);// 4 m+2
-        indices.push_back(12);// 2
-
-        indices.push_back(8); // 1 p4
-        indices.push_back(13);// 2 m
-        indices.push_back(7); // 3 
-        indices.push_back(8); // 1
-        indices.push_back(14);// 4
-        indices.push_back(13);// 2
-
-        indices.push_back(11);// 1
-        indices.push_back(14);// 2
-        indices.push_back(8); // 3
-        indices.push_back(11);// 1
-        indices.push_back(15);// 4
-        indices.push_back(14);// 2
-        //-----------------------------------
-
-        uvs.push_back(glm::vec2(0.0f, 0.0f));
-        uvs.push_back(glm::vec2(1.0f, 0.0f));
-        uvs.push_back(glm::vec2(0.0f, 1.0f));
-        uvs.push_back(glm::vec2(1.0f, 1.0f));
-
-        uvs.push_back(glm::vec2(0.0f, 0.0f));
-        uvs.push_back(glm::vec2(0.0f, 0.0f));
-        uvs.push_back(glm::vec2(0.0f, 0.0f));
-        uvs.push_back(glm::vec2(0.0f, 0.0f));
-        uvs.push_back(glm::vec2(0.0f, 0.0f));
-
-        uvs.push_back(glm::vec2(0.0f, 0.0f));
-        uvs.push_back(glm::vec2(0.0f, 0.0f));
-        uvs.push_back(glm::vec2(0.0f, 0.0f));
-
-        uvs.push_back(glm::vec2(0.0f, 0.0f));
-        uvs.push_back(glm::vec2(0.0f, 0.0f));
-        uvs.push_back(glm::vec2(0.0f, 0.0f));
-        uvs.push_back(glm::vec2(0.0f, 0.0f));
-
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-        normals.push_back(glm::vec3(0.0f, 1.0f, 0.0f));*/
-
         vertexCount = vertices.size();
         indiceCount = indices.size();
+
+		//std::cout << vertexCount << std::endl;
     }
     else if (preset == BLADE)
     {
@@ -296,16 +151,6 @@ Shape::Shape(int preset, int resolution)
 		layer++;
         vertices.push_back(glm::vec3(0.0f, layer * BLADE_HEIGHT, 0.0f));
 
-        //uvs.push_back(glm::vec2(0.0f, 0.0f));
-        //uvs.push_back(glm::vec2(1.0f, 0.0f));
-        //uvs.push_back(glm::vec2(0.0f, 1.0f));
-        //uvs.push_back(glm::vec2(1.0f, 1.0f));
-
-        //normals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
-        //normals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
-        //normals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
-        //normals.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
-
         indices.push_back(0);
         indices.push_back(1);
         indices.push_back(2);
@@ -327,20 +172,6 @@ Shape::Shape(int preset, int resolution)
 			max = max + 2;
 		}
 
-        //indices.push_back(4);
-        //indices.push_back(3);
-        //indices.push_back(0);
-        //indices.push_back(4);
-        //indices.push_back(5);
-        //indices.push_back(3);
-//
-        //indices.push_back(6);
-        //indices.push_back(5);
-        //indices.push_back(4);
-        //indices.push_back(6);
-        //indices.push_back(7);
-        //indices.push_back(5);
-
         indices.push_back(max + 1);
         indices.push_back(max);
         indices.push_back(top);
@@ -352,7 +183,7 @@ Shape::Shape(int preset, int resolution)
     RecalculateData();
 }
 
-float * Shape::GetData()
+float *Shape::GetData()
 {
     return (data.data());
 }
@@ -377,7 +208,7 @@ std::vector<unsigned int> Shape::Indices()
     return (indices);
 }
 
-unsigned int * Shape::GetIndices()
+unsigned int *Shape::GetIndices()
 {
     return (indices.data());
 }

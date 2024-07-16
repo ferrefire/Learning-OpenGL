@@ -15,6 +15,11 @@ Camera::Camera()
     Rotate(glm::vec3(25.0f, -90.0f, 0.0f));
 }
 
+Camera::~Camera()
+{
+	
+}
+
 void Camera::UpdateProjection()
 {
 	projection = glm::perspective(glm::radians(FOV), Input::width / Input::height, near, far);
@@ -23,16 +28,16 @@ void Camera::UpdateProjection()
 	Shader::setMatrix4Global("projection", projection);
 }
 
-void Camera::Move(glm::vec3 amount)
+void Camera::Move(const glm::vec3 &amount)
 {
     position += amount * speed * Time::deltaTime;
 
     view = glm::lookAt(position, position + front, up);
 }
 
-void Camera::Rotate(glm::vec3 angles)
+void Camera::Rotate(const glm::vec3 &degrees)
 {
-    this->angles = angles;
+    this->angles = degrees;
 
     if (angles.x > 89.0f)
         angles.x = 89.0f;
@@ -50,37 +55,37 @@ void Camera::Rotate(glm::vec3 angles)
     view = glm::lookAt(position, position + front, up);
 }
 
-glm::vec3 Camera::Position()
+const glm::vec3 &Camera::Position()
 {
     return (position);
 }
 
-glm::vec3 Camera::Front()
+const glm::vec3 &Camera::Front()
 {
     return (front);
 }
 
-glm::vec3 Camera::Up()
+const glm::vec3 &Camera::Up()
 {
     return (up);
 }
 
-glm::vec3 Camera::Side()
+const glm::vec3 &Camera::Side()
 {
     return (side);
 }
 
-glm::vec3 Camera::Angles()
+const glm::vec3 &Camera::Angles()
 {
     return (angles);
 }
 
-glm::mat4 Camera::View()
+const glm::mat4 &Camera::View()
 {
     return (view);
 }
 
-glm::mat4 Camera::Projection()
+const glm::mat4 &Camera::Projection()
 {
     return (projection);
 }

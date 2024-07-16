@@ -55,13 +55,15 @@ std::map<int, Input::KeyStatus> Input::keys = std::map<int, Input::KeyStatus>();
 std::vector<Object *> Manager::objects = std::vector<Object *>();
 std::vector<Manager::InstanceBatch> Manager::instanceBatches = std::vector<Manager::InstanceBatch>();
 std::vector<Shader *> Manager::shaders = std::vector<Shader *>();
+std::vector<Shape *> Manager::shapes = std::vector<Shape *>();
+std::vector<Mesh *> Manager::meshes = std::vector<Mesh *>();
 bool Manager::wireframeActive = false;
 bool Manager::vSyncActive = true;
 bool Manager::mouseLocked = true;
 bool Manager::fullScreen = false;
 bool Manager::cullingActive = true;
 unsigned int Manager::depthBuffer = 0;
-glm::vec3 Manager::sunDirection = glm::vec3(0.375, 0.25, 0.375);
+glm::vec3 Manager::sunDirection = glm::normalize(glm::vec3(1, 1, 1));
 glm::vec2 Manager::sunAngles = glm::vec2(0, 0);
 Camera &Manager::camera = cam;
 GLFWwindow *Manager::window = NULL;
@@ -161,17 +163,6 @@ void GetArguments(int argc, char **argv)
 	}
 }
 
-float GetRandom01()
-{
-	int ran = rand();
-    return (float(rand() % ran) / float(ran));
-}
-
-float GetRandom11()
-{
-	return (((float(rand() % 100000) / 100000.0) - 0.5f) * 2.0f);
-}
-
 void Print(int val)
 {
     std::cout << val << std::endl;
@@ -190,32 +181,28 @@ int main(int argc, char **argv)
 	const GLubyte *renderer = glGetString(GL_RENDERER);
 	printf("%s\n", (char *)renderer);
 
-	Terrain::CreateTerrain(90000, 10000, 2500, 4096, 1024, 4, 4);
+	Terrain::CreateTerrain(90000, 10000, 2500, 4096, 1024, 4, 1);
 	//Terrain::CreateTerrain();
-	Shader instanceShader("instanced_vertex.glsl", "instanced_fragment.glsl");
+	Shader *instanceShader = new Shader("instanced_vertex.glsl", "instanced_fragment.glsl");
 
     //int count = 1048576;
     int count = 4194304;
 
-    Shader computeShader("compute_shader.glsl");
-	computeShader.setInt("instanceCount", count);
-	computeShader.setFloat("instanceMult", 1.0 / float(count));
-	computeShader.setInt("instanceCountSqrt", sqrt(count));
-	computeShader.setFloat("instanceCountSqrtMult", 1.0 / float(sqrt(count)));
-	computeShader.setInt("heightMap", 0);
-	computeShader.setInt("heightMapArray", 1);
-	computeShader.setInt("occlusionMap", 2);
+    Shader *computeShader = new Shader("compute_shader.glsl");
+	computeShader->setInt("instanceCount", count);
+	computeShader->setFloat("instanceMult", 1.0 / float(count));
+	computeShader->setInt("instanceCountSqrt", sqrt(count));
+	computeShader->setFloat("instanceCountSqrtMult", 1.0 / float(sqrt(count)));
+	computeShader->setInt("heightMap", 0);
+	computeShader->setInt("heightMapArray", 1);
+	computeShader->setInt("occlusionMap", 2);
 	//computeShader.setInt("frameBuffer", 2);
 
-	//glBindTexture(GL_TEXTURE_2D, 0);
-	//glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-
 	Shape instanceShape(BLADE);
+    Mesh instanceMesh(&instanceShape, instanceShader);
 
-    Mesh instanceMesh(&instanceShape, &instanceShader);
-
-	Manager::AddShader(&instanceShader);
-	Manager::AddShader(&computeShader);
+	Manager::AddShader(instanceShader);
+	Manager::AddShader(computeShader);
 	Manager::AddInstanceBatch(&instanceMesh, count);
 
     unsigned int buffer;
@@ -263,23 +250,6 @@ int main(int argc, char **argv)
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if (Input::GetKey(GLFW_KEY_G).pressed)
-        {
-			Terrain::offset = glm::vec2(Manager::camera.Position().x, Manager::camera.Position().z) / Terrain::terrainChunkSize;
-			Shader::setFloat2Global("terrainOffset", Terrain::offset * Terrain::terrainChunkSize);
-			Terrain::heightMapComputeShader->setFloat2("offset", Terrain::offset);
-			Terrain::GenerateHeightMap();
-		}
-
-		if (Input::GetKey(GLFW_KEY_H).pressed)
-		{
-			Terrain::seed = glm::vec2(GetRandom11() * 100, GetRandom11() * 100);
-			Terrain::heightMapComputeShader->setFloat2("seed", Terrain::seed);
-			Terrain::heightMapArrayComputeShader->setFloat2("seed", Terrain::seed);
-			Terrain::GenerateHeightMap();
-			Terrain::GenerateHeightMapArray();
-		}
-
 		bool sunMoved = false;
 		if (Input::GetKey(GLFW_KEY_DOWN).down)
 		{
@@ -309,16 +279,11 @@ int main(int argc, char **argv)
 			Manager::sunDirection = glm::normalize(Manager::sunDirection);
 			Shader::setFloat3Global("lightDirection", Manager::sunDirection);
 		}
-
-		if (Time::newTick)
-		{
-			//Terrain::GenerateOcclusionMap();
-		}
 		
-		Terrain::RenderTerrain();
+		Terrain::NewFrame();
 		
 
-		computeShader.useShader();
+		computeShader->useShader();
         glDispatchCompute(inssqrt / 4, inssqrt / 4, 1);
         //glMemoryBarrier(GL_ALL_BARRIER_BITS);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, computeCount);

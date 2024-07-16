@@ -20,24 +20,25 @@ class Camera
 
     public:
         Camera();
+		~Camera();
 
         float near = 0.1f;
         float far = 1000.0f;
         float FOV = 45.0f;
         float speed = 1.0f;
 
-        void Move(glm::vec3 amount);
-        void Rotate(glm::vec3 angles);
+        void Move(const glm::vec3 &amount);
+        void Rotate(const glm::vec3 &degrees);
 		void UpdateProjection();
 
-        glm::vec3 Position();
-        glm::vec3 Front();
-        glm::vec3 Up();
-        glm::vec3 Side();
-        glm::vec3 Angles();
+        const glm::vec3 &Position();
+        const glm::vec3 &Front();
+        const glm::vec3 &Up();
+        const glm::vec3 &Side();
+        const glm::vec3 &Angles();
 
-        glm::mat4 View();
-        glm::mat4 Projection();
+        const glm::mat4 &View();
+        const glm::mat4 &Projection();
 };
 
 #endif

@@ -8,12 +8,15 @@
 #include "mesh.hpp"
 #include "object.hpp"
 #include "camera.hpp"
+#include "shape.hpp"
 
 class Manager
 {
     private:
+		static std::vector<Mesh *> meshes;
+		static std::vector<Shape *> shapes;
 
-    public:
+	public:
         struct InstanceBatch
         {
             Mesh *mesh;
@@ -46,7 +49,9 @@ class Manager
         static void AddObject(Object *object);
         static void AddInstanceBatch(InstanceBatch instanceBatch);
         static void AddInstanceBatch(Mesh *mesh, int count);
-        static void AddShader(Shader *shader);
+		static void AddShader(Shader *shader);
+		static void AddShape(Shape *shape);
+		static void AddMesh(Mesh *mesh);
 
 		static void SetShaderVariables(Shader *shader);
 		static void SetShaderFrameVariables();
@@ -54,6 +59,7 @@ class Manager
 		static void EnableCulling(bool mode);
 
 		static void Close();
+		static void Clean();
 		static void Quit(int exitCode = EXIT_SUCCESS);
 };
 

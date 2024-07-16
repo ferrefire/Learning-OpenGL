@@ -25,15 +25,6 @@ void Input::processInput(GLFWwindow *window)
 
 	if (GetKey(GLFW_KEY_Q).pressed) Manager::Quit();
 
-    //if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
-    //{
-    //    Manager::wireframeActive = !Manager::wireframeActive;
-    //    if (Manager::wireframeActive)
-    //        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    //    else
-    //        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    //}
-
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
         camera.Move(camera.Front());

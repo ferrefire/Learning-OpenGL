@@ -21,6 +21,7 @@ class Object
 
     public:
         Object(Mesh *mesh);
+		~Object();
 
         glm::vec3 Position();
         glm::vec3 Rotation();

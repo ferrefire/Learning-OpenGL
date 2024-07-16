@@ -62,6 +62,8 @@ class Terrain
 		static void GenerateOcclusionMap();
 
 		static void RenderTerrain();
+
+		static void NewFrame();
 };
 
 #endif

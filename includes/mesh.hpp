@@ -23,6 +23,7 @@ class Mesh
 		static unsigned int currentActiveVAO;
 
         Mesh(Shape *shape, Shader *shader);
+		~Mesh();
 
         unsigned int GetVAO();
         unsigned int GetVBO();

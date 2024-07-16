@@ -66,3 +66,13 @@ bool Utilities::Contains(const std::string &str, const std::string &find)
 {
     return (str.find(find) != std::string::npos);
 }
+
+float Utilities::Random11()
+{
+	return (((float(rand() % 100000) * 0.00001) - 0.5f) * 2.0f);
+}
+
+float Utilities::Random01()
+{
+	return float(rand() % 100000) * 0.00001;
+}
