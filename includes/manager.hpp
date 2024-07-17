@@ -9,12 +9,14 @@
 #include "object.hpp"
 #include "camera.hpp"
 #include "shape.hpp"
+#include "texture.hpp"
 
 class Manager
 {
     private:
 		static std::vector<Mesh *> meshes;
 		static std::vector<Shape *> shapes;
+		static std::vector<Texture *> textures;
 
 	public:
         struct InstanceBatch
@@ -52,6 +54,7 @@ class Manager
 		static void AddShader(Shader *shader);
 		static void AddShape(Shape *shape);
 		static void AddMesh(Mesh *mesh);
+		static void AddTexture(Texture *texture);
 
 		static void SetShaderVariables(Shader *shader);
 		static void SetShaderFrameVariables();

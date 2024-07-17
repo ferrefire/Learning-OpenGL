@@ -10,7 +10,7 @@ Camera::Camera()
     UpdateProjection();
 	position.x = 0;
 	position.z = 0;
-	position.y = 0;
+	position.y = 1000;
 	Move(glm::vec3(0.0f));
     Rotate(glm::vec3(25.0f, -90.0f, 0.0f));
 }
@@ -30,7 +30,7 @@ void Camera::UpdateProjection()
 
 void Camera::Move(const glm::vec3 &amount)
 {
-    position += amount * speed * Time::deltaTime;
+    position += amount;
 
     view = glm::lookAt(position, position + front, up);
 }

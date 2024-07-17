@@ -1,6 +1,7 @@
 #include "input.hpp"
 #include <glm/glm.hpp>
 #include "manager.hpp"
+#include "time.hpp"
 
 void Input::AddKey(int keyCode)
 {
@@ -27,28 +28,28 @@ void Input::processInput(GLFWwindow *window)
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        camera.Move(camera.Front());
-    }
+		camera.Move(camera.Front() * camera.speed * Time::deltaTime);
+	}
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        camera.Move(-camera.Front());
-    }
+		camera.Move(-camera.Front() * camera.speed * Time::deltaTime);
+	}
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        camera.Move(camera.Side());
-    }
+		camera.Move(camera.Side() * camera.speed * Time::deltaTime);
+	}
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        camera.Move(-camera.Side());
-    }
+		camera.Move(-camera.Side() * camera.speed * Time::deltaTime);
+	}
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
-        camera.Move(camera.Up());
-    }
+		camera.Move(camera.Up() * camera.speed * Time::deltaTime);
+	}
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
     {
-        camera.Move(-camera.Up());
-    }
+		camera.Move(-camera.Up() * camera.speed * Time::deltaTime);
+	}
 }
 
 void Input::mouse_callback(GLFWwindow *window, double xpos, double ypos)

@@ -56,7 +56,7 @@ void main()
     float falloff = SquaredDistanceToViewPosition(vec3(x, y, z)) * pow(instanceCountSqrtMult * 2.0 * spacingMult, 2);
 	if (InView(vec3(x, y, z) + vec3(0, 0.5, 0), pow(1.0 - falloff, 2) * 0.5) == 0) return ;
 	falloff = falloff * 1.025 - 0.025;
-    falloff = pow(falloff, 0.175);
+    falloff = pow(falloff, 0.2);
 
 	
 	//vec3 norm = SampleNormalDynamic(vec2(x, z), 0.25);

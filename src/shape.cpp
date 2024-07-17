@@ -228,7 +228,7 @@ unsigned int Shape::DataCount()
     return (dataCount);
 }
 
-void Shape::Rotate(float degrees, glm::vec3 axis)
+void Shape::Rotate(float degrees, const glm::vec3 &axis)
 {
     glm::mat4 rotation = glm::mat4(1.0f);
     rotation = glm::rotate(rotation, glm::radians(degrees), axis);
@@ -250,7 +250,7 @@ void Shape::Rotate(float degrees, glm::vec3 axis)
 	RecalculateData();
 }
 
-void Shape::Translate(glm::vec3 translation)
+void Shape::Translate(const glm::vec3 &translation)
 {
     glm::mat4 translationMatrix = glm::mat4(1.0f);
     translationMatrix = glm::translate(translationMatrix, translation);
@@ -265,7 +265,7 @@ void Shape::Translate(glm::vec3 translation)
     RecalculateData();
 }
 
-void Shape::Scale(glm::vec3 scale)
+void Shape::Scale(const glm::vec3 &scale)
 {
     glm::mat4 scaleMatrix = glm::mat4(1.0f);
     scaleMatrix = glm::scale(scaleMatrix, scale);
@@ -307,7 +307,7 @@ void Shape::RecalculateData()
     dataCount = data.size();
 }
 
-void Shape::Join(Shape joinShape)
+void Shape::Join(Shape &joinShape)
 {
     std::vector<glm::vec3> addVertices = joinShape.Vertices();
 	std::vector<glm::vec2> addUvs = joinShape.Uvs();

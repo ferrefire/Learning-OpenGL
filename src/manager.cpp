@@ -53,6 +53,10 @@ void Manager::SetShaderVariables(Shader *shader)
 	shader->setFloat("terrainHeightMult", 1.0 / Terrain::terrainHeight);
 	shader->setFloat("terrainOccludeSize", Terrain::terrainOccludeSize);
 	shader->setFloat("terrainOccludeSizeMult", 1.0 / Terrain::terrainOccludeSize);
+	shader->setFloat("terrainLod0Size", Terrain::terrainLod0Size);
+	shader->setFloat("terrainLod0SizeMult", 1.0 / Terrain::terrainLod0Size);
+	shader->setFloat("terrainLod1Size", Terrain::terrainLod1Size);
+	shader->setFloat("terrainLod1SizeMult", 1.0 / Terrain::terrainLod1Size);
 	shader->setInt("chunksLength", Terrain::chunksLength);
 	shader->setFloat("chunksLengthMult", 1.0 / Terrain::chunksLength);
 	shader->setFloat("worldSampleDistance", Terrain::worldSampleDistance);
@@ -60,6 +64,7 @@ void Manager::SetShaderVariables(Shader *shader)
 	shader->setFloat("noiseSampleDistance", 0.0003);
 	shader->setFloat("noiseSampleDistanceMult", 1.0 / (0.0003));
 	shader->setFloat2("offset", 0.0, 0.0);
+	shader->setFloat2("terrainWorldOffset", Terrain::terrainOffset);
 	shader->setFloat2("seed", 0.0, 0.0);
 }
 
@@ -77,6 +82,11 @@ void Manager::AddShape(Shape *shape)
 void Manager::AddMesh(Mesh *mesh)
 {
 	meshes.push_back(mesh);
+}
+
+void Manager::AddTexture(Texture *texture)
+{
+	textures.push_back(texture);
 }
 
 void Manager::SetShaderFrameVariables()
@@ -125,22 +135,27 @@ void Manager::Close()
 
 void Manager::Clean()
 {
-	for (const Shader *shader : shaders)
+	for (Shader *shader : shaders)
 	{
 		delete shader;
 	}
 
-	for (const Shape *shape : shapes)
+	for (Shape *shape : shapes)
 	{
 		delete shape;
 	}
 
-	for (const Mesh *mesh : meshes)
+	for (Mesh *mesh : meshes)
 	{
 		delete mesh;
 	}
 
-	for (const Object *object : objects)
+	for (Texture *texture : textures)
+	{
+		delete texture;
+	}
+
+	for (Object *object : objects)
 	{
 		delete object;
 	}

@@ -11,7 +11,7 @@ void Time::NewFrame()
 		newSecond = false;
 		timeLastSecond = currentFrame;
 	}
-	if (currentFrame - timeLastSecond > 1.0f)
+	if (currentFrame - timeLastSecond > 1.0)
 	{
 		newSecond = true;
 		timeLastSecond = 0;
@@ -22,7 +22,7 @@ void Time::NewFrame()
 		newTick = false;
 		timeLastTick = currentFrame;
 	}
-	if (currentFrame - timeLastTick > 0.02f)
+	if (currentFrame - timeLastTick > 0.1)
 	{
 		newTick = true;
 		timeLastTick = 0;
@@ -33,7 +33,7 @@ void Time::NewFrame()
 		newSubTick = false;
 		timeLastSubTick = currentFrame;
 	}
-	if (currentFrame - timeLastSubTick > 0.25f)
+	if (currentFrame - timeLastSubTick > 0.25)
 	{
 		newSubTick = true;
 		timeLastSubTick = 0;

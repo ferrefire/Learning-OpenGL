@@ -98,6 +98,7 @@ float GenerateNoise(vec2 uv, int layers)
         //float erodeSum = 1.0 / pow(1.0 / erosion, 2);
 
         noise += point0 * erodeSum;
+        //noise += point0;
         maxNoise += weight;
 
         weight *= 0.4;

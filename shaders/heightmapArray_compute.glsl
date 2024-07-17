@@ -25,7 +25,7 @@ void main()
 		for (int yi = -chunksRadius; yi <= chunksRadius; yi++)
 		{
 			imageStore(heightMapArray, ivec3(gl_GlobalInvocationID.xy, index), 
-				vec4(GenerateNoise((vec2(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y) * resolutionMult + vec2(xi, yi)) 
+				vec4(GenerateNoise((vec2(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y) * resolutionMult - 0.5 + vec2(xi, yi)) 
 					+ offset + seed, noiseLayers)));
 
 			index++;

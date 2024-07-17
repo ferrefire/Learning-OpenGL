@@ -10,15 +10,26 @@
 void Debug::NewFrame()
 {
 	totalFramesThisSecond++;
+	totalFramesThisTick++;
+	totalFrameTimeThisTick += Time::deltaTime;
 
 	if (Time::newSecond)
 	{
-		std::cout << "FPS: " << totalFramesThisSecond << std::endl;
+		//std::cout << "FPS: " << totalFramesThisSecond << std::endl;
 		//Utilities::PrintVec3(Manager::camera.Position());
+		totalFramesLastSecond = totalFramesThisSecond;
 		totalFramesThisSecond = 0;
 	}
 
-    if (Input::GetKey(GLFW_KEY_L).pressed)
+	if (Time::newSubTick)
+	{
+		glfwSetWindowTitle(Manager::window, std::to_string(int(totalFramesThisTick / totalFrameTimeThisTick)).c_str());
+
+		totalFramesThisTick = 0;
+		totalFrameTimeThisTick = 0;
+	}
+
+	if (Input::GetKey(GLFW_KEY_L).pressed)
     {
         Manager::wireframeActive = !Manager::wireframeActive;
 

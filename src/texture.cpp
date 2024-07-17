@@ -1,26 +1,93 @@
 #include "texture.hpp"
 #include "manager.hpp"
 
-Texture::Texture(const char *path)
+Texture::Texture(std::string name, int index, GLenum unit, int width, int height, GLenum dataType)
 {
-    unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
+	glGenTextures(1, &this->ID);
 
-    if (!data)
-    {
-        std::cout << "ERROR::TEXTURE::LOADING_FAILED path: " << path << std::endl;
-		Manager::Quit(EXIT_FAILURE);
-	}
+	this->name = name;
+	this->index = index;
+	this->unit = unit;
+	this->width = width;
+	this->height = height;
+	this->dataType = dataType;
 
-    glGenTextures(1, &ID);
-    glBindTexture(GL_TEXTURE_2D, ID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(data);
+	this->textureType = GL_TEXTURE_2D;
+	this->wrapMode = GL_CLAMP_TO_EDGE;
+	this->filterMode = GL_LINEAR;
+	this->colorChannels = GL_RED;
 }
 
-void Texture::bindTexture(int textureUnit)
+Texture::~Texture()
 {
-    glActiveTexture(textureUnit);
-    glBindTexture(GL_TEXTURE_2D, ID);
+	glDeleteTextures(1, &this->ID);
+}
+
+void Texture::SetDimensions(int width, int height)
+{
+	this->width = width;
+	this->height = height;
+}
+
+void Texture::SetUnit(GLenum unit)
+{
+	this->unit = unit;
+}
+
+void Texture::SetTextureType(GLenum textureType)
+{
+	this->textureType = textureType;
+}
+
+void Texture::SetWrapMode(GLenum wrapMode)
+{
+	this->wrapMode = wrapMode;
+}
+
+void Texture::SetFilterMode(GLenum filterMode)
+{
+	this->filterMode = filterMode;
+}
+
+void Texture::SetDataType(GLenum dataType)
+{
+	this->dataType = dataType;
+}
+
+void Texture::SetColorChannels(GLenum colorChannels)
+{
+	this->colorChannels = colorChannels;
+}
+
+void Texture::CreateTexture()
+{
+	glActiveTexture(this->unit);
+	glBindTexture(this->textureType, this->ID);
+	glTexParameteri(this->textureType, GL_TEXTURE_WRAP_S, this->wrapMode);
+	glTexParameteri(this->textureType, GL_TEXTURE_WRAP_T, this->wrapMode);
+	glTexParameteri(this->textureType, GL_TEXTURE_MAG_FILTER, this->filterMode);
+	glTexParameteri(this->textureType, GL_TEXTURE_MIN_FILTER, this->filterMode);
+	glTexImage2D(this->textureType, 0, this->dataType, this->width, this->height, 0, this->colorChannels, GL_FLOAT, NULL);
+	glActiveTexture(0);
+}
+
+const std::string &Texture::Name()
+{
+	return this->name;
+}
+
+int Texture::Index()
+{
+	return this->index;
+}
+
+unsigned int Texture::TextureID()
+{
+	return this->ID;
+}
+
+void Texture::BindImage(int imageIndex)
+{
+	//glActiveTexture(this->unit);
+	glBindImageTexture(imageIndex, this->ID, 0, GL_FALSE, 0, GL_READ_WRITE, this->dataType);
 }

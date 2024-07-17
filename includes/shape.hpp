@@ -49,12 +49,12 @@ class Shape
 
         bool vertexOnly = false;
 
-        void Rotate(float degrees, glm::vec3 axis);
-        void Translate(glm::vec3 translation);
-        void Scale(glm::vec3 scale);
+        void Rotate(float degrees, const glm::vec3 &axis);
+        void Translate(const glm::vec3 &translation);
+        void Scale(const glm::vec3 &scale);
 
         void RecalculateData();
-        void Join(Shape joinShape);
+        void Join(Shape &joinShape);
 };
 
 #endif
