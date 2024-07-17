@@ -26,6 +26,7 @@
 #include "input.hpp"
 #include "object.hpp"
 #include "terrain.hpp"
+#include "cinematic.hpp"
 
 unsigned int Debug::totalFramesThisSecond = 0;
 unsigned int Debug::totalFramesLastSecond = 0;
@@ -53,9 +54,11 @@ float Input::width = 1600.0;
 float Input::lastX = Input::width * 0.5f;
 float Input::lastY = Input::height * 0.5f;
 float Input::sensitivity = 0.1f;
-Camera cam = Camera();
-Camera &Input::camera = cam;
+bool Input::canMove = true;
+bool Input::canLook = true;
 std::map<int, Input::KeyStatus> Input::keys = std::map<int, Input::KeyStatus>();
+
+Camera cam = Camera();
 
 std::vector<Object *> Manager::objects = std::vector<Object *>();
 std::vector<Manager::InstanceBatch> Manager::instanceBatches = std::vector<Manager::InstanceBatch>();
@@ -153,7 +156,7 @@ void setupSettings(int argc, char **argv, GLFWwindow *window)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glPatchParameteri(GL_PATCH_VERTICES, 3);
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, Input::mouse_callback);
     glfwSetScrollCallback(window, Input::scroll_callback);
@@ -253,12 +256,31 @@ int main(int argc, char **argv)
     Print(count);
     Print(inssqrt);
 
+	Input::canMove = false;
+	Input::canLook = false;
+	Cinematic cinematic;
+	cinematic.AddKeyPosition(glm::vec3(0, 7500, -1250), 0);
+	cinematic.AddKeyPosition(glm::vec3(460, 2165, -4670), 3);
+	cinematic.AddKeyPosition(glm::vec3(-800, 1860, -3800), 3);
+	cinematic.AddKeyPosition(glm::vec3(625, 4775, 2000), 3);
+	cinematic.AddKeyPosition(glm::vec3(4000, 2260, 1750), 3);
+
+	cinematic.AddKeyRotation(glm::vec3(0.4, -95, 0), 0);
+	cinematic.AddKeyRotation(glm::vec3(-13.5, -80, 0), 3);
+	cinematic.AddKeyRotation(glm::vec3(-1.7, -226, 0), 3);
+	cinematic.AddKeyRotation(glm::vec3(1.7, -292, 0), 3);
+	cinematic.AddKeyRotation(glm::vec3(-15, -359, 0), 3);
+
 	while (!glfwWindowShouldClose(window))
     {
 		Time::NewFrame();
 		Debug::NewFrame();
-        Input::processInput(window);
+		cinematic.Start();
+        Input::ProcessInput();
 		Manager::SetShaderFrameVariables();
+
+		//if (Input::GetKey(GLFW_KEY_P).pressed) Utilities::PrintVec3(Manager::camera.Position());
+		if (Input::GetKey(GLFW_KEY_P).pressed) Utilities::PrintVec3(Manager::camera.Angles());
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

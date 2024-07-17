@@ -1,0 +1,45 @@
+#ifndef CINEMATIC_HPP
+#define CINEMATIC_HPP
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <vector>
+
+class Cinematic
+{
+	private:
+		int positionIndex = 0;
+		int rotationIndex = 0;
+
+		float positionDuration = 0;
+		float rotationDuration = 0;
+
+		float totalFrameTime = 0;
+		int totalFrames = 0;
+
+	public:
+		struct CinematicKey
+		{
+			glm::vec3 value;
+			float duration;
+		};
+
+		Cinematic();
+		~Cinematic();
+
+		bool running = true;
+
+		std::vector<CinematicKey> keyPositions = std::vector<CinematicKey>();
+		std::vector<CinematicKey> keyRotations = std::vector<CinematicKey>();
+
+		void AddKeyPosition(glm::vec3 value, float duration);
+		void AddKeyRotation(glm::vec3 value, float duration);
+
+		void Start();
+		void Stop();
+		void Pause();
+		void Resume();
+};
+
+#endif

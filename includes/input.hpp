@@ -21,23 +21,25 @@ class Input
             bool released = false;
         };
 
-        static Camera &camera;
-
         static std::map<int, KeyStatus> keys;
 
-        static float lastX;
+		static bool canMove;
+		static bool canLook;
+
+		static float lastX;
         static float lastY;
         static float sensitivity;
         static float height;
         static float width;
 
-        static void processInput(GLFWwindow *window);
-        static void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+		static void ProcessInput();
+		static void CameraMovement();
+		static void mouse_callback(GLFWwindow *window, double xpos, double ypos);
         static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
         static void AddKey(int keyCode);
         static KeyStatus GetKey(int keyCode);
-        static void SetKeyStatus(GLFWwindow *window);
+        static void SetKeyStatus();
 };
 
 #endif

@@ -27,8 +27,10 @@ class Camera
         float FOV = 45.0f;
         float speed = 1.0f;
 
-        void Move(const glm::vec3 &amount);
-        void Rotate(const glm::vec3 &degrees);
+		void Move(const glm::vec3 &amount);
+		void SetPosition(const glm::vec3 &newPosition);
+		void Rotate(const glm::vec3 &degrees);
+		void SetRotation(const glm::vec3 &newRotation);
 		void UpdateProjection();
 
         const glm::vec3 &Position();

@@ -35,6 +35,13 @@ void Camera::Move(const glm::vec3 &amount)
     view = glm::lookAt(position, position + front, up);
 }
 
+void Camera::SetPosition(const glm::vec3 &newPosition)
+{
+	position = newPosition;
+
+	view = glm::lookAt(position, position + front, up);
+}
+
 void Camera::Rotate(const glm::vec3 &degrees)
 {
     this->angles = degrees;
@@ -53,6 +60,26 @@ void Camera::Rotate(const glm::vec3 &degrees)
     up = glm::normalize(glm::cross(side, front));
 
     view = glm::lookAt(position, position + front, up);
+}
+
+void Camera::SetRotation(const glm::vec3 &newRotation)
+{
+	this->angles = newRotation;
+
+	if (angles.x > 89.0f)
+		angles.x = 89.0f;
+	if (angles.x < -89.0f)
+		angles.x = -89.0f;
+
+	direction.x = cos(glm::radians(angles.y)) * cos(glm::radians(angles.x));
+	direction.y = sin(glm::radians(angles.x));
+	direction.z = sin(glm::radians(angles.y)) * cos(glm::radians(angles.x));
+
+	front = glm::normalize(direction);
+	side = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
+	up = glm::normalize(glm::cross(side, front));
+
+	view = glm::lookAt(position, position + front, up);
 }
 
 const glm::vec3 &Camera::Position()
