@@ -32,7 +32,7 @@ class Shape
 
     public:
         Shape();
-        Shape(int preset, int resolution = 10);
+        Shape(int preset, int resolution = 5);
 		~Shape();
 
         float *GetData();

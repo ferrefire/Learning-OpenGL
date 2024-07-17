@@ -10,6 +10,7 @@
 #include "camera.hpp"
 #include "shape.hpp"
 #include "texture.hpp"
+#include "cinematic.hpp"
 
 class Manager
 {
@@ -17,6 +18,7 @@ class Manager
 		static std::vector<Mesh *> meshes;
 		static std::vector<Shape *> shapes;
 		static std::vector<Texture *> textures;
+		static Cinematic activeCinematic;
 
 	public:
         struct InstanceBatch
@@ -64,6 +66,8 @@ class Manager
 		static void Close();
 		static void Clean();
 		static void Quit(int exitCode = EXIT_SUCCESS);
+
+		static void SetCinematic(Cinematic &cinematic);
 };
 
 #endif

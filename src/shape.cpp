@@ -132,7 +132,7 @@ Shape::Shape(int preset, int resolution)
         vertexOnly = true;
 
 		int layer = 1;
-		int subLayers = 4;
+		int subLayers = resolution;
 		const float BLADE_WIDTH = 0.05f;
 		const float BLADE_HEIGHT = 1.0 / (subLayers + 2);
 

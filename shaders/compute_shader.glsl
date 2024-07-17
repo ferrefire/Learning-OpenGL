@@ -58,7 +58,6 @@ void main()
 	falloff = falloff * 1.025 - 0.025;
     falloff = pow(falloff, 0.2);
 
-	
 	//vec3 norm = SampleNormalDynamic(vec2(x, z), 0.25);
     //float steepness = GetSteepness(norm);
     //steepness = 1.0 - pow(1.0 - steepness, 15);

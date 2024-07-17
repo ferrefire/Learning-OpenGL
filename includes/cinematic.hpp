@@ -28,15 +28,18 @@ class Cinematic
 		Cinematic();
 		~Cinematic();
 
-		bool running = true;
+		bool running = false;
 
 		std::vector<CinematicKey> keyPositions = std::vector<CinematicKey>();
 		std::vector<CinematicKey> keyRotations = std::vector<CinematicKey>();
+
+		void Load(const char *path);
 
 		void AddKeyPosition(glm::vec3 value, float duration);
 		void AddKeyRotation(glm::vec3 value, float duration);
 
 		void Start();
+		void Play();
 		void Stop();
 		void Pause();
 		void Resume();

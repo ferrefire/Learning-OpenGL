@@ -2,6 +2,10 @@
 #include "manager.hpp"
 #include "time.hpp"
 #include <iostream>
+#include "terrain.hpp"
+#include <string>
+#include "utilities.hpp"
+#include "input.hpp"
 
 Cinematic::Cinematic()
 {
@@ -11,6 +15,67 @@ Cinematic::Cinematic()
 Cinematic::~Cinematic()
 {
 
+}
+
+void Cinematic::Load(const char *path)
+{
+	std::string positionsString = "#key_positions";
+	std::string rotationsString = "#key_rotations";
+	std::string endString = "#end";
+	std::string fileString = Utilities::FileToString(path);
+
+	size_t rotationsPosition = fileString.find(rotationsString);
+	size_t endPosition = fileString.find(endString);
+	size_t filePosition = fileString.find(positionsString);
+	size_t dividerPosition;
+
+	filePosition = fileString.find("<");
+
+	while (filePosition != std::string::npos && filePosition < rotationsPosition)
+	{
+		glm::vec3 newKeyPosition;
+		float newKeyDuration;
+
+		filePosition++;
+		dividerPosition = fileString.find(",", filePosition);
+		newKeyPosition.x = std::stof(fileString.substr(filePosition, dividerPosition));
+		filePosition = dividerPosition + 1;
+		dividerPosition = fileString.find(",", filePosition);
+		newKeyPosition.y = std::stof(fileString.substr(filePosition, dividerPosition));
+		filePosition = dividerPosition + 1;
+		dividerPosition = fileString.find(",", filePosition);
+		newKeyPosition.z = std::stof(fileString.substr(filePosition, dividerPosition));
+		filePosition = dividerPosition + 1;
+		dividerPosition = fileString.find(">", filePosition);
+		newKeyDuration = std::stof(fileString.substr(filePosition, dividerPosition));
+		filePosition = fileString.find("<", filePosition);
+
+		//Utilities::PrintVec3(newKeyPosition);
+		AddKeyPosition(newKeyPosition, newKeyDuration);
+	}
+
+	while (filePosition != std::string::npos && filePosition < endPosition)
+	{
+		glm::vec3 newKeyRotation;
+		float newKeyDuration;
+
+		filePosition++;
+		dividerPosition = fileString.find(",", filePosition);
+		newKeyRotation.x = std::stof(fileString.substr(filePosition, dividerPosition));
+		filePosition = dividerPosition + 1;
+		dividerPosition = fileString.find(",", filePosition);
+		newKeyRotation.y = std::stof(fileString.substr(filePosition, dividerPosition));
+		filePosition = dividerPosition + 1;
+		dividerPosition = fileString.find(",", filePosition);
+		newKeyRotation.z = std::stof(fileString.substr(filePosition, dividerPosition));
+		filePosition = dividerPosition + 1;
+		dividerPosition = fileString.find(">", filePosition);
+		newKeyDuration = std::stof(fileString.substr(filePosition, dividerPosition));
+		filePosition = fileString.find("<", filePosition);
+
+		//Utilities::PrintVec3(newKeyRotation);
+		AddKeyRotation(newKeyRotation, newKeyDuration);
+	}
 }
 
 void Cinematic::AddKeyPosition(glm::vec3 value, float duration)
@@ -33,11 +98,21 @@ void Cinematic::AddKeyRotation(glm::vec3 value, float duration)
 
 void Cinematic::Start()
 {
+	Input::canMove = false;
+	Input::canLook = false;
+	running = true;
+}
+
+void Cinematic::Play()
+{
 	bool ended = true;
 
 	if (positionIndex + 1 < keyPositions.size())
 	{
-		Manager::camera.SetPosition(glm::mix(keyPositions[positionIndex].value, keyPositions[positionIndex + 1].value,
+		Manager::camera.SetPosition(glm::mix(keyPositions[positionIndex].value - 
+			glm::vec3(Terrain::terrainOffset.x, 0, Terrain::terrainOffset.y), 
+			keyPositions[positionIndex + 1].value -
+			glm::vec3(Terrain::terrainOffset.x, 0, Terrain::terrainOffset.y),
 			positionDuration / keyPositions[positionIndex + 1].duration));
 
 		positionDuration += Time::deltaTime;
@@ -71,7 +146,9 @@ void Cinematic::Start()
 	{
 		running = false;
 		float fps = float(totalFrames) / totalFrameTime;
-		std::cout << fps << std::endl; 
+		std::cout << fps << std::endl;
+		Input::canMove = true;
+		Input::canLook = true;
 	}
 	else
 	{

@@ -117,6 +117,11 @@ void Manager::NewFrame()
     {
         renderMeshInstanced(*instanceBatches[i].mesh, instanceBatches[i].count);
     }
+
+	if (Manager::activeCinematic.running)
+	{
+		Manager::activeCinematic.Play();
+	}
 }
 
 void Manager::EnableCulling(bool mode)
@@ -166,4 +171,9 @@ void Manager::Quit(int exitCode)
 	Clean();
 	glfwTerminate();
 	exit(exitCode);
+}
+
+void Manager::SetCinematic(Cinematic &cinematic)
+{
+	Manager::activeCinematic = cinematic;
 }

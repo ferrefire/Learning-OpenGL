@@ -76,6 +76,7 @@ glm::vec3 Manager::sunDirection = glm::normalize(glm::vec3(1, 1, 1));
 glm::vec2 Manager::sunAngles = glm::vec2(0, 0);
 Camera &Manager::camera = cam;
 GLFWwindow *Manager::window = NULL;
+Cinematic Manager::activeCinematic;
 
 float Terrain::terrainSize = 90000.0;
 float Terrain::terrainLod0Size = 2500.0;
@@ -169,6 +170,14 @@ void GetArguments(int argc, char **argv)
 	{
 		std::string arg = argv[i];
 		if (Utilities::Contains(arg, "FULL")) Manager::fullScreen = true;
+		else if (Utilities::Contains(arg, "CIN=")) 
+		{
+			std::string path = std::filesystem::current_path();
+			Cinematic cinematic;
+			cinematic.Load((path + "/cinematics/" + (argv[i] + arg.find('=') + 1) + ".txt").c_str());
+			cinematic.Start();
+			Manager::SetCinematic(cinematic);
+		}
 		else if (Utilities::Contains(arg, "TERRAIN_RES=")) Terrain::terrainLod0Resolution = std::stof(argv[i] + arg.find('=') + 1);
 		else if (Utilities::Contains(arg, "TERRAIN_CHUNK_RES=")) Terrain::terrainChunkResolution = std::stof(argv[i] + arg.find('=') + 1);
 		else if (Utilities::Contains(arg, "TERRAIN_HEIGHT=")) Terrain::terrainHeight = std::stof(argv[i] + arg.find('=') + 1);
@@ -213,7 +222,7 @@ int main(int argc, char **argv)
 	computeShader->setInt("occlusionMap", 3);
 	//computeShader.setInt("frameBuffer", 2);
 
-	Shape instanceShape(BLADE);
+	Shape instanceShape(BLADE, 2);
     Mesh instanceMesh(&instanceShape, instanceShader);
 
 	Manager::AddShader(instanceShader);
@@ -256,31 +265,24 @@ int main(int argc, char **argv)
     Print(count);
     Print(inssqrt);
 
-	Input::canMove = false;
-	Input::canLook = false;
-	Cinematic cinematic;
-	cinematic.AddKeyPosition(glm::vec3(0, 7500, -1250), 0);
-	cinematic.AddKeyPosition(glm::vec3(460, 2165, -4670), 3);
-	cinematic.AddKeyPosition(glm::vec3(-800, 1860, -3800), 3);
-	cinematic.AddKeyPosition(glm::vec3(625, 4775, 2000), 3);
-	cinematic.AddKeyPosition(glm::vec3(4000, 2260, 1750), 3);
-
-	cinematic.AddKeyRotation(glm::vec3(0.4, -95, 0), 0);
-	cinematic.AddKeyRotation(glm::vec3(-13.5, -80, 0), 3);
-	cinematic.AddKeyRotation(glm::vec3(-1.7, -226, 0), 3);
-	cinematic.AddKeyRotation(glm::vec3(1.7, -292, 0), 3);
-	cinematic.AddKeyRotation(glm::vec3(-15, -359, 0), 3);
+	//Cinematic cinematic;
+	//cinematic.Load((path + "/cinematics/grassCin.txt").c_str());
+	//Manager::SetCinematic(cinematic);
+	//cinematic.Start();
 
 	while (!glfwWindowShouldClose(window))
     {
 		Time::NewFrame();
 		Debug::NewFrame();
-		cinematic.Start();
         Input::ProcessInput();
 		Manager::SetShaderFrameVariables();
 
-		//if (Input::GetKey(GLFW_KEY_P).pressed) Utilities::PrintVec3(Manager::camera.Position());
-		if (Input::GetKey(GLFW_KEY_P).pressed) Utilities::PrintVec3(Manager::camera.Angles());
+		if (Input::GetKey(GLFW_KEY_P).pressed)
+		{
+			std::cout << std::endl;
+			Utilities::PrintVec3(Manager::camera.Position());
+			Utilities::PrintVec3(Manager::camera.Angles());
+		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
