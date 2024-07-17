@@ -19,6 +19,8 @@ class Input
 
             bool pressed = false;
             bool released = false;
+
+			bool mouse = false;
         };
 
         static std::map<int, KeyStatus> keys;
@@ -39,7 +41,9 @@ class Input
 
         static void AddKey(int keyCode);
         static KeyStatus GetKey(int keyCode);
-        static void SetKeyStatus();
+		static void AddKey(int keyCode, bool mouse);
+		static KeyStatus GetKey(int keyCode, bool mouse);
+		static void SetKeyStatus();
 };
 
 #endif

@@ -108,9 +108,9 @@ Shader *Terrain::heightMapArrayComputeShader = NULL;
 Mesh *Terrain::terrainMesh = NULL;
 Mesh *Terrain::terrainLodMesh = NULL;
 Object ***Terrain::terrainChunks = NULL;
-int Terrain::terrainRadius = 2;
-int Terrain::terrainLength = 5;
-int Terrain::terrainCount = 25;
+int Terrain::terrainRadius = 3;
+int Terrain::terrainLength = 7;
+int Terrain::terrainCount = 49;
 float Terrain::worldSampleDistance = 1;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -270,6 +270,10 @@ int main(int argc, char **argv)
 	//Manager::SetCinematic(cinematic);
 	//cinematic.Start();
 
+	double lastTime = 0;
+	std::vector<glm::vec4> pos;
+	std::vector<glm::vec4> rot;
+
 	while (!glfwWindowShouldClose(window))
     {
 		Time::NewFrame();
@@ -277,11 +281,24 @@ int main(int argc, char **argv)
         Input::ProcessInput();
 		Manager::SetShaderFrameVariables();
 
-		if (Input::GetKey(GLFW_KEY_P).pressed)
+		if (Input::GetKey(GLFW_MOUSE_BUTTON_RIGHT, true).pressed)
 		{
-			std::cout << std::endl;
-			Utilities::PrintVec3(Manager::camera.Position());
-			Utilities::PrintVec3(Manager::camera.Angles());
+			//std::cout << std::endl;
+			glm::vec4 newPosKey;
+			newPosKey.w = glfwGetTime() - lastTime;
+			newPosKey.x = Manager::camera.Position().x + Terrain::terrainOffset.x;
+			newPosKey.y = Manager::camera.Position().y;
+			newPosKey.z = Manager::camera.Position().z + Terrain::terrainOffset.y;
+			pos.push_back(newPosKey);
+			glm::vec4 newRotKey;
+			newRotKey.w = glfwGetTime() - lastTime;
+			newRotKey.x = Manager::camera.Angles().x;
+			newRotKey.y = Manager::camera.Angles().y;
+			newRotKey.z = Manager::camera.Angles().z;
+			rot.push_back(newRotKey);
+			//Utilities::PrintVec3(Manager::camera.Position());
+			//Utilities::PrintVec3(Manager::camera.Angles());
+			lastTime = glfwGetTime();
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -337,6 +354,26 @@ int main(int argc, char **argv)
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+	std::string ps;
+
+	ps.append("#key_positions\n");
+
+	for (glm::vec4 &vec : pos)
+	{
+		ps.append("<" + std::to_string(vec.x) + "," + std::to_string(vec.y) + "," + std::to_string(vec.z) + "," + std::to_string(vec.w) + ">" + "\n");
+	}
+
+	ps.append("#key_rotations\n");
+
+	for (glm::vec4 &vec : rot)
+	{
+		ps.append("<" + std::to_string(vec.x) + "," + std::to_string(vec.y) + "," + std::to_string(vec.z) + "," + std::to_string(vec.w) + ">" + "\n");
+	}
+
+	ps.append("#end\n");
+
+	std::cout << ps << std::endl;
 
     Manager::Quit();
 }
