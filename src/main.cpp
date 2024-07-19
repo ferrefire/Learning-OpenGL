@@ -157,7 +157,7 @@ void setupSettings(int argc, char **argv, GLFWwindow *window)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glPatchParameteri(GL_PATCH_VERTICES, 3);
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, Input::mouse_callback);
     glfwSetScrollCallback(window, Input::scroll_callback);
