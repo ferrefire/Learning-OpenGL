@@ -9,6 +9,7 @@ uniform float chunksLengthMult;
 uniform sampler2D heightMapLod0;
 uniform sampler2D heightMapLod1;
 uniform sampler2DArray heightMapArray;
+uniform sampler2DArray heightMapArrayNormal;
 
 uniform float worldSampleDistance;
 uniform float worldSampleDistanceMult;
@@ -25,10 +26,21 @@ float SampleArray(vec2 uvPosition)
 
 	uvPosition -= chunkUV;
 	uvPosition = (uvPosition * chunksLength * 2.0) * 0.5 + 0.5; //+ uv offset
-	//uvPosition.x = clamp(uvPosition.x, 0.0, 1.0);
-	//uvPosition.y = clamp(uvPosition.y, 0.0, 1.0);
 
 	return textureLod(heightMapArray, vec3(uvPosition, indexUV.x * chunksLength + indexUV.y), 0).r;
+}
+
+vec3 SampleArrayNormal(vec2 uvPosition)
+{
+	vec2 chunkUV = vec2(ceil(uvPosition.x * chunksLength), ceil(uvPosition.y * chunksLength));
+	chunkUV = chunkUV * chunksLengthMult - chunksLengthMult * 0.5;
+
+	vec2 indexUV = vec2(floor(chunkUV.x * chunksLength), floor(chunkUV.y * chunksLength));
+
+	uvPosition -= chunkUV;
+	uvPosition = (uvPosition * chunksLength * 2.0) * 0.5 + 0.5; //+ uv offset
+
+	return textureLod(heightMapArrayNormal, vec3(uvPosition, indexUV.x * chunksLength + indexUV.y), 0).rgb;
 }
 
 float Sample(vec2 uv, int lod)
@@ -60,6 +72,11 @@ float SampleDynamic(vec2 worldPosition)
 
 vec3 SampleNormalDynamic(vec2 worldPosition, float power)
 {
+	vec2 worldUV = (worldPosition + terrainWorldOffset) * terrainSizeMult + 0.5;
+	vec3 normal_TS = SampleArrayNormal(worldUV);
+	normal_TS.xz *= power;
+	return (normalize(normal_TS));
+
 	float left = SampleDynamic(worldPosition - vec2(worldSampleDistance, 0));
     float right = SampleDynamic(worldPosition + vec2(worldSampleDistance, 0));
     float down = SampleDynamic(worldPosition - vec2(0, worldSampleDistance));

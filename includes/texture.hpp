@@ -10,21 +10,23 @@ class Texture
 		unsigned int ID;
 
 		std::string name;
-		int width;
-		int height;
-		int index;
-		GLenum unit;
-		GLenum textureType;
-		GLenum wrapMode;
-		GLenum filterMode;
-		GLenum dataType;
-		GLenum colorChannels;
+		int width = 100;
+		int height = 100;
+		int depth = 1;
+		int index = 0;
+		GLenum unit = GL_TEXTURE0;
+		GLenum textureType = GL_TEXTURE_2D;
+		GLenum wrapMode = GL_CLAMP_TO_EDGE;
+		GLenum filterMode = GL_LINEAR;
+		GLenum dataType = GL_R16_SNORM;
+		GLenum colorChannels = GL_RED;
 
 	public:
 		Texture(std::string name, int index, GLenum unit, int width, int height, GLenum dataType);
 		~Texture();
 
 		void SetDimensions(int width, int height);
+		void SetDimensions(int width, int height, int depth);
 		void SetUnit(GLenum unit);
 		void SetTextureType(GLenum textureType);
 		void SetWrapMode(GLenum wrapMode);
@@ -37,6 +39,8 @@ class Texture
 		const std::string &Name();
 		int Index();
 		unsigned int TextureID();
+		int Resolution();
+		float ResolutionMultiplier();
 
 		void BindImage(int imageIndex);
 };

@@ -42,11 +42,13 @@ class Terrain
 
 		//static unsigned int heightMapLod0Texture;
 		//static unsigned int heightMapLod1Texture;
-		static unsigned int heightMapArrayTexture;
-		static unsigned int occlusionMapTexture;
+		//static unsigned int heightMapArrayTexture;
+		//static unsigned int occlusionMapTexture;
 
 		static Texture *heightMapLod0Texture;
 		static Texture *heightMapLod1Texture;
+		static Texture *heightMapArrayTexture;
+		static Texture *heightMapArrayNormal;
 
 		static float worldSampleDistance;
 
@@ -55,6 +57,7 @@ class Terrain
 
 		static Shader *heightMapComputeShader;
 		static Shader *heightMapArrayComputeShader;
+		static Shader *heightMapArrayNormalComputeShader;
 		static Shader *occlusionMapComputeShader;
 
 		static Mesh *terrainMesh;

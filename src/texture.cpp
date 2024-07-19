@@ -29,6 +29,13 @@ void Texture::SetDimensions(int width, int height)
 	this->height = height;
 }
 
+void Texture::SetDimensions(int width, int height, int depth)
+{
+	this->width = width;
+	this->height = height;
+	this->depth = depth;
+}
+
 void Texture::SetUnit(GLenum unit)
 {
 	this->unit = unit;
@@ -61,13 +68,14 @@ void Texture::SetColorChannels(GLenum colorChannels)
 
 void Texture::CreateTexture()
 {
-	glActiveTexture(this->unit);
-	glBindTexture(this->textureType, this->ID);
-	glTexParameteri(this->textureType, GL_TEXTURE_WRAP_S, this->wrapMode);
-	glTexParameteri(this->textureType, GL_TEXTURE_WRAP_T, this->wrapMode);
-	glTexParameteri(this->textureType, GL_TEXTURE_MAG_FILTER, this->filterMode);
-	glTexParameteri(this->textureType, GL_TEXTURE_MIN_FILTER, this->filterMode);
-	glTexImage2D(this->textureType, 0, this->dataType, this->width, this->height, 0, this->colorChannels, GL_FLOAT, NULL);
+	glActiveTexture(unit);
+	glBindTexture(textureType, ID);
+	glTexParameteri(textureType, GL_TEXTURE_WRAP_S, wrapMode);
+	glTexParameteri(textureType, GL_TEXTURE_WRAP_T, wrapMode);
+	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, filterMode);
+	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, filterMode);
+	if (textureType == GL_TEXTURE_2D_ARRAY) glTexImage3D(textureType, 0, dataType, width, height, depth, 0, colorChannels, GL_FLOAT, NULL);
+	else glTexImage2D(textureType, 0, dataType, width, height, 0, colorChannels, GL_FLOAT, NULL);
 	glActiveTexture(0);
 }
 
@@ -78,16 +86,27 @@ const std::string &Texture::Name()
 
 int Texture::Index()
 {
-	return this->index;
+	return index;
 }
 
 unsigned int Texture::TextureID()
 {
-	return this->ID;
+	return ID;
 }
 
 void Texture::BindImage(int imageIndex)
 {
 	//glActiveTexture(this->unit);
-	glBindImageTexture(imageIndex, this->ID, 0, GL_FALSE, 0, GL_READ_WRITE, this->dataType);
+	if (textureType == GL_TEXTURE_2D_ARRAY) glBindImageTexture(imageIndex, ID, 0, GL_TRUE, 0, GL_READ_WRITE, dataType);
+	else glBindImageTexture(imageIndex, ID, 0, GL_FALSE, 0, GL_READ_WRITE, dataType);
+}
+
+int Texture::Resolution()
+{
+	return (width);
+}
+
+float Texture::ResolutionMultiplier()
+{
+	return (1.0 / float(width));
 }

@@ -4,7 +4,7 @@
 
 layout (local_size_x = 4, local_size_y = 4) in;
 
-layout(r16_snorm, binding = 1) uniform image2DArray heightMapArray;
+layout(r16_snorm, binding = 0) uniform image2DArray heightMapArray;
 
 uniform vec2 offset;
 uniform vec2 seed;
@@ -16,8 +16,6 @@ uniform int chunksRadius;
 
 void main()
 {
-	//if (gl_GlobalInvocationID.x > resolution || gl_GlobalInvocationID.y > resolution) return ;
-
 	int index = 0;
 
 	for (int xi = -chunksRadius; xi <= chunksRadius; xi++)

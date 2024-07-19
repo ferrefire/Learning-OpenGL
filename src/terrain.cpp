@@ -40,15 +40,18 @@ void Terrain::CreateShaders()
 {
 	heightMapComputeShader = new Shader("heightmap_compute.glsl");
 	Manager::AddShader(heightMapComputeShader);
-	//heightMapComputeShader->setFloat("resolution", terrainLod0Resolution);
-	//heightMapComputeShader->setFloat("resolutionMult", 1.0 / float(terrainLod0Resolution));
-	//heightMapComputeShader->setFloat("mapScale", terrainLod0Size / terrainChunkSize);
 
 	heightMapArrayComputeShader = new Shader("heightmapArray_compute.glsl");
 	Manager::AddShader(heightMapArrayComputeShader);
 	heightMapArrayComputeShader->setFloat("resolution", terrainChunkResolution);
 	heightMapArrayComputeShader->setFloat("resolutionMult", 1.0 / float(terrainChunkResolution));
 	heightMapArrayComputeShader->setInt("chunksRadius", chunkRadius);
+
+	heightMapArrayNormalComputeShader = new Shader("heightmapArrayNormal_compute.glsl");
+	Manager::AddShader(heightMapArrayNormalComputeShader);
+	heightMapArrayNormalComputeShader->setFloat("resolution", terrainChunkResolution);
+	heightMapArrayNormalComputeShader->setFloat("resolutionMult", 1.0 / float(terrainChunkResolution));
+	heightMapArrayNormalComputeShader->setInt("chunksRadius", chunkRadius);
 
 	occlusionMapComputeShader = new Shader("occlusion_compute.glsl");
 	Manager::AddShader(occlusionMapComputeShader);
@@ -64,14 +67,16 @@ void Terrain::CreateShaders()
 	Manager::AddShader(terrainShader);
 	terrainShader->setInt(heightMapLod0Texture->Name().c_str(), heightMapLod0Texture->Index());
 	terrainShader->setInt(heightMapLod1Texture->Name().c_str(), heightMapLod1Texture->Index());
-	terrainShader->setInt("heightMapArray", 2);
+	terrainShader->setInt(heightMapArrayTexture->Name().c_str(), heightMapArrayTexture->Index());
+	terrainShader->setInt(heightMapArrayNormal->Name().c_str(), heightMapArrayNormal->Index());
 	terrainShader->setFloat4("color", glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
 
 	terrainLodShader = new Shader("terrain_vertex_lod.glsl", "terrain_fragment_lod.glsl");
 	Manager::AddShader(terrainLodShader);
 	terrainLodShader->setInt(heightMapLod0Texture->Name().c_str(), heightMapLod0Texture->Index());
 	terrainLodShader->setInt(heightMapLod1Texture->Name().c_str(), heightMapLod1Texture->Index());
-	terrainLodShader->setInt("heightMapArray", 2);
+	terrainLodShader->setInt(heightMapArrayTexture->Name().c_str(), heightMapArrayTexture->Index());
+	terrainLodShader->setInt(heightMapArrayNormal->Name().c_str(), heightMapArrayNormal->Index());
 	terrainLodShader->setFloat4("color", glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
 
 	//terrainShader->setInt("occlusionMap", 3);
@@ -84,9 +89,21 @@ void Terrain::CreateTextures()
 	Manager::AddTexture(heightMapLod0Texture);
 
 	heightMapLod1Texture = new Texture("heightMapLod1", 1, GL_TEXTURE1, terrainLod1Resolution, terrainLod1Resolution, GL_R16_SNORM);
-	heightMapLod1Texture->SetWrapMode(GL_MIRROR_CLAMP_TO_EDGE);
 	heightMapLod1Texture->CreateTexture();
 	Manager::AddTexture(heightMapLod1Texture);
+
+	heightMapArrayTexture = new Texture("heightMapArray", 2, GL_TEXTURE2, terrainChunkResolution, terrainChunkResolution, GL_R16_SNORM);
+	heightMapArrayTexture->SetDimensions(terrainChunkResolution, terrainChunkResolution, chunkCount);
+	heightMapArrayTexture->SetTextureType(GL_TEXTURE_2D_ARRAY);
+	heightMapArrayTexture->CreateTexture();
+	Manager::AddTexture(heightMapArrayTexture);
+
+	heightMapArrayNormal = new Texture("heightMapArrayNormal", 3, GL_TEXTURE3, terrainChunkResolution, terrainChunkResolution, GL_RGBA16_SNORM);
+	heightMapArrayNormal->SetDimensions(terrainChunkResolution, terrainChunkResolution, chunkCount);
+	heightMapArrayNormal->SetTextureType(GL_TEXTURE_2D_ARRAY);
+	heightMapArrayNormal->SetColorChannels(GL_RGBA);
+	heightMapArrayNormal->CreateTexture();
+	Manager::AddTexture(heightMapArrayNormal);
 
 	//glGenTextures(1, &heightMapLod0Texture);
 	//glActiveTexture(GL_TEXTURE0);
@@ -112,28 +129,28 @@ void Terrain::CreateTextures()
 
 	//glBindTexture(GL_TEXTURE_2D, 0);
 
-	glGenTextures(1, &heightMapArrayTexture);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, heightMapArrayTexture);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R16_SNORM, terrainChunkResolution, terrainChunkResolution,
-		chunkCount, 0, GL_RED, GL_FLOAT, NULL);
+	//glGenTextures(1, &heightMapArrayTexture);
+	//glActiveTexture(GL_TEXTURE2);
+	//glBindTexture(GL_TEXTURE_2D_ARRAY, heightMapArrayTexture);
+	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R16_SNORM, terrainChunkResolution, terrainChunkResolution,
+	//	chunkCount, 0, GL_RED, GL_FLOAT, NULL);
 
-	glBindImageTexture(1, heightMapArrayTexture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R16_SNORM);
+	//glBindImageTexture(1, heightMapArrayTexture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R16_SNORM);
 
-	glGenTextures(1, &occlusionMapTexture);
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, occlusionMapTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8_SNORM, terrainOcclusionResolution, terrainOcclusionResolution, 0, GL_RED, GL_FLOAT, NULL);
-	
-	glBindImageTexture(2, occlusionMapTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R8_SNORM);
+	//glGenTextures(1, &occlusionMapTexture);
+	//glActiveTexture(GL_TEXTURE3);
+	//glBindTexture(GL_TEXTURE_2D, occlusionMapTexture);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R8_SNORM, terrainOcclusionResolution, terrainOcclusionResolution, 0, GL_RED, GL_FLOAT, NULL);
+	//
+	//glBindImageTexture(2, occlusionMapTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R8_SNORM);
 
 	//glActiveTexture(0);
 	//glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
@@ -180,38 +197,44 @@ void Terrain::GenerateHeightMap(int lod)
 {
 	if (lod == 0)
 	{
-		//glActiveTexture(GL_TEXTURE0);
 		Shader::setFloat2Global("terrainOffsetLod0", offsetLod0);
 		heightMapComputeShader->useShader();
 		heightMapLod0Texture->BindImage(0);
-		//glBindImageTexture(0, heightMapLod0Texture->TextureID(), 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16_SNORM);
-		heightMapComputeShader->setFloat("resolution", terrainLod0Resolution);
-		heightMapComputeShader->setFloat("resolutionMult", 1.0 / float(terrainLod0Resolution));
+		heightMapComputeShader->setFloat("resolution", heightMapLod0Texture->Resolution());
+		heightMapComputeShader->setFloat("resolutionMult", heightMapLod0Texture->ResolutionMultiplier());
 		heightMapComputeShader->setFloat("mapScale", terrainLod0Size / terrainChunkSize);
 		heightMapComputeShader->setFloat2("offset", offsetLod0 / terrainLod0Size);
 		heightMapComputeShader->setFloat2("worldOffset", terrainOffset / terrainChunkSize);
-		glDispatchCompute(terrainLod0Resolution / 4, terrainLod0Resolution / 4, 1);
+		glDispatchCompute(heightMapLod0Texture->Resolution() / 4, heightMapLod0Texture->Resolution() / 4, 1);
 	}
 	else if (lod == 1)
 	{
-		//glActiveTexture(GL_TEXTURE1);
 		Shader::setFloat2Global("terrainOffsetLod1", offsetLod1);
 		heightMapComputeShader->useShader();
 		heightMapLod1Texture->BindImage(0);
-		//glBindImageTexture(0, heightMapLod1Texture->TextureID(), 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16_SNORM);
-		heightMapComputeShader->setFloat("resolution", terrainLod1Resolution);
-		heightMapComputeShader->setFloat("resolutionMult", 1.0 / float(terrainLod1Resolution));
+		heightMapComputeShader->setFloat("resolution", heightMapLod1Texture->Resolution());
+		heightMapComputeShader->setFloat("resolutionMult", heightMapLod1Texture->ResolutionMultiplier());
 		heightMapComputeShader->setFloat("mapScale", terrainLod1Size / terrainChunkSize);
 		heightMapComputeShader->setFloat2("offset", offsetLod1 / terrainLod1Size);
 		heightMapComputeShader->setFloat2("worldOffset", terrainOffset / terrainChunkSize);
-		glDispatchCompute(terrainLod1Resolution / 4, terrainLod1Resolution / 4, 1);
+		glDispatchCompute(heightMapLod1Texture->Resolution() / 4, heightMapLod1Texture->Resolution() / 4, 1);
 	}
 }
 
 void Terrain::GenerateHeightMapArray()
 {
 	heightMapArrayComputeShader->useShader();
-	glDispatchCompute(terrainChunkResolution / 4, terrainChunkResolution / 4, 1);
+	heightMapArrayTexture->BindImage(0);
+	glDispatchCompute(heightMapArrayTexture->Resolution() / 4, heightMapArrayTexture->Resolution() / 4, 1);
+
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+	heightMapArrayNormalComputeShader->useShader();
+	heightMapArrayNormal->BindImage(0);
+	glDispatchCompute(heightMapArrayNormal->Resolution() / 4, heightMapArrayNormal->Resolution() / 4, 1);
+
+	//heightMapArrayComputeShader->useShader();
+	//glDispatchCompute(terrainChunkResolution / 4, terrainChunkResolution / 4, 1);
 }
 
 void Terrain::GenerateOcclusionMap()
