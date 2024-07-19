@@ -18,17 +18,17 @@ uniform vec2 terrainOffsetLod1;
 
 float SampleArray(vec2 uvPosition)
 {
-	//maybe covert to on line and operate on vector instead 
-	float x = ceil(uvPosition.x * chunksLength) * chunksLengthMult - chunksLengthMult * 0.5;
-	float y = ceil(uvPosition.y * chunksLength) * chunksLengthMult - chunksLengthMult * 0.5;
+	vec2 chunkUV = vec2(ceil(uvPosition.x * chunksLength), ceil(uvPosition.y * chunksLength));
+	chunkUV = chunkUV * chunksLengthMult - chunksLengthMult * 0.5;
 
-	float ix = floor(x * chunksLength);
-	float iy = floor(y * chunksLength);
+	vec2 indexUV = vec2(floor(chunkUV.x * chunksLength), floor(chunkUV.y * chunksLength));
 
-	uvPosition -= vec2(x, y);
+	uvPosition -= chunkUV;
 	uvPosition = (uvPosition * chunksLength * 2.0) * 0.5 + 0.5; //+ uv offset
+	uvPosition.x = clamp(uvPosition.x, 0.0, 1.0);
+	uvPosition.y = clamp(uvPosition.y, 0.0, 1.0);
 
-	return textureLod(heightMapArray, vec3(uvPosition, ix * chunksLength + iy), 0).r;
+	return textureLod(heightMapArray, vec3(uvPosition, indexUV.x * chunksLength + indexUV.y), 0).r;
 }
 
 float Sample(vec2 uv, int lod)

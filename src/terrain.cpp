@@ -287,7 +287,7 @@ void Terrain::RenderTerrain()
 
 void Terrain::NewFrame()
 {
-	RenderTerrain();
+	
 
 	if (Input::GetKey(GLFW_KEY_G).pressed)
 	{
@@ -300,54 +300,95 @@ void Terrain::NewFrame()
 	}
 
 	
-	float xw = floor(Manager::camera.Position().x);
-	float zw = floor(Manager::camera.Position().z);
+	float xw = Manager::camera.Position().x;
+	float zw = Manager::camera.Position().z;
+
+	bool moveTerrain = false;
+	bool moveLod0 = false;
+	bool moveLod1 = false;
+
+	
+	if (abs(xw) >= terrainChunkSize * 0.5 || abs(zw) >= terrainChunkSize * 0.5) moveTerrain = true;
+
+	if (moveTerrain)
+	{
+		//RenderTerrain();
+		glm::vec2 newOffset = glm::vec2(Utilities::Fits(terrainChunkSize * 0.5, xw), Utilities::Fits(terrainChunkSize * 0.5, zw)) * terrainChunkSize * 0.5f;
+		terrainOffset += newOffset;
+		//Shader::setFloat2Global("terrainWorldOffset", terrainOffset);
+		offsetLod0 = glm::vec2(0);
+		offsetLod1 = glm::vec2(0);
+		Manager::camera.Move(-glm::vec3(newOffset.x, 0, newOffset.y));
+		xw = Manager::camera.Position().x;
+		zw = Manager::camera.Position().z;
+		//std::cout << "terrain regenerated" << std::endl;
+	}
+
 	float x0 = xw - offsetLod0.x;
 	float z0 = zw - offsetLod0.y;
 	float x1 = xw - offsetLod1.x;
 	float z1 = zw - offsetLod1.y;
-	
 
-	if (abs(xw) > terrainChunkSize * 0.5)
+	if (moveTerrain || abs(x0) >= terrainLod0Size * 0.25 || abs(z0) >= terrainLod0Size * 0.25) moveLod0 = true;
+	if (moveTerrain || abs(x1) >= terrainLod1Size * 0.25 || abs(z1) >= terrainLod1Size * 0.25) moveLod1 = true;
+
+	if (moveLod0)
 	{
-		terrainOffset += glm::vec2(xw, 0);
-		Shader::setFloat2Global("terrainWorldOffset", terrainOffset);
-		offsetLod0 = glm::vec2(0);
-		offsetLod1 = glm::vec2(0);
+		glm::vec2 newOffset = glm::vec2(Utilities::Fits(terrainLod0Size * 0.25, x0), Utilities::Fits(terrainLod0Size * 0.25, z0)) * terrainLod0Size * 0.25f;
+		offsetLod0 += newOffset;
 		GenerateHeightMap(0);
-		GenerateHeightMap(1);
-		Manager::camera.Move(-glm::vec3(xw, 0, 0));
-	}
-	else if (abs(zw) > terrainChunkSize * 0.5)
-	{
-		terrainOffset += glm::vec2(0, zw);
-		Shader::setFloat2Global("terrainWorldOffset", terrainOffset);
-		offsetLod0 = glm::vec2(0);
-		offsetLod1 = glm::vec2(0);
-		GenerateHeightMap(0);
-		GenerateHeightMap(1);
-		Manager::camera.Move(-glm::vec3(0, 0, zw));
-	}
-	else if (abs(x0) > terrainLod0Size * 0.25)
-	{
-		offsetLod0 += glm::vec2(x0, 0);
-		GenerateHeightMap(0);
-	}
-	else if (abs(x1) > terrainLod1Size * 0.25)
-	{
-		offsetLod1 += glm::vec2(x1, 0);
-		GenerateHeightMap(1);
-	}
-	else if (abs(z0) > terrainLod0Size * 0.25)
-	{
-		offsetLod0 += glm::vec2(0, z0);
-		GenerateHeightMap(0);
-	}
-	else if (abs(z1) > terrainLod1Size * 0.25)
-	{
-		offsetLod1 += glm::vec2(0, z1);
-		GenerateHeightMap(1);
+		//std::cout << "lod0 regenerated" << std::endl;
 	}
 
-	
+	if (moveLod1)
+	{
+		glm::vec2 newOffset = glm::vec2(Utilities::Fits(terrainLod1Size * 0.25, x1), Utilities::Fits(terrainLod1Size * 0.25, z1)) * terrainLod1Size * 0.25f;
+		offsetLod1 += newOffset;
+		GenerateHeightMap(1);
+		//std::cout << "lod1 regenerated" << std::endl;
+	}
+
+	RenderTerrain();
+	if (moveTerrain) Shader::setFloat2Global("terrainWorldOffset", terrainOffset);
+
+	//if (abs(xw) > terrainChunkSize * 0.5)
+	//{
+	//	terrainOffset += glm::vec2(xw, 0);
+	//	Shader::setFloat2Global("terrainWorldOffset", terrainOffset);
+	//	offsetLod0 = glm::vec2(0);
+	//	offsetLod1 = glm::vec2(0);
+	//	GenerateHeightMap(0);
+	//	GenerateHeightMap(1);
+	//	Manager::camera.Move(-glm::vec3(xw, 0, 0));
+	//}
+	//else if (abs(zw) > terrainChunkSize * 0.5)
+	//{
+	//	terrainOffset += glm::vec2(0, zw);
+	//	Shader::setFloat2Global("terrainWorldOffset", terrainOffset);
+	//	offsetLod0 = glm::vec2(0);
+	//	offsetLod1 = glm::vec2(0);
+	//	GenerateHeightMap(0);
+	//	GenerateHeightMap(1);
+	//	Manager::camera.Move(-glm::vec3(0, 0, zw));
+	//}
+	//else if (abs(x0) > terrainLod0Size * 0.25)
+	//{
+	//	offsetLod0 += glm::vec2(x0, 0);
+	//	GenerateHeightMap(0);
+	//}
+	//else if (abs(x1) > terrainLod1Size * 0.25)
+	//{
+	//	offsetLod1 += glm::vec2(x1, 0);
+	//	GenerateHeightMap(1);
+	//}
+	//else if (abs(z0) > terrainLod0Size * 0.25)
+	//{
+	//	offsetLod0 += glm::vec2(0, z0);
+	//	GenerateHeightMap(0);
+	//}
+	//else if (abs(z1) > terrainLod1Size * 0.25)
+	//{
+	//	offsetLod1 += glm::vec2(0, z1);
+	//	GenerateHeightMap(1);
+	//}
 }

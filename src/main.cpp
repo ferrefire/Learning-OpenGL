@@ -134,6 +134,13 @@ GLFWwindow *setupGLFW()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+	if (Manager::fullScreen)
+	{
+		const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+    	Input::width = mode->width;
+    	Input::height = mode->height;
+	}
     GLFWwindow *window = glfwCreateWindow(Input::width, Input::height, "LearnOpenGL", Manager::fullScreen ? glfwGetPrimaryMonitor() : NULL, NULL);
 
     if (window == NULL)

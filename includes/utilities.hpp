@@ -26,6 +26,8 @@ class Utilities
         static bool Contains(const std::string &str, const std::string &find);
 		static float Random11();
 		static float Random01();
+        static int Fits(float part, float whole);
+        static float SignedFloor(float x);
 };
 
 #endif

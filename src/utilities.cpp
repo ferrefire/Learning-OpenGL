@@ -76,3 +76,16 @@ float Utilities::Random01()
 {
 	return float(rand() % 100000) * 0.00001;
 }
+
+float Utilities::SignedFloor(float x)
+{
+    if (x > 0) return floor(x);
+    else return ceil(x);
+}
+
+int Utilities::Fits(float part, float whole)
+{
+    float times = whole / part;
+    int result = SignedFloor(times);
+    return result;
+}
