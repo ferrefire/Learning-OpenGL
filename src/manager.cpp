@@ -133,6 +133,12 @@ void Manager::EnableCulling(bool mode)
 	else glDisable(GL_CULL_FACE);
 }
 
+void Manager::EnableVsync(bool mode)
+{
+	Manager::vSyncActive = mode;
+    glfwSwapInterval(Manager::vSyncActive ? 1 : 0);
+}
+
 void Manager::Close()
 {
 	glfwSetWindowShouldClose(window, true);

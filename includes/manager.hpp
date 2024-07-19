@@ -18,7 +18,6 @@ class Manager
 		static std::vector<Mesh *> meshes;
 		static std::vector<Shape *> shapes;
 		static std::vector<Texture *> textures;
-		static Cinematic activeCinematic;
 
 	public:
         struct InstanceBatch
@@ -34,11 +33,14 @@ class Manager
 		static Camera &camera;
 		static GLFWwindow *window;
 
+		static Cinematic activeCinematic;
+
 		static bool wireframeActive;
 		static bool vSyncActive;
 		static bool mouseLocked;
 		static bool fullScreen;
 		static bool cullingActive;
+		static bool firstFrame;
 
 		static glm::vec3 sunDirection;
 		static glm::vec2 sunAngles;
@@ -62,6 +64,7 @@ class Manager
 		static void SetShaderFrameVariables();
 
 		static void EnableCulling(bool mode);
+		static void EnableVsync(bool mode);
 
 		static void Close();
 		static void Clean();

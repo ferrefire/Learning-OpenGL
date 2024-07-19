@@ -41,8 +41,10 @@ void Debug::NewFrame()
 
     if (Input::GetKey(GLFW_KEY_V).pressed)
     {
-        Manager::vSyncActive = !Manager::vSyncActive;
-        glfwSwapInterval(Manager::vSyncActive);
+        //Manager::vSyncActive = !Manager::vSyncActive;
+        //glfwSwapInterval(Manager::vSyncActive);
+
+		Manager::EnableVsync(!Manager::vSyncActive);
     }
 
 	if (Input::GetKey(GLFW_KEY_M).pressed)

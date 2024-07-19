@@ -6,6 +6,7 @@
 #include <string>
 #include "utilities.hpp"
 #include "input.hpp"
+#include <fstream>
 
 Cinematic::Cinematic()
 {
@@ -78,6 +79,29 @@ void Cinematic::Load(const char *path)
 	}
 }
 
+void Cinematic::Create(const char *path)
+{
+	std::string ps;
+
+	ps.append("#key_positions\n");
+	for (CinematicKey &key : keyPositions)
+	{
+		ps.append("<" + std::to_string(key.value.x) + "," + std::to_string(key.value.y) + "," + std::to_string(key.value.z) + "," + 
+			std::to_string(key.duration) + ">" + "\n");
+	}
+	ps.append("#key_rotations\n");
+	for (CinematicKey &key : keyRotations)
+	{
+		ps.append("<" + std::to_string(key.value.x) + "," + std::to_string(key.value.y) + "," + std::to_string(key.value.z) + "," + 
+			std::to_string(key.duration) + ">" + "\n");
+	}
+	ps.append("#end\n");
+
+	std::ofstream newCinFile(path);
+	newCinFile << ps;
+	newCinFile.close();
+}
+
 void Cinematic::AddKeyPosition(glm::vec3 value, float duration)
 {
 	CinematicKey key;
@@ -98,13 +122,18 @@ void Cinematic::AddKeyRotation(glm::vec3 value, float duration)
 
 void Cinematic::Start()
 {
+	if (!Valid()) return ;
+
 	Input::canMove = false;
 	Input::canLook = false;
+	Manager::EnableVsync(false);
 	running = true;
 }
 
 void Cinematic::Play()
 {
+	if (!Valid()) return;
+
 	bool ended = true;
 
 	if (positionIndex + 1 < keyPositions.size())
@@ -142,11 +171,7 @@ void Cinematic::Play()
 
 	if (running && ended)
 	{
-		running = false;
-		float fps = float(totalFrames) / totalFrameTime;
-		std::cout << fps << std::endl;
-		Input::canMove = true;
-		Input::canLook = true;
+		Stop();
 	}
 	else
 	{
@@ -157,7 +182,14 @@ void Cinematic::Play()
 
 void Cinematic::Stop()
 {
+	if (!Valid()) return;
 
+	running = false;
+	float fps = float(totalFrames) / totalFrameTime;
+	std::cout << fps << std::endl;
+	Input::canMove = true;
+	Input::canLook = true;
+	Manager::EnableVsync(true);
 }
 
 void Cinematic::Pause()
@@ -168,4 +200,9 @@ void Cinematic::Pause()
 void Cinematic::Resume()
 {
 
+}
+
+bool Cinematic::Valid()
+{
+	return (keyPositions.size() > 1 || keyRotations.size() > 1);
 }

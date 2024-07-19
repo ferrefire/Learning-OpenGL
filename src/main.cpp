@@ -1,7 +1,7 @@
 #include <iostream>
 #include "glad.h"
 #include <GLFW/glfw3.h>
-#include <string.h>
+//#include <string.h>
 #include <stdio.h>
 #include "manager.hpp"
 #include "shape.hpp"
@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <chrono>
 #include <vector>
+#include <string>
 #include <map>
 #include "camera.hpp"
 #include "input.hpp"
@@ -71,6 +72,7 @@ bool Manager::vSyncActive = true;
 bool Manager::mouseLocked = true;
 bool Manager::fullScreen = false;
 bool Manager::cullingActive = true;
+bool Manager::firstFrame = true;
 unsigned int Manager::depthBuffer = 0;
 glm::vec3 Manager::sunDirection = glm::normalize(glm::vec3(1, 1, 1));
 glm::vec2 Manager::sunAngles = glm::vec2(0, 0);
@@ -113,8 +115,12 @@ int Terrain::terrainLength = 7;
 int Terrain::terrainCount = 49;
 float Terrain::worldSampleDistance = 1;
 
+bool makeCinematic = false;
+std::string makeCinName;
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
+	std::cout << width << "-" << height << std::endl;
 	Input::width = width;
 	Input::height = height;
 	cam.UpdateProjection();
@@ -157,7 +163,7 @@ void setupSettings(int argc, char **argv, GLFWwindow *window)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glPatchParameteri(GL_PATCH_VERTICES, 3);
-    glfwSwapInterval(1);
+    Manager::EnableVsync(true);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, Input::mouse_callback);
     glfwSetScrollCallback(window, Input::scroll_callback);
@@ -170,13 +176,19 @@ void GetArguments(int argc, char **argv)
 	{
 		std::string arg = argv[i];
 		if (Utilities::Contains(arg, "FULL")) Manager::fullScreen = true;
+		else if (Utilities::Contains(arg, "MAKECIN=")) 
+		{
+			makeCinematic = true;
+			std::string path = std::filesystem::current_path();
+			makeCinName = (path + "/cinematics/" + (argv[i] + arg.find('=') + 1) + ".txt");
+		}
 		else if (Utilities::Contains(arg, "CIN=")) 
 		{
 			std::string path = std::filesystem::current_path();
-			Cinematic cinematic;
-			cinematic.Load((path + "/cinematics/" + (argv[i] + arg.find('=') + 1) + ".txt").c_str());
-			cinematic.Start();
-			Manager::SetCinematic(cinematic);
+			//Cinematic cinematic;
+			Manager::activeCinematic.Load((path + "/cinematics/" + (argv[i] + arg.find('=') + 1) + ".txt").c_str());
+			//Manager::activeCinematic.Start();
+			//Manager::SetCinematic(cinematic);
 		}
 		else if (Utilities::Contains(arg, "TERRAIN_RES=")) Terrain::terrainLod0Resolution = std::stof(argv[i] + arg.find('=') + 1);
 		else if (Utilities::Contains(arg, "TERRAIN_CHUNK_RES=")) Terrain::terrainChunkResolution = std::stof(argv[i] + arg.find('=') + 1);
@@ -271,8 +283,8 @@ int main(int argc, char **argv)
 	//cinematic.Start();
 
 	double lastTime = 0;
-	std::vector<glm::vec4> pos;
-	std::vector<glm::vec4> rot;
+	//std::vector<glm::vec4> pos;
+	//std::vector<glm::vec4> rot;
 
 	while (!glfwWindowShouldClose(window))
     {
@@ -281,21 +293,27 @@ int main(int argc, char **argv)
         Input::ProcessInput();
 		Manager::SetShaderFrameVariables();
 
-		if (Input::GetKey(GLFW_MOUSE_BUTTON_RIGHT, true).pressed)
+		if (Manager::firstFrame) Manager::activeCinematic.Start();
+
+		if (makeCinematic && Input::GetKey(GLFW_MOUSE_BUTTON_RIGHT, true).pressed)
 		{
 			//std::cout << std::endl;
-			glm::vec4 newPosKey;
-			newPosKey.w = glfwGetTime() - lastTime;
+			glm::vec3 newPosKey;
+			float newPosDur;
+			newPosDur = glfwGetTime() - lastTime;
 			newPosKey.x = Manager::camera.Position().x + Terrain::terrainOffset.x;
 			newPosKey.y = Manager::camera.Position().y;
 			newPosKey.z = Manager::camera.Position().z + Terrain::terrainOffset.y;
-			pos.push_back(newPosKey);
-			glm::vec4 newRotKey;
-			newRotKey.w = glfwGetTime() - lastTime;
+			Manager::activeCinematic.AddKeyPosition(newPosKey, newPosDur);
+			//pos.push_back(newPosKey);
+			glm::vec3 newRotKey;
+			float newRotDur;
+			newRotDur = glfwGetTime() - lastTime;
 			newRotKey.x = Manager::camera.Angles().x;
 			newRotKey.y = Manager::camera.Angles().y;
 			newRotKey.z = Manager::camera.Angles().z;
-			rot.push_back(newRotKey);
+			Manager::activeCinematic.AddKeyRotation(newRotKey, newRotDur);
+			//rot.push_back(newRotKey);
 			//Utilities::PrintVec3(Manager::camera.Position());
 			//Utilities::PrintVec3(Manager::camera.Angles());
 			lastTime = glfwGetTime();
@@ -348,6 +366,7 @@ int main(int argc, char **argv)
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         Manager::NewFrame();
+		if (Manager::firstFrame) Manager::firstFrame = false;
 
 		glBindVertexArray(0);
 
@@ -355,25 +374,7 @@ int main(int argc, char **argv)
         glfwPollEvents();
     }
 
-	std::string ps;
-
-	ps.append("#key_positions\n");
-
-	for (glm::vec4 &vec : pos)
-	{
-		ps.append("<" + std::to_string(vec.x) + "," + std::to_string(vec.y) + "," + std::to_string(vec.z) + "," + std::to_string(vec.w) + ">" + "\n");
-	}
-
-	ps.append("#key_rotations\n");
-
-	for (glm::vec4 &vec : rot)
-	{
-		ps.append("<" + std::to_string(vec.x) + "," + std::to_string(vec.y) + "," + std::to_string(vec.z) + "," + std::to_string(vec.w) + ">" + "\n");
-	}
-
-	ps.append("#end\n");
-
-	std::cout << ps << std::endl;
+	if (makeCinematic) Manager::activeCinematic.Create(makeCinName.c_str());
 
     Manager::Quit();
 }

@@ -34,6 +34,7 @@ class Cinematic
 		std::vector<CinematicKey> keyRotations = std::vector<CinematicKey>();
 
 		void Load(const char *path);
+		void Create(const char *path);
 
 		void AddKeyPosition(glm::vec3 value, float duration);
 		void AddKeyRotation(glm::vec3 value, float duration);
@@ -43,6 +44,8 @@ class Cinematic
 		void Stop();
 		void Pause();
 		void Resume();
+		
+		bool Valid();
 };
 
 #endif
