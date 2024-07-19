@@ -51,13 +51,15 @@ class Terrain
 		static float worldSampleDistance;
 
 		static Shader *terrainShader;
+		static Shader *terrainLodShader;
 
 		static Shader *heightMapComputeShader;
 		static Shader *heightMapArrayComputeShader;
 		static Shader *occlusionMapComputeShader;
 
 		static Mesh *terrainMesh;
-		static Mesh *terrainLodMesh;
+		static Mesh *terrainLod0Mesh;
+		static Mesh *terrainLod1Mesh;
 
 		static Object ***terrainChunks;
 

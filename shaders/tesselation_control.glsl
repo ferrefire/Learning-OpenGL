@@ -8,6 +8,7 @@ layout (vertices = 3) out;
 //in vec3 Normal[];
 //in vec3 FragmentPosition[];
 //in vec4 Color[];
+//in vec3 worldPosition[];
 
 //out vec2 tUV[];
 //out vec3 tNormal[];

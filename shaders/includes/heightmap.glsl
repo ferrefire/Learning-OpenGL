@@ -25,8 +25,8 @@ float SampleArray(vec2 uvPosition)
 
 	uvPosition -= chunkUV;
 	uvPosition = (uvPosition * chunksLength * 2.0) * 0.5 + 0.5; //+ uv offset
-	uvPosition.x = clamp(uvPosition.x, 0.0, 1.0);
-	uvPosition.y = clamp(uvPosition.y, 0.0, 1.0);
+	//uvPosition.x = clamp(uvPosition.x, 0.0, 1.0);
+	//uvPosition.y = clamp(uvPosition.y, 0.0, 1.0);
 
 	return textureLod(heightMapArray, vec3(uvPosition, indexUV.x * chunksLength + indexUV.y), 0).r;
 }

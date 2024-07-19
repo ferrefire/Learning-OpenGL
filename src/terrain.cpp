@@ -65,6 +65,15 @@ void Terrain::CreateShaders()
 	terrainShader->setInt(heightMapLod0Texture->Name().c_str(), heightMapLod0Texture->Index());
 	terrainShader->setInt(heightMapLod1Texture->Name().c_str(), heightMapLod1Texture->Index());
 	terrainShader->setInt("heightMapArray", 2);
+	terrainShader->setFloat4("color", glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
+
+	terrainLodShader = new Shader("terrain_vertex_lod.glsl", "terrain_fragment_lod.glsl");
+	Manager::AddShader(terrainLodShader);
+	terrainLodShader->setInt(heightMapLod0Texture->Name().c_str(), heightMapLod0Texture->Index());
+	terrainLodShader->setInt(heightMapLod1Texture->Name().c_str(), heightMapLod1Texture->Index());
+	terrainLodShader->setInt("heightMapArray", 2);
+	terrainLodShader->setFloat4("color", glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
+
 	//terrainShader->setInt("occlusionMap", 3);
 }
 
@@ -75,6 +84,7 @@ void Terrain::CreateTextures()
 	Manager::AddTexture(heightMapLod0Texture);
 
 	heightMapLod1Texture = new Texture("heightMapLod1", 1, GL_TEXTURE1, terrainLod1Resolution, terrainLod1Resolution, GL_R16_SNORM);
+	heightMapLod1Texture->SetWrapMode(GL_MIRROR_CLAMP_TO_EDGE);
 	heightMapLod1Texture->CreateTexture();
 	Manager::AddTexture(heightMapLod1Texture);
 
@@ -133,15 +143,20 @@ void Terrain::CreateChunks()
 {
 	Shape *plane = new Shape(PLANE, 100);
 	Manager::AddShape(plane);
-	Shape *lodPlane = new Shape(PLANE, 10);
-	Manager::AddShape(lodPlane);
+	Shape *lod0Plane = new Shape(PLANE, 10);
+	Manager::AddShape(lod0Plane);
+	Shape *lod1Plane = new Shape(PLANE, 25);
+	Manager::AddShape(lod1Plane);
 	plane->Scale(glm::vec3(terrainChunkSize));
-	lodPlane->Scale(glm::vec3(terrainChunkSize));
+	lod0Plane->Scale(glm::vec3(terrainChunkSize));
+	lod1Plane->Scale(glm::vec3(terrainChunkSize));
 
 	terrainMesh = new Mesh(plane, terrainShader);
 	Manager::AddMesh(terrainMesh);
-	terrainLodMesh = new Mesh(lodPlane, terrainShader);
-	Manager::AddMesh(terrainLodMesh);
+	terrainLod0Mesh = new Mesh(lod0Plane, terrainShader);
+	Manager::AddMesh(terrainLod0Mesh);
+	terrainLod1Mesh = new Mesh(lod1Plane, terrainLodShader);
+	Manager::AddMesh(terrainLod1Mesh);
 
 	terrainChunks = new Object **[terrainLength];
 	for (int x = -terrainRadius; x <= terrainRadius; x++)
@@ -151,11 +166,11 @@ void Terrain::CreateChunks()
 		for (int y = -terrainRadius; y <= terrainRadius; y++)
 		{
 			int yi = y + terrainRadius;
-			terrainChunks[xi][yi] = new Object(terrainLodMesh);
+			terrainChunks[xi][yi] = new Object(terrainLod0Mesh);
 			terrainChunks[xi][yi]->Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
 			terrainChunks[xi][yi]->Move(glm::vec3(x, 0, y) * terrainChunkSize);
-			terrainChunks[xi][yi]->GetMesh()->GetShader()->setMatrix4("model", terrainChunks[xi][yi]->Translation());
-			terrainChunks[xi][yi]->GetMesh()->GetShader()->setFloat4("color", terrainChunks[xi][yi]->Color());
+			//terrainChunks[xi][yi]->GetMesh()->GetShader()->setMatrix4("model", terrainChunks[xi][yi]->Translation());
+			//terrainChunks[xi][yi]->GetMesh()->GetShader()->setFloat4("color", terrainChunks[xi][yi]->Color());
 			Manager::AddObject(terrainChunks[xi][yi]);
 		}
 	}
@@ -265,30 +280,42 @@ void Terrain::RenderTerrain()
 			int ix = x + terrainRadius;
 			int iz = z + terrainRadius;
 			float distance = glm::clamp(glm::distance(glm::vec2(x, z), glm::vec2(sx, sz)), 0.0f, float(terrainLength));
+			bool inView = ChunkInView(terrainChunks[ix][iz]->Position(), 0, projection, view);
 			
 			if (distance < 0.75)
 			{
 				terrainChunks[ix][iz]->GetPosition().y = 0;
+				//terrainShader->useShader();
 				terrainMesh->UseMesh();
 				terrainShader->setMatrix4("model", terrainChunks[ix][iz]->Translation());
 				glDrawElements(GL_PATCHES, terrainMesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0);
 			}
-			else if (ChunkInView(terrainChunks[ix][iz]->Position(), 0, projection, view))
+			else if (inView)
 			{
-				terrainChunks[ix][iz]->GetPosition().y = -10;
-				terrainLodMesh->UseMesh();
+				//terrainLodShader->useShader();
+				terrainChunks[ix][iz]->GetPosition().y = pow(distance / float(terrainLength), 0.5) * -10;
+				//terrainShader->useShader();
+				terrainLod0Mesh->UseMesh();
 				terrainShader->setMatrix4("model", terrainChunks[ix][iz]->Translation());
-				glDrawElements(GL_PATCHES, terrainLodMesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0);
+				glDrawElements(GL_PATCHES, terrainLod0Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0);
 				amount++;
 			}
+			//else if (inView)
+			//{
+			//	//terrainLodShader->useShader();
+			//	terrainChunks[ix][iz]->GetPosition().y = -20;
+			//	terrainLodShader->useShader();
+			//	terrainLod1Mesh->UseMesh();
+			//	terrainLodShader->setMatrix4("model", terrainChunks[ix][iz]->Translation());
+			//	glDrawElements(GL_TRIANGLES, terrainLod1Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0);
+			//	amount++;
+			//}
 		}
 	}
 }
 
 void Terrain::NewFrame()
 {
-	
-
 	if (Input::GetKey(GLFW_KEY_G).pressed)
 	{
 		seed = glm::vec2(int(Utilities::Random11() * 100), int(Utilities::Random11() * 100));
@@ -298,7 +325,6 @@ void Terrain::NewFrame()
 		GenerateHeightMap(1);
 		GenerateHeightMapArray();
 	}
-
 	
 	float xw = Manager::camera.Position().x;
 	float zw = Manager::camera.Position().z;

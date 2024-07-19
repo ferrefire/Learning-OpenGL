@@ -17,6 +17,20 @@ vec3 WorldToClip(vec3 position)
     return (clipSpace);
 }
 
+vec4 WorldToView(vec3 position)
+{
+    vec4 ViewSpace = projection * view * vec4(position, 1.0);
+
+    return (ViewSpace);
+}
+
+vec4 ObjectToView(vec3 position)
+{
+    vec4 ViewSpace = projection * view * model * vec4(position, 1.0);
+
+    return (ViewSpace);
+}
+
 vec3 ObjectToWorld(vec3 position)
 {
     vec3 WorldSpace = (model * vec4(position, 1.0)).xyz;
