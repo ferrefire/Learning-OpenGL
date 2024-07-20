@@ -12,17 +12,16 @@ uniform vec2 seed;
 uniform int resolution;
 uniform float resolutionMult;
 uniform float mapScale;
+uniform vec2 part;
 
 #include "noise.glsl"
 
 void main()
 {
-	//if (gl_GlobalInvocationID.x > resolution || gl_GlobalInvocationID.y > resolution) return ;
+	if (gl_GlobalInvocationID.x > resolution || gl_GlobalInvocationID.y > resolution) return ;
 
-	vec2 uv = vec2(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y) * resolutionMult - 0.5 + offset;
+	vec2 index = gl_GlobalInvocationID.xy + part;
+	vec2 uv = index * resolutionMult - 0.5 + offset;
 	uv *= mapScale;
-	//uv = (uv - 0.5) * 2;
-	//uv *= 0.5;
-	//uv += 0.5;
-    imageStore(heightMap, ivec2(gl_GlobalInvocationID.xy), vec4(GenerateNoise(uv + worldOffset + seed, noiseLayers)));
+    imageStore(heightMap, ivec2(index), vec4(GenerateNoise(uv + worldOffset + seed, noiseLayers)));
 }

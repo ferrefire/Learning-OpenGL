@@ -7,7 +7,9 @@ uniform int chunksLength;
 uniform float chunksLengthMult;
 
 uniform sampler2D heightMapLod0;
+uniform sampler2D heightMapLod0Normal;
 uniform sampler2D heightMapLod1;
+uniform sampler2D heightMapLod1Normal;
 uniform sampler2DArray heightMapArray;
 uniform sampler2DArray heightMapArrayNormal;
 
@@ -16,6 +18,9 @@ uniform float worldSampleDistanceMult;
 
 uniform vec2 terrainOffsetLod0;
 uniform vec2 terrainOffsetLod1;
+
+uniform int lod0Ready = 1;
+uniform int lod1Ready = 1;
 
 float SampleArray(vec2 uvPosition)
 {
@@ -49,16 +54,22 @@ float Sample(vec2 uv, int lod)
 	else if (lod == 1) return textureLod(heightMapLod1, uv, 0).r;
 }
 
+vec3 SampleNormal(vec2 uv, int lod)
+{
+	if (lod == 0) return textureLod(heightMapLod0Normal, uv, 0).rgb;
+	else if (lod == 1) return textureLod(heightMapLod1Normal, uv, 0).rgb;
+}
+
 float SampleDynamic(vec2 worldPosition)
 {
 	vec2 worldUV = (worldPosition + terrainWorldOffset) * terrainSizeMult;
 	if (abs(worldUV.x) > 0.5 || abs(worldUV.y) > 0.5) return 0;
-	if (abs(worldPosition.x - terrainOffsetLod0.x) < terrainLod0Size * 0.5 && abs(worldPosition.y - terrainOffsetLod0.y) < terrainLod0Size * 0.5)
+	if (lod0Ready == 1 && abs(worldPosition.x - terrainOffsetLod0.x) < terrainLod0Size * 0.5 && abs(worldPosition.y - terrainOffsetLod0.y) < terrainLod0Size * 0.5)
 	{
 		//return 0.05;
 		return (Sample((worldPosition - terrainOffsetLod0) * terrainLod0SizeMult + 0.5, 0));
 	}
-	else if (abs(worldPosition.x - terrainOffsetLod1.x) < terrainLod1Size * 0.5 && abs(worldPosition.y - terrainOffsetLod1.y) < terrainLod1Size * 0.5)
+	else if (lod1Ready == 1 && abs(worldPosition.x - terrainOffsetLod1.x) < terrainLod1Size * 0.5 && abs(worldPosition.y - terrainOffsetLod1.y) < terrainLod1Size * 0.5)
 	{
 		//return 0.1;
 		return (Sample((worldPosition - terrainOffsetLod1) * terrainLod1SizeMult + 0.5, 1));
@@ -72,10 +83,44 @@ float SampleDynamic(vec2 worldPosition)
 
 vec3 SampleNormalDynamic(vec2 worldPosition, float power)
 {
-	vec2 worldUV = (worldPosition + terrainWorldOffset) * terrainSizeMult + 0.5;
-	vec3 normal_TS = SampleArrayNormal(worldUV);
-	normal_TS.xz *= power;
-	return (normalize(normal_TS));
+	//vec3 normalTS;
+	//vec2 worldUV = (worldPosition + terrainWorldOffset) * terrainSizeMult;
+	//if (abs(worldUV.x) > 0.5 || abs(worldUV.y) > 0.5) return vec3(0);
+	//if (abs(worldPosition.x - terrainOffsetLod0.x) < terrainLod0Size * 0.5 && abs(worldPosition.y - terrainOffsetLod0.y) < terrainLod0Size * 0.5)
+	//{
+	//	//return 0.05;
+	//	normalTS = SampleNormal((worldPosition - terrainOffsetLod0) * terrainLod0SizeMult + 0.5, 0);
+	//}
+	//else if (abs(worldPosition.x - terrainOffsetLod1.x) < terrainLod1Size * 0.5 && abs(worldPosition.y - terrainOffsetLod1.y) < terrainLod1Size * 0.5)
+	//{
+	//	//return 0.1;
+	//	normalTS = SampleNormal((worldPosition - terrainOffsetLod1) * terrainLod1SizeMult + 0.5, 1);
+	//}
+	//else
+	//{
+	//	//return 0.15;
+	//	normalTS = SampleArrayNormal(worldUV + 0.5);
+	//}
+	//normalTS.xz *= power;
+	//return (normalize(normalTS));
+
+	//float minDis = terrainLod1Size * 0.5;
+	//if (lod1Ready == 0) minDis = terrainLod0Size * 0.5;
+	//if (lod0Ready == 0) minDis = 0;
+
+	bool useArray = abs(worldPosition.x - terrainOffsetLod1.x) >= terrainLod1Size * 0.5 ||
+		abs(worldPosition.y - terrainOffsetLod1.y) >= terrainLod1Size * 0.5;
+	if (!useArray && lod1Ready == 0) useArray = abs(worldPosition.x - terrainOffsetLod0.x) >= terrainLod0Size * 0.5 ||
+		abs(worldPosition.y - terrainOffsetLod0.y) >= terrainLod0Size * 0.5;
+	if (!useArray && lod0Ready == 0) useArray = true;	
+
+	if (useArray)
+	{
+		vec2 worldUV = (worldPosition + terrainWorldOffset) * terrainSizeMult + 0.5;
+		vec3 normal_TS = SampleArrayNormal(worldUV);
+		normal_TS.xz *= power;
+		return (normalize(normal_TS));
+	}
 
 	float left = SampleDynamic(worldPosition - vec2(worldSampleDistance, 0));
     float right = SampleDynamic(worldPosition + vec2(worldSampleDistance, 0));

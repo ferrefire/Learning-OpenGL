@@ -18,10 +18,10 @@ vec3 SampleArrayNormal(vec2 uv, vec2 indexUV)
 {
     //GenerateNoise((vec2(uv.x, uv.y) * resolutionMult - 0.5 + vec2(xi, yi)) + offset + seed, noiseLayers)
 
-	float left = GenerateNoise((vec2(uv.x - 0.1, uv.y) * resolutionMult - 0.5 + indexUV) + offset + seed, noiseLayers);
-    float right = GenerateNoise((vec2(uv.x + 0.1, uv.y) * resolutionMult - 0.5 + indexUV) + offset + seed, noiseLayers);
-    float down = GenerateNoise((vec2(uv.x, uv.y - 0.1) * resolutionMult - 0.5 + indexUV) + offset + seed, noiseLayers);
-    float up = GenerateNoise((vec2(uv.x, uv.y + 0.1) * resolutionMult - 0.5 + indexUV) + offset + seed, noiseLayers);
+	float left = GenerateNoise((vec2(uv.x - 0.05, uv.y) * resolutionMult - 0.5 + indexUV) + offset + seed, noiseLayers);
+    float right = GenerateNoise((vec2(uv.x + 0.05, uv.y) * resolutionMult - 0.5 + indexUV) + offset + seed, noiseLayers);
+    float down = GenerateNoise((vec2(uv.x, uv.y - 0.05) * resolutionMult - 0.5 + indexUV) + offset + seed, noiseLayers);
+    float up = GenerateNoise((vec2(uv.x, uv.y + 0.05) * resolutionMult - 0.5 + indexUV) + offset + seed, noiseLayers);
 
     vec3 normalTS = vec3((left - right) / 0.0002, 1, (down - up) / 0.0002);
     //normalTS.xz *= 0.25;

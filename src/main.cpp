@@ -80,7 +80,7 @@ Camera &Manager::camera = cam;
 GLFWwindow *Manager::window = NULL;
 Cinematic Manager::activeCinematic;
 
-float Terrain::terrainSize = 30000.0;
+float Terrain::terrainSize = 90000.0;
 float Terrain::terrainLod0Size = 2500.0;
 float Terrain::terrainLod1Size = 5000.0;
 float Terrain::terrainOccludeSize = 1000.0;
@@ -90,17 +90,22 @@ int Terrain::terrainLayers = 8;
 float Terrain::terrainChunkSize = 10000.0;
 int Terrain::terrainLod0Resolution = 1024;
 int Terrain::terrainLod1Resolution = 1024;
+int Terrain::terrainNormalResolution = 512;
 int Terrain::terrainOcclusionResolution = 1024;
-int Terrain::terrainChunkResolution = 1024;
-int Terrain::chunkRadius = 1;
-int Terrain::chunksLength = 3;
-int Terrain::chunkCount = 9;
+int Terrain::terrainChunkResolution = 512;
+int Terrain::chunkRadius = 4;
+int Terrain::chunksLength = 9;
+int Terrain::chunkCount = 81;
+int Terrain::computePartLod0 = 0;
+int Terrain::computePartLod1 = 0;
 glm::vec2 Terrain::terrainOffset = glm::vec2(0.0, 0.0);
 glm::vec2 Terrain::offsetLod0 = glm::vec2(0.0, 0.0);
 glm::vec2 Terrain::offsetLod1 = glm::vec2(0.0, 0.0);
 glm::vec2 Terrain::seed = glm::vec2(0.0, 0.0);
 Texture *Terrain::heightMapLod0Texture = NULL;
+Texture *Terrain::heightMapLod0Normal = NULL;
 Texture *Terrain::heightMapLod1Texture = NULL;
+Texture *Terrain::heightMapLod1Normal = NULL;
 Texture *Terrain::heightMapArrayTexture = NULL;
 Texture *Terrain::heightMapArrayNormal = NULL;
 //unsigned int Terrain::occlusionMapTexture = 0;
@@ -108,6 +113,7 @@ Texture *Terrain::heightMapArrayNormal = NULL;
 Shader *Terrain::terrainShader = NULL;
 Shader *Terrain::terrainLodShader = NULL;
 Shader *Terrain::heightMapComputeShader = NULL;
+Shader *Terrain::heightMapNormalComputeShader = NULL;
 Shader *Terrain::occlusionMapComputeShader = NULL;
 Shader *Terrain::heightMapArrayComputeShader = NULL;
 Shader *Terrain::heightMapArrayNormalComputeShader = NULL;
@@ -115,9 +121,9 @@ Mesh *Terrain::terrainMesh = NULL;
 Mesh *Terrain::terrainLod0Mesh = NULL;
 Mesh *Terrain::terrainLod1Mesh = NULL;
 Object ***Terrain::terrainChunks = NULL;
-int Terrain::terrainRadius = 1;
-int Terrain::terrainLength = 3;
-int Terrain::terrainCount = 9;
+int Terrain::terrainRadius = 3;
+int Terrain::terrainLength = 7;
+int Terrain::terrainCount = 49;
 float Terrain::worldSampleDistance = 1;
 
 bool makeCinematic = false;
@@ -243,8 +249,13 @@ int main(int argc, char **argv)
 	computeShader->setInt(Terrain::heightMapLod0Texture->Name().c_str(), Terrain::heightMapLod0Texture->Index());
 	computeShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
 	computeShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());
-	computeShader->setInt(Terrain::heightMapArrayNormal->Name().c_str(), Terrain::heightMapArrayNormal->Index());
-	computeShader->setInt("occlusionMap", 3);
+	if (Terrain::heightMapArrayNormal) computeShader->setInt(Terrain::heightMapArrayNormal->Name().c_str(), 
+		Terrain::heightMapArrayNormal->Index());
+	if (Terrain::heightMapLod0Normal) computeShader->setInt(Terrain::heightMapLod0Normal->Name().c_str(), 
+		Terrain::heightMapLod0Normal->Index());
+	if (Terrain::heightMapLod1Normal) computeShader->setInt(Terrain::heightMapLod1Normal->Name().c_str(), 
+		Terrain::heightMapLod1Normal->Index());
+	//computeShader->setInt("occlusionMap", 3);
 	//computeShader.setInt("frameBuffer", 2);
 
 	Shape instanceShape(BLADE, 2);

@@ -23,6 +23,7 @@ class Terrain
 		static int terrainLod0Resolution;
 		static int terrainLod1Resolution;
 		static int terrainChunkResolution;
+		static int terrainNormalResolution;
 		static int terrainOcclusionResolution;
 		static float terrainScale;
 		static int terrainLayers;
@@ -46,16 +47,22 @@ class Terrain
 		//static unsigned int occlusionMapTexture;
 
 		static Texture *heightMapLod0Texture;
+		static Texture *heightMapLod0Normal;
 		static Texture *heightMapLod1Texture;
+		static Texture *heightMapLod1Normal;
 		static Texture *heightMapArrayTexture;
 		static Texture *heightMapArrayNormal;
 
 		static float worldSampleDistance;
 
+		static int computePartLod0;
+		static int computePartLod1;
+
 		static Shader *terrainShader;
 		static Shader *terrainLodShader;
 
 		static Shader *heightMapComputeShader;
+		static Shader *heightMapNormalComputeShader;
 		static Shader *heightMapArrayComputeShader;
 		static Shader *heightMapArrayNormalComputeShader;
 		static Shader *occlusionMapComputeShader;
@@ -74,6 +81,7 @@ class Terrain
 		static void CreateChunks();
 
 		static void GenerateHeightMap(int lod);
+		static void GenerateHeightMapParts(int lod, glm::vec2 part);
 		static void GenerateHeightMapArray();
 		static void GenerateOcclusionMap();
 
