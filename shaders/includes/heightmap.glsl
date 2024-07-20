@@ -108,19 +108,18 @@ vec3 SampleNormalDynamic(vec2 worldPosition, float power)
 	//if (lod1Ready == 0) minDis = terrainLod0Size * 0.5;
 	//if (lod0Ready == 0) minDis = 0;
 
-	bool useArray = abs(worldPosition.x - terrainOffsetLod1.x) >= terrainLod1Size * 0.5 ||
-		abs(worldPosition.y - terrainOffsetLod1.y) >= terrainLod1Size * 0.5;
-	if (!useArray && lod1Ready == 0) useArray = abs(worldPosition.x - terrainOffsetLod0.x) >= terrainLod0Size * 0.5 ||
-		abs(worldPosition.y - terrainOffsetLod0.y) >= terrainLod0Size * 0.5;
-	if (!useArray && lod0Ready == 0) useArray = true;	
-
-	if (useArray)
-	{
-		vec2 worldUV = (worldPosition + terrainWorldOffset) * terrainSizeMult + 0.5;
-		vec3 normal_TS = SampleArrayNormal(worldUV);
-		normal_TS.xz *= power;
-		return (normalize(normal_TS));
-	}
+	//bool useArray = abs(worldPosition.x - terrainOffsetLod1.x) >= terrainLod1Size * 0.5 ||
+	//	abs(worldPosition.y - terrainOffsetLod1.y) >= terrainLod1Size * 0.5;
+	//if (!useArray && lod1Ready == 0) useArray = abs(worldPosition.x - terrainOffsetLod0.x) >= terrainLod0Size * 0.5 ||
+	//	abs(worldPosition.y - terrainOffsetLod0.y) >= terrainLod0Size * 0.5;
+	//if (!useArray && lod0Ready == 0) useArray = true;	
+	//if (useArray)
+	//{
+	//	vec2 worldUV = (worldPosition + terrainWorldOffset) * terrainSizeMult + 0.5;
+	//	vec3 normal_TS = SampleArrayNormal(worldUV);
+	//	normal_TS.xz *= power;
+	//	return (normalize(normal_TS));
+	//}
 
 	float left = SampleDynamic(worldPosition - vec2(worldSampleDistance, 0));
     float right = SampleDynamic(worldPosition + vec2(worldSampleDistance, 0));

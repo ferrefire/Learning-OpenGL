@@ -113,12 +113,12 @@ void Terrain::CreateTextures()
 	heightMapArrayTexture->CreateTexture();
 	Manager::AddTexture(heightMapArrayTexture);
 
-	heightMapArrayNormal = new Texture("heightMapArrayNormal", 3, GL_TEXTURE3, terrainNormalResolution, terrainNormalResolution, GL_RGBA16_SNORM);
-	heightMapArrayNormal->SetDimensions(terrainNormalResolution, terrainNormalResolution, chunkCount);
-	heightMapArrayNormal->SetTextureType(GL_TEXTURE_2D_ARRAY);
-	heightMapArrayNormal->SetColorChannels(GL_RGBA);
-	heightMapArrayNormal->CreateTexture();
-	Manager::AddTexture(heightMapArrayNormal);
+	//heightMapArrayNormal = new Texture("heightMapArrayNormal", 3, GL_TEXTURE3, terrainNormalResolution, terrainNormalResolution, GL_RGBA16_SNORM);
+	//heightMapArrayNormal->SetDimensions(terrainNormalResolution, terrainNormalResolution, chunkCount);
+	//heightMapArrayNormal->SetTextureType(GL_TEXTURE_2D_ARRAY);
+	//heightMapArrayNormal->SetColorChannels(GL_RGBA);
+	//heightMapArrayNormal->CreateTexture();
+	//Manager::AddTexture(heightMapArrayNormal);
 }
 
 void Terrain::CreateChunks()
