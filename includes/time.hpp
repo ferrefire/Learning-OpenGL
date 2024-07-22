@@ -15,10 +15,12 @@ class Time
 		static double timeLastSecond;
 		static double timeLastTick;
 		static double timeLastSubTick;
+		static double timeLastFrameTick;
 
 		static bool newSecond;
 		static bool newTick;
 		static bool newSubTick;
+		static bool newFrameTick;
 
 		static void NewFrame();
 };

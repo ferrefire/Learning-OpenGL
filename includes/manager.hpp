@@ -11,6 +11,7 @@
 #include "shape.hpp"
 #include "texture.hpp"
 #include "cinematic.hpp"
+#include "buffer.hpp"
 
 class Manager
 {
@@ -18,6 +19,7 @@ class Manager
 		static std::vector<Mesh *> meshes;
 		static std::vector<Shape *> shapes;
 		static std::vector<Texture *> textures;
+		static std::vector<Buffer *> buffers;
 
 	public:
         struct InstanceBatch
@@ -59,6 +61,7 @@ class Manager
 		static void AddShape(Shape *shape);
 		static void AddMesh(Mesh *mesh);
 		static void AddTexture(Texture *texture);
+		static void AddBuffer(Buffer *buffer);
 
 		static void SetShaderVariables(Shader *shader);
 		static void SetShaderFrameVariables();

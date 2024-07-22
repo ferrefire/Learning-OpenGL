@@ -38,4 +38,15 @@ void Time::NewFrame()
 		newSubTick = true;
 		timeLastSubTick = 0;
 	}
+
+	if (timeLastFrameTick == 0)
+	{
+		newFrameTick = false;
+		timeLastFrameTick = currentFrame;
+	}
+	if (currentFrame - timeLastFrameTick > 0.015)
+	{
+		newFrameTick = true;
+		timeLastFrameTick = 0;
+	}
 }

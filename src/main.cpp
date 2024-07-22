@@ -28,6 +28,8 @@
 #include "object.hpp"
 #include "terrain.hpp"
 #include "cinematic.hpp"
+#include "grass.hpp"
+#include "buffer.hpp"
 
 unsigned int Debug::totalFramesThisSecond = 0;
 unsigned int Debug::totalFramesLastSecond = 0;
@@ -46,9 +48,11 @@ float Time::lastFrame = 0.0f;
 double Time::timeLastSecond = 0;
 double Time::timeLastTick = 0;
 double Time::timeLastSubTick = 0;
+double Time::timeLastFrameTick = 0;
 bool Time::newSecond = false;
 bool Time::newTick = false;
 bool Time::newSubTick = false;
+bool Time::newFrameTick = false;
 
 float Input::height = 900.0;
 float Input::width = 1600.0;
@@ -67,6 +71,7 @@ std::vector<Shader *> Manager::shaders = std::vector<Shader *>();
 std::vector<Shape *> Manager::shapes = std::vector<Shape *>();
 std::vector<Texture *> Manager::textures = std::vector<Texture *>();
 std::vector<Mesh *> Manager::meshes = std::vector<Mesh *>();
+std::vector<Buffer *> Manager::buffers = std::vector<Buffer *>();
 bool Manager::wireframeActive = false;
 bool Manager::vSyncActive = true;
 bool Manager::mouseLocked = true;
@@ -129,6 +134,15 @@ int Terrain::terrainRadius = 3;
 int Terrain::terrainLength = 7;
 int Terrain::terrainCount = 49;
 float Terrain::worldSampleDistance = 1;
+
+unsigned int Grass::grassCount = 4194304;
+unsigned int Grass::grassCountSqrRoot = 2048;
+unsigned int Grass::grassRenderCount = 0;
+Shader *Grass::grassShader = NULL;
+Shader *Grass::grassComputeShader = NULL;
+Buffer *Grass::grassBuffer = NULL;
+Buffer *Grass::countBuffer = NULL;
+Mesh *Grass::grassMesh = NULL;
 
 bool makeCinematic = false;
 std::string makeCinName;
@@ -241,53 +255,20 @@ int main(int argc, char **argv)
 
 	//Terrain::CreateTerrain(90000, 10000, 2500, 1024, 1024, 4, 1);
 	Terrain::CreateTerrain();
-	Shader *instanceShader = new Shader("instanced_vertex.glsl", "instanced_fragment.glsl");
-	instanceShader->setInt(Terrain::heightMapLod0Texture->Name().c_str(), Terrain::heightMapLod0Texture->Index());
-	instanceShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
-	instanceShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());
-	instanceShader->setInt(Terrain::shadowMapTexture->Name().c_str(), Terrain::shadowMapTexture->Index());
+	Grass::CreateGrass();
 
 	//int count = 1048576;
-    int count = 4194304;
+    //int count = 4194304;
 
-    Shader *computeShader = new Shader("compute_shader.glsl");
-	computeShader->setInt("instanceCount", count);
-	computeShader->setFloat("instanceMult", 1.0 / float(count));
-	computeShader->setInt("instanceCountSqrt", sqrt(count));
-	computeShader->setFloat("instanceCountSqrtMult", 1.0 / float(sqrt(count)));
-	computeShader->setInt(Terrain::heightMapLod0Texture->Name().c_str(), Terrain::heightMapLod0Texture->Index());
-	computeShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
-	computeShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());
-	computeShader->setInt(Terrain::shadowMapTexture->Name().c_str(), Terrain::shadowMapTexture->Index());
-	if (Terrain::heightMapArrayNormal) computeShader->setInt(Terrain::heightMapArrayNormal->Name().c_str(), 
-		Terrain::heightMapArrayNormal->Index());
-	if (Terrain::heightMapLod0Normal) computeShader->setInt(Terrain::heightMapLod0Normal->Name().c_str(), 
-		Terrain::heightMapLod0Normal->Index());
-	if (Terrain::heightMapLod1Normal) computeShader->setInt(Terrain::heightMapLod1Normal->Name().c_str(), 
-		Terrain::heightMapLod1Normal->Index());
+    
 	//computeShader->setInt("occlusionMap", 3);
 	//computeShader.setInt("frameBuffer", 2);
 
-	Shape instanceShape(BLADE, 2);
-    Mesh instanceMesh(&instanceShape, instanceShader);
+	
 
-	Manager::AddShader(instanceShader);
-	Manager::AddShader(computeShader);
-	Manager::AddInstanceBatch(&instanceMesh, count);
+	//Manager::AddInstanceBatch(&instanceMesh, count);
 
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, count * sizeof(float) * 8, NULL, GL_STATIC_COPY);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, buffer);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-    unsigned int computeCount;
-    glGenBuffers(1, &computeCount);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, computeCount);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(unsigned int), NULL, GL_STATIC_COPY);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, computeCount);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    
 
 	//glGenFramebuffers(1, &Manager::depthBuffer);
 	//glBindFramebuffer(GL_FRAMEBUFFER, Manager::depthBuffer);
@@ -307,9 +288,9 @@ int main(int argc, char **argv)
 	//	std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	int inssqrt = sqrt(count);
-    Print(count);
-    Print(inssqrt);
+	//int inssqrt = sqrt(count);
+    //Print(count);
+    //Print(inssqrt);
 
 	//Cinematic cinematic;
 	//cinematic.Load((path + "/cinematics/grassCin.txt").c_str());
@@ -386,18 +367,7 @@ int main(int argc, char **argv)
 		}
 		
 		Terrain::NewFrame();
-		
-		computeShader->useShader();
-        glDispatchCompute(inssqrt / 4, inssqrt / 4, 1);
-        //glMemoryBarrier(GL_ALL_BARRIER_BITS);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, computeCount);
-        void *ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
-        unsigned int cCount = *(unsigned int *)ptr;
-        //Print(cCount);
-        Manager::instanceBatches[0].count = cCount;
-        *(unsigned int *)ptr = 0;
-        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+		Grass::NewFrame();
 
         Manager::NewFrame();
 		if (Manager::firstFrame) Manager::firstFrame = false;

@@ -91,6 +91,11 @@ void Manager::AddTexture(Texture *texture)
 	textures.push_back(texture);
 }
 
+void Manager::AddBuffer(Buffer *buffer)
+{
+	buffers.push_back(buffer);
+}
+
 void Manager::SetShaderFrameVariables()
 {
 	int size = shaders.size();
@@ -112,13 +117,7 @@ void Manager::NewFrame()
     //    renderObject(objects[i]);
     //}
 
-	EnableCulling(false);
-
-    int size = instanceBatches.size();
-    for (int i = 0; i < size; i++)
-    {
-        renderMeshInstanced(*instanceBatches[i].mesh, instanceBatches[i].count);
-    }
+	
 
 	if (Manager::activeCinematic.running)
 	{
@@ -171,6 +170,11 @@ void Manager::Clean()
 	for (Object *object : objects)
 	{
 		delete object;
+	}
+
+	for (Buffer *buffer : buffers)
+	{
+		delete buffer;
 	}
 }
 
