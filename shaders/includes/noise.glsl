@@ -75,39 +75,44 @@ float GenerateNoise(vec2 uv, int layers)
     float noise = 0;
     float maxNoise = 0;
     float weight = 1;
+    float erosionWeight = 1;
     float scale = 1;
 	float erosion = 0;
 
     for (int i = 0; i < layers; i++)
     {
-        float point0 = snoise(uv * noiseScale * scale) * weight;
-        float point1 = snoise((uv + vec2(noiseSampleDistance, 0)) * noiseScale * scale) * weight;
-        float point2 = snoise((uv + vec2(0, noiseSampleDistance)) * noiseScale * scale) * weight;
-        //float left = snoise((uv + vec2(-noiseSampleDistance, 0)) * noiseScale * scale) * weight;
-        //float right = snoise((uv + vec2(noiseSampleDistance, 0)) * noiseScale * scale) * weight;
-        //float down = snoise((uv + vec2(0, -noiseSampleDistance)) * noiseScale * scale) * weight;
-        //float up = snoise((uv + vec2(0, noiseSampleDistance)) * noiseScale * scale) * weight;
+        float center = snoise(uv * noiseScale * scale);
+		float left = snoise((uv + vec2(-noiseSampleDistance, 0)) * noiseScale * scale);
+        float right = snoise((uv + vec2(noiseSampleDistance, 0)) * noiseScale * scale);
+        float down = snoise((uv + vec2(0, -noiseSampleDistance)) * noiseScale * scale);
+        float up = snoise((uv + vec2(0, noiseSampleDistance)) * noiseScale * scale);
+		vec3 derivative = vec3((left - right) / (noiseSampleDistance * 2), 1.0, (down - up) / (noiseSampleDistance * 2));
+		derivative = normalize(derivative);
+		float steepness = 1.0 - (dot(derivative, vec3(0, 1, 0)) * 0.5 + 0.5);
+		erosion += steepness * erosionWeight;
+        float erodeSum = 1.0 / (1.0 + erosion * 1.5);
+		noise += center * weight * erodeSum;
 
-        vec2 derivative = vec2((point1 - point0), (point2 - point0));
-        //vec3 derivative = vec3((left - right) / (steepnessStepSize * 2), 1.0, (down - up) / (steepnessStepSize * 2));
-        float steepness = length(derivative) * (noiseSampleDistanceMult);
-        
-        erosion += steepness;
-        float erodeSum = 1.0 / (1.0 + erosion * 0.25);
-        //float point = mix(point0, (left + right + down + up + point0) * 0.2, 1.0 - pow(1.0 - steep, 8));
-        //float erodeSum = 1.0 / pow(1.0 / erosion, 2);
+		//float center = snoise(uv * noiseScale * scale);
+        //float right = snoise((uv + vec2(noiseSampleDistance, 0)) * noiseScale * scale);
+        //float up = snoise((uv + vec2(0, noiseSampleDistance)) * noiseScale * scale);
+		//vec3 derivative = vec3((right - center) / (noiseSampleDistance), 1.0, (up - center) / (noiseSampleDistance));
+		//derivative = normalize(derivative);
+		//float steepness = 1.0 - (dot(derivative, vec3(0, 1, 0)) * 0.5 + 0.5);
+		//erosion += steepness * erosionWeight;
+        //float erodeSum = 1.0 / (1.0 + erosion * 1.5);
+        //noise += center * weight * erodeSum;
 
-        noise += point0 * erodeSum;
-        //noise += point0;
         maxNoise += weight;
-
-        weight *= 0.4;
+        weight *= 0.375;
+		erosionWeight *= 0.70;
         scale *= 2.5;
     }
 
-	noise = pow(noise, 0.5);
+	//noise = pow(noise, 0.5);
+	//maxNoise = pow(maxNoise, 0.5);
     noise = InvLerp(0.0, maxNoise, noise);
-    noise = noise * noise * noise;
+    //noise = noise * noise;
 
     return (noise);
 }

@@ -81,17 +81,19 @@ GLFWwindow *Manager::window = NULL;
 Cinematic Manager::activeCinematic;
 
 float Terrain::terrainSize = 90000.0;
+float Terrain::terrainShadowSize = 25000.0;
 float Terrain::terrainLod0Size = 2500.0;
 float Terrain::terrainLod1Size = 5000.0;
 float Terrain::terrainOccludeSize = 1000.0;
-float Terrain::terrainHeight = 10000.0;
-float Terrain::terrainScale = 1;
+float Terrain::terrainHeight = 5000.0;
+float Terrain::terrainScale = 0.75;
 int Terrain::terrainLayers = 8;
 float Terrain::terrainChunkSize = 10000.0;
 int Terrain::terrainLod0Resolution = 1024;
 int Terrain::terrainLod1Resolution = 1024;
 int Terrain::terrainNormalResolution = 512;
 int Terrain::terrainOcclusionResolution = 1024;
+int Terrain::terrainShadowResolution = 512;
 int Terrain::terrainChunkResolution = 1024;
 int Terrain::chunkRadius = 4;
 int Terrain::chunksLength = 9;
@@ -108,6 +110,7 @@ Texture *Terrain::heightMapLod1Texture = NULL;
 Texture *Terrain::heightMapLod1Normal = NULL;
 Texture *Terrain::heightMapArrayTexture = NULL;
 Texture *Terrain::heightMapArrayNormal = NULL;
+Texture *Terrain::shadowMapTexture = NULL;
 //unsigned int Terrain::occlusionMapTexture = 0;
 //unsigned int Terrain::heightMapArrayTexture = 0;
 Shader *Terrain::terrainShader = NULL;
@@ -117,6 +120,7 @@ Shader *Terrain::heightMapNormalComputeShader = NULL;
 Shader *Terrain::occlusionMapComputeShader = NULL;
 Shader *Terrain::heightMapArrayComputeShader = NULL;
 Shader *Terrain::heightMapArrayNormalComputeShader = NULL;
+Shader *Terrain::shadowMapComputeShader = NULL;
 Mesh *Terrain::terrainMesh = NULL;
 Mesh *Terrain::terrainLod0Mesh = NULL;
 Mesh *Terrain::terrainLod1Mesh = NULL;
@@ -205,6 +209,7 @@ void GetArguments(int argc, char **argv)
 			std::string path = std::filesystem::current_path();
 			//Cinematic cinematic;
 			Manager::activeCinematic.Load((path + "/cinematics/" + (argv[i] + arg.find('=') + 1) + ".txt").c_str());
+			Manager::activeCinematic.speed = 1;
 			//Manager::activeCinematic.Start();
 			//Manager::SetCinematic(cinematic);
 		}
@@ -237,8 +242,12 @@ int main(int argc, char **argv)
 	//Terrain::CreateTerrain(90000, 10000, 2500, 1024, 1024, 4, 1);
 	Terrain::CreateTerrain();
 	Shader *instanceShader = new Shader("instanced_vertex.glsl", "instanced_fragment.glsl");
+	instanceShader->setInt(Terrain::heightMapLod0Texture->Name().c_str(), Terrain::heightMapLod0Texture->Index());
+	instanceShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
+	instanceShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());
+	instanceShader->setInt(Terrain::shadowMapTexture->Name().c_str(), Terrain::shadowMapTexture->Index());
 
-    //int count = 1048576;
+	//int count = 1048576;
     int count = 4194304;
 
     Shader *computeShader = new Shader("compute_shader.glsl");
@@ -249,6 +258,7 @@ int main(int argc, char **argv)
 	computeShader->setInt(Terrain::heightMapLod0Texture->Name().c_str(), Terrain::heightMapLod0Texture->Index());
 	computeShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
 	computeShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());
+	computeShader->setInt(Terrain::shadowMapTexture->Name().c_str(), Terrain::shadowMapTexture->Index());
 	if (Terrain::heightMapArrayNormal) computeShader->setInt(Terrain::heightMapArrayNormal->Name().c_str(), 
 		Terrain::heightMapArrayNormal->Index());
 	if (Terrain::heightMapLod0Normal) computeShader->setInt(Terrain::heightMapLod0Normal->Name().c_str(), 

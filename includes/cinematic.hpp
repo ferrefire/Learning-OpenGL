@@ -29,6 +29,7 @@ class Cinematic
 		~Cinematic();
 
 		bool running = false;
+		float speed = 1;
 
 		std::vector<CinematicKey> keyPositions = std::vector<CinematicKey>();
 		std::vector<CinematicKey> keyRotations = std::vector<CinematicKey>();

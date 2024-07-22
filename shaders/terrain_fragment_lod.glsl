@@ -18,19 +18,17 @@ uniform vec4 color;
 #include "heightmap.glsl"
 #include "lighting.glsl"
 
-//uniform sampler2D occlusionMap;
-
 void main()
 {
     float depth = GetDepth(gl_FragCoord.z, near, far);
 
-	vec3 normal = SampleNormalDynamic(worldPosition.xz, 0.5);
+	vec3 normal = SampleNormalDynamic(worldPosition, 0.5);
 	float steepness = GetSteepness(normal);
 
 	//only sample normal once
 
     float power = mix(0.25, 1.0, 1.0 - pow(1.0 - depth, 4));
-	normal = SampleNormalDynamic(worldPosition.xz, power);
+	normal = SampleNormalDynamic(worldPosition, power);
 
     steepness = 1.0 - pow(1.0 - steepness, 15);
     vec4 terrainColor = mix(color, vec4(0.25, 0.25, 0.25, 1), steepness);

@@ -33,6 +33,8 @@ class Camera
 		void SetRotation(const glm::vec3 &newRotation);
 		void UpdateProjection();
 
+		void PrintStatus();
+
         const glm::vec3 &Position();
         const glm::vec3 &Front();
         const glm::vec3 &Up();

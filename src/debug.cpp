@@ -7,7 +7,7 @@
 #include "manager.hpp"
 #include "utilities.hpp"
 
-void Debug::NewFrame()
+void Debug::CalculateFramesPerSecond()
 {
 	totalFramesThisSecond++;
 	totalFramesThisTick++;
@@ -15,8 +15,8 @@ void Debug::NewFrame()
 
 	if (Time::newSecond)
 	{
-		//std::cout << "FPS: " << totalFramesThisSecond << std::endl;
-		//Utilities::PrintVec3(Manager::camera.Position());
+		// std::cout << "FPS: " << totalFramesThisSecond << std::endl;
+		// Utilities::PrintVec3(Manager::camera.Position());
 		totalFramesLastSecond = totalFramesThisSecond;
 		totalFramesThisSecond = 0;
 	}
@@ -28,6 +28,11 @@ void Debug::NewFrame()
 		totalFramesThisTick = 0;
 		totalFrameTimeThisTick = 0;
 	}
+}
+
+void Debug::NewFrame()
+{
+	CalculateFramesPerSecond();
 
 	if (Input::GetKey(GLFW_KEY_L).pressed)
     {
@@ -41,9 +46,6 @@ void Debug::NewFrame()
 
     if (Input::GetKey(GLFW_KEY_V).pressed)
     {
-        //Manager::vSyncActive = !Manager::vSyncActive;
-        //glfwSwapInterval(Manager::vSyncActive);
-
 		Manager::EnableVsync(!Manager::vSyncActive);
     }
 
@@ -51,6 +53,11 @@ void Debug::NewFrame()
 	{
 		Manager::mouseLocked = !Manager::mouseLocked;
 		glfwSetInputMode(Manager::window, GLFW_CURSOR, Manager::mouseLocked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+	}
+
+	if (Input::GetKey(GLFW_KEY_P).pressed)
+	{
+		Manager::camera.PrintStatus();
 	}
 }
 

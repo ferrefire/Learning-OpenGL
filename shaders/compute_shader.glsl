@@ -49,8 +49,6 @@ void main()
     x = x * spacing + floor(viewPosition.x);
     z = z * spacing + floor(viewPosition.z);
 
-	//if (MapOccluded(vec3(x, 0, z)) == 1) return ;
-
     float y = SampleDynamic(vec2(x, z)) * heightMapHeight;
     
     float falloff = SquaredDistanceToViewPosition(vec3(x, y, z)) * pow(instanceCountSqrtMult * 2.0 * spacingMult, 2);
@@ -58,15 +56,10 @@ void main()
 	falloff = falloff * 1.025 - 0.025;
     falloff = pow(falloff, 0.2);
 
-	//vec3 norm = SampleNormalDynamic(vec2(x, z), 0.25);
-    //float steepness = GetSteepness(norm);
-    //steepness = 1.0 - pow(1.0 - steepness, 15);
-
     float ranMult = 1.0 - (abs(x) + abs(z)) * terrainSizeMult * 0.5;
     float ran = random(vec2(x, z) * ranMult);
 
     if (falloff > ran) return ;
-	
 	if (RayOccluded(vec3(x, y, z)) == 1) return ;
 
     vec3 position = vec3(x, y, z);
@@ -75,11 +68,11 @@ void main()
     ran = random(vec2(ran * 200, ran * 100));
 	position.z += ran - 0.5;
 	position.y = SampleDynamic(position.xz) * heightMapHeight;
-    vec3 norm = SampleNormalDynamic(position.xz, 0.25);
+    vec3 norm = SampleNormalDynamic(position, 0.5);
 
     float steepness = GetSteepness(norm);
     steepness = 1.0 - pow(1.0 - steepness, 15);
-    if (steepness > 0.125 + (ran - 0.5) * 0.25) return ;
+    if (steepness > 0.5 + (ran - 0.5) * 0.25) return ;
     
     //if (InView(position + vec3(0, 0.5, 0), 0.1) == 0) return ;
     index = atomicAdd(computeCount, 1);
@@ -89,7 +82,6 @@ void main()
     float wave = sin(time * 2 + (x + z) * 0.1) * 0.5 + 0.5;
     //float wave = 0;
     ran = random(position.xz * ranMult + vec2(position.y, -position.y) * 0.01);
-    //rotations.x = mix(ran, (ran * 0.5 + 2.0) * 0.5, wave);
     rotations.x = mix(0.25, 1.0, ran);
 	rotations.x = mix(rotations.x, 1.0 + (ran - 0.5) * 0.25, wave);
     ran = random(vec2(position.xz * ranMult + vec2(position.y + ran * 10, -position.y + ran * 10) * 0.01));

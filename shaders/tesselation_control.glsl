@@ -19,6 +19,8 @@ layout (vertices = 3) out;
 #include "culling.glsl"
 #include "heightmap.glsl"
 
+uniform float tesselationFactor = 10;
+
 float NegativePow(float val)
 {
     return (1.0 - pow(1.0 - val, 4.0));
@@ -29,7 +31,7 @@ float TessellationFactor (vec3 p0, vec3 p1)
     float edgeLength = distance(p0, p1);
     vec3 edgeCenter = (p0 + p1) * 0.5;
     float viewDistance = distance(edgeCenter, viewPosition);
-    return (edgeLength * height * (1.0 / (10.0 * viewDistance)));
+    return (edgeLength * height * (1.0 / (tesselationFactor * viewDistance)));
 }
 
 void main()

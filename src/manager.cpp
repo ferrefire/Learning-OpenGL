@@ -47,6 +47,8 @@ void Manager::SetShaderVariables(Shader *shader)
     shader->setFloat("heightMapHeight", Terrain::terrainHeight);
 	shader->setFloat("terrainSize", Terrain::terrainSize);
 	shader->setFloat("terrainSizeMult", 1.0 / Terrain::terrainSize);
+	shader->setFloat("terrainShadowSize", Terrain::terrainShadowSize);
+	shader->setFloat("terrainShadowSizeMult", 1.0 / Terrain::terrainShadowSize);
 	shader->setFloat("terrainChunkSize", Terrain::terrainChunkSize);
 	shader->setFloat("terrainChunkSizeMult", 1.0 / Terrain::terrainChunkSize);
 	shader->setFloat("terrainHeight", Terrain::terrainHeight);
@@ -61,8 +63,8 @@ void Manager::SetShaderVariables(Shader *shader)
 	shader->setFloat("chunksLengthMult", 1.0 / Terrain::chunksLength);
 	shader->setFloat("worldSampleDistance", Terrain::worldSampleDistance);
 	shader->setFloat("worldSampleDistanceMult", (Terrain::worldSampleDistance * 2) / (Terrain::terrainChunkSize * Terrain::worldSampleDistance));
-	shader->setFloat("noiseSampleDistance", 0.0003);
-	shader->setFloat("noiseSampleDistanceMult", 1.0 / (0.0003));
+	shader->setFloat("noiseSampleDistance", 0.0001);
+	shader->setFloat("noiseSampleDistanceMult", 1.0 / (0.0003 * 2));
 	shader->setFloat2("offset", 0.0, 0.0);
 	shader->setFloat2("terrainWorldOffset", Terrain::terrainOffset);
 	shader->setFloat2("seed", 0.0, 0.0);

@@ -35,6 +35,9 @@ uniform float terrainLod0Size;
 uniform float terrainLod0SizeMult;
 uniform float terrainLod1Size;
 uniform float terrainLod1SizeMult;
+uniform float terrainShadowSize;
+uniform float terrainShadowSizeMult;
+
 uniform vec2 terrainWorldOffset;
 
 #endif

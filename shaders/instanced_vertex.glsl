@@ -23,6 +23,7 @@ out vec3 normal;
 out vec3 terrainNormal;
 out vec3 worldPosition;
 out vec4 Color;
+out float shadow;
 
 float spacing = 0.25;
 float spacingMult = 4;
@@ -30,6 +31,7 @@ float spacingMult = 4;
 #include "variables.glsl"
 #include "transformation.glsl"
 #include "functions.glsl"
+#include "shadow.glsl"
 
 float random (vec2 st)
 {
@@ -73,4 +75,6 @@ void main()
 	terrainNormal = data[gl_InstanceID].norm;
 
     Color = vec4(0.25, 0.6, 0.1, 1.0);
+	shadow = RayInShadow(worldPosition);
+	//Color.rgb *= RayInShadow(worldPosition);
 }

@@ -34,21 +34,15 @@ float MapOccluded(vec3 position)
 
 int RayOccluded(vec3 position)
 {
-	//vec3 rayPosition = viewPosition;
-	//vec3 direction = (position - viewPosition) * 0.1;
 	vec3 rayPosition;
 	float i = 0;
 	int occluded = 0;
 
-	//int iterations = 0;
-
 	while (i <= 0.95 && occluded == 0)
 	{
-		//rayPosition += direction;
 		i += 0.05;
 		rayPosition = mix(position, viewPosition, i);
 		if (SampleDynamic(rayPosition.xz) * terrainHeight >= rayPosition.y) occluded = 1; 
-		//iterations++;
 	}
 
 	return occluded;

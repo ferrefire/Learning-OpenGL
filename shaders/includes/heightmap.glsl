@@ -81,7 +81,7 @@ float SampleDynamic(vec2 worldPosition)
 	}
 }
 
-vec3 SampleNormalDynamic(vec2 worldPosition, float power)
+vec3 SampleNormalDynamic(vec3 worldPosition, float power)
 {
 	//vec3 normalTS;
 	//vec2 worldUV = (worldPosition + terrainWorldOffset) * terrainSizeMult;
@@ -121,14 +121,20 @@ vec3 SampleNormalDynamic(vec2 worldPosition, float power)
 	//	return (normalize(normal_TS));
 	//}
 
-	float left = SampleDynamic(worldPosition - vec2(worldSampleDistance, 0));
-    float right = SampleDynamic(worldPosition + vec2(worldSampleDistance, 0));
-    float down = SampleDynamic(worldPosition - vec2(0, worldSampleDistance));
-    float up = SampleDynamic(worldPosition + vec2(0, worldSampleDistance));
-
+	float left = SampleDynamic(worldPosition.xz - vec2(worldSampleDistance, 0));
+    float right = SampleDynamic(worldPosition.xz + vec2(worldSampleDistance, 0));
+    float down = SampleDynamic(worldPosition.xz - vec2(0, worldSampleDistance));
+    float up = SampleDynamic(worldPosition.xz + vec2(0, worldSampleDistance));
     vec3 normalTS = vec3((left - right) / worldSampleDistanceMult, 1, (down - up) / worldSampleDistanceMult);
-    normalTS.xz *= power;
 
+	//float center = worldPosition.y * terrainHeightMult;
+    //float right = SampleDynamic(worldPosition.xz + vec2(worldSampleDistance, 0));
+    //float up = SampleDynamic(worldPosition.xz + vec2(0, worldSampleDistance));
+    //vec3 normalTS = vec3((right - center) / (worldSampleDistanceMult * 0.5), 1.0, (up - center) / (worldSampleDistanceMult * 0.5));
+
+	if (power == 1) return (normalTS);
+
+    normalTS.xz *= power;
     return (normalize(normalTS));
 }
 

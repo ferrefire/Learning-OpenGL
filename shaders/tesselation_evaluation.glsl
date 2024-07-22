@@ -12,7 +12,8 @@ layout (triangles, fractional_odd_spacing, ccw) in;
 //out vec2 fUV;
 //out vec3 fNormal;
 out vec3 worldPosition;
-//out vec4 fColor;
+//out float shadow;
+//out vec3 terrainNormal;
 
 uniform vec4 color;
 
@@ -20,6 +21,7 @@ uniform vec4 color;
 #include "LOD.glsl"
 #include "transformation.glsl"
 #include "heightmap.glsl"
+#include "shadow.glsl"
 
 #define BARYCENTRIC_INTERPOLATE(fieldName) \
 		        fieldName[0] * gl_TessCoord[0] + \
@@ -33,6 +35,10 @@ void main()
 
 	worldPosition = position.xyz;
 	worldPosition.y = ObjectToWorld(vec3(0)).y + SampleDynamic(worldPosition.xz) * heightMapHeight;
+
+	//terrainNormal = SampleNormalDynamic(worldPosition, 1.0);
+
+	//shadow = RayInShadow(worldPosition);
 
 	gl_Position = projection * view * vec4(worldPosition, 1.0);
 }

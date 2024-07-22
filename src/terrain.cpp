@@ -4,35 +4,37 @@
 #include "mesh.hpp"
 #include "rendering.hpp"
 #include "input.hpp"
+#include "time.hpp"
 
 void Terrain::CreateTerrain(float terrainSize, float terrainChunkSize, float terrainHeight,
-	int terrainLod0Resolution, int terrainChunkResolution, int chunkRadius, int terrainRadius)
+							int terrainLod0Resolution, int terrainChunkResolution, int chunkRadius, int terrainRadius)
 {
-	//if (terrainSize != -1) Terrain::terrainSize = terrainSize;
-	//if (terrainChunkSize != -1) Terrain::terrainChunkSize = terrainChunkSize;
-	//if (terrainLod0Resolution != -1) Terrain::terrainLod0Resolution = terrainLod0Resolution;
-	//if (terrainChunkResolution != -1) Terrain::terrainChunkResolution = terrainChunkResolution;
-	//if (chunkRadius != -1)
+	// if (terrainSize != -1) Terrain::terrainSize = terrainSize;
+	// if (terrainChunkSize != -1) Terrain::terrainChunkSize = terrainChunkSize;
+	// if (terrainLod0Resolution != -1) Terrain::terrainLod0Resolution = terrainLod0Resolution;
+	// if (terrainChunkResolution != -1) Terrain::terrainChunkResolution = terrainChunkResolution;
+	// if (chunkRadius != -1)
 	//{
 	//	Terrain::chunkRadius = chunkRadius;
 	//	Terrain::chunksLength = Terrain::chunkRadius * 2 + 1;
 	//	Terrain::chunkCount = Terrain::chunksLength * Terrain::chunksLength;
-	//}
-	//if (terrainRadius != -1) 
+	// }
+	// if (terrainRadius != -1)
 	//{
 	//	Terrain::terrainRadius = terrainRadius;
 	//	Terrain::terrainLength = terrainRadius * 2 + 1;
 	//	Terrain::terrainCount = Terrain::terrainLength * Terrain::terrainLength;
-	//}
+	// }
 
-	//Terrain::worldSampleDistance *= Terrain::terrainScale;
+	// Terrain::worldSampleDistance *= Terrain::terrainScale;
 
 	CreateTextures();
 	CreateShaders();
 	GenerateHeightMap(0);
 	GenerateHeightMap(1);
 	GenerateHeightMapArray();
-	//GenerateOcclusionMap();
+	GenerateShadowMap();
+	// GenerateOcclusionMap();
 	CreateChunks();
 }
 
@@ -40,6 +42,14 @@ void Terrain::CreateShaders()
 {
 	heightMapComputeShader = new Shader("heightmap_compute.glsl");
 	Manager::AddShader(heightMapComputeShader);
+
+	shadowMapComputeShader = new Shader("terrain_shadows_compute.glsl");
+	Manager::AddShader(shadowMapComputeShader);
+	shadowMapComputeShader->setFloat("resolution", terrainShadowResolution);
+	shadowMapComputeShader->setFloat("resolutionMult", 1.0 / float(terrainShadowResolution));
+	shadowMapComputeShader->setInt(heightMapLod0Texture->Name().c_str(), heightMapLod0Texture->Index());
+	shadowMapComputeShader->setInt(heightMapLod1Texture->Name().c_str(), heightMapLod1Texture->Index());
+	shadowMapComputeShader->setInt(heightMapArrayTexture->Name().c_str(), heightMapArrayTexture->Index());
 
 	heightMapNormalComputeShader = new Shader("heightmap_normal_compute.glsl");
 	Manager::AddShader(heightMapNormalComputeShader);
@@ -60,20 +70,24 @@ void Terrain::CreateShaders()
 	Manager::AddShader(occlusionMapComputeShader);
 	occlusionMapComputeShader->setInt(heightMapLod0Texture->Name().c_str(), 0);
 	occlusionMapComputeShader->setInt(heightMapLod1Texture->Name().c_str(), 1);
-	//occlusionMapComputeShader->setInt("heightMapLod1", 1);
+	// occlusionMapComputeShader->setInt("heightMapLod1", 1);
 	occlusionMapComputeShader->setInt("heightMapArray", 2);
 	occlusionMapComputeShader->setFloat("resolution", terrainOcclusionResolution);
 	occlusionMapComputeShader->setFloat("resolutionMult", 1.0 / float(terrainOcclusionResolution));
 
-	terrainShader = new Shader("terrain_vertex.glsl", "tesselation_control.glsl", "tesselation_evaluation.glsl", 
-		"terrain_fragment.glsl");
+	terrainShader = new Shader("terrain_vertex.glsl", "tesselation_control.glsl", "tesselation_evaluation.glsl",
+							   "terrain_fragment.glsl");
 	Manager::AddShader(terrainShader);
 	terrainShader->setInt(heightMapLod0Texture->Name().c_str(), heightMapLod0Texture->Index());
 	terrainShader->setInt(heightMapLod1Texture->Name().c_str(), heightMapLod1Texture->Index());
 	terrainShader->setInt(heightMapArrayTexture->Name().c_str(), heightMapArrayTexture->Index());
-	if (heightMapArrayNormal) terrainShader->setInt(heightMapArrayNormal->Name().c_str(), heightMapArrayNormal->Index());
-	if (heightMapLod0Normal) terrainShader->setInt(heightMapLod0Normal->Name().c_str(), heightMapLod0Normal->Index());
-	if (heightMapLod1Normal) terrainShader->setInt(heightMapLod1Normal->Name().c_str(), heightMapLod1Normal->Index());
+	terrainShader->setInt(shadowMapTexture->Name().c_str(), shadowMapTexture->Index());
+	if (heightMapArrayNormal)
+		terrainShader->setInt(heightMapArrayNormal->Name().c_str(), heightMapArrayNormal->Index());
+	if (heightMapLod0Normal)
+		terrainShader->setInt(heightMapLod0Normal->Name().c_str(), heightMapLod0Normal->Index());
+	if (heightMapLod1Normal)
+		terrainShader->setInt(heightMapLod1Normal->Name().c_str(), heightMapLod1Normal->Index());
 	terrainShader->setFloat4("color", glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
 
 	terrainLodShader = new Shader("terrain_vertex_lod.glsl", "terrain_fragment_lod.glsl");
@@ -81,10 +95,11 @@ void Terrain::CreateShaders()
 	terrainLodShader->setInt(heightMapLod0Texture->Name().c_str(), heightMapLod0Texture->Index());
 	terrainLodShader->setInt(heightMapLod1Texture->Name().c_str(), heightMapLod1Texture->Index());
 	terrainLodShader->setInt(heightMapArrayTexture->Name().c_str(), heightMapArrayTexture->Index());
-	if (heightMapArrayNormal) terrainLodShader->setInt(heightMapArrayNormal->Name().c_str(), heightMapArrayNormal->Index());
+	if (heightMapArrayNormal)
+		terrainLodShader->setInt(heightMapArrayNormal->Name().c_str(), heightMapArrayNormal->Index());
 	terrainLodShader->setFloat4("color", glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
 
-	//terrainShader->setInt("occlusionMap", 3);
+	// terrainShader->setInt("occlusionMap", 3);
 }
 
 void Terrain::CreateTextures()
@@ -93,19 +108,19 @@ void Terrain::CreateTextures()
 	heightMapLod0Texture->CreateTexture();
 	Manager::AddTexture(heightMapLod0Texture);
 
-	//heightMapLod0Normal = new Texture("heightMapLod0Normal", 4, GL_TEXTURE4, terrainLod0Resolution, terrainLod0Resolution, GL_RGBA16_SNORM);
-	//heightMapLod0Normal->SetColorChannels(GL_RGBA);
-	//heightMapLod0Normal->CreateTexture();
-	//Manager::AddTexture(heightMapLod0Normal);
+	// heightMapLod0Normal = new Texture("heightMapLod0Normal", 4, GL_TEXTURE4, terrainLod0Resolution, terrainLod0Resolution, GL_RGBA16_SNORM);
+	// heightMapLod0Normal->SetColorChannels(GL_RGBA);
+	// heightMapLod0Normal->CreateTexture();
+	// Manager::AddTexture(heightMapLod0Normal);
 
 	heightMapLod1Texture = new Texture("heightMapLod1", 1, GL_TEXTURE1, terrainLod1Resolution, terrainLod1Resolution, GL_R16_SNORM);
 	heightMapLod1Texture->CreateTexture();
 	Manager::AddTexture(heightMapLod1Texture);
 
-	//heightMapLod1Normal = new Texture("heightMapLod1Normal", 5, GL_TEXTURE5, terrainLod1Resolution, terrainLod1Resolution, GL_RGBA16_SNORM);
-	//heightMapLod1Normal->SetColorChannels(GL_RGBA);
-	//heightMapLod1Normal->CreateTexture();
-	//Manager::AddTexture(heightMapLod1Normal);
+	// heightMapLod1Normal = new Texture("heightMapLod1Normal", 5, GL_TEXTURE5, terrainLod1Resolution, terrainLod1Resolution, GL_RGBA16_SNORM);
+	// heightMapLod1Normal->SetColorChannels(GL_RGBA);
+	// heightMapLod1Normal->CreateTexture();
+	// Manager::AddTexture(heightMapLod1Normal);
 
 	heightMapArrayTexture = new Texture("heightMapArray", 2, GL_TEXTURE2, terrainChunkResolution, terrainChunkResolution, GL_R16_SNORM);
 	heightMapArrayTexture->SetDimensions(terrainChunkResolution, terrainChunkResolution, chunkCount);
@@ -113,12 +128,16 @@ void Terrain::CreateTextures()
 	heightMapArrayTexture->CreateTexture();
 	Manager::AddTexture(heightMapArrayTexture);
 
-	//heightMapArrayNormal = new Texture("heightMapArrayNormal", 3, GL_TEXTURE3, terrainNormalResolution, terrainNormalResolution, GL_RGBA16_SNORM);
-	//heightMapArrayNormal->SetDimensions(terrainNormalResolution, terrainNormalResolution, chunkCount);
-	//heightMapArrayNormal->SetTextureType(GL_TEXTURE_2D_ARRAY);
-	//heightMapArrayNormal->SetColorChannels(GL_RGBA);
-	//heightMapArrayNormal->CreateTexture();
-	//Manager::AddTexture(heightMapArrayNormal);
+	// heightMapArrayNormal = new Texture("heightMapArrayNormal", 3, GL_TEXTURE3, terrainNormalResolution, terrainNormalResolution, GL_RGBA16_SNORM);
+	// heightMapArrayNormal->SetDimensions(terrainNormalResolution, terrainNormalResolution, chunkCount);
+	// heightMapArrayNormal->SetTextureType(GL_TEXTURE_2D_ARRAY);
+	// heightMapArrayNormal->SetColorChannels(GL_RGBA);
+	// heightMapArrayNormal->CreateTexture();
+	// Manager::AddTexture(heightMapArrayNormal);
+
+	shadowMapTexture = new Texture("shadowMap", 3, GL_TEXTURE3, terrainShadowResolution, terrainShadowResolution, GL_R16_SNORM);
+	shadowMapTexture->CreateTexture();
+	Manager::AddTexture(shadowMapTexture);
 }
 
 void Terrain::CreateChunks()
@@ -151,8 +170,8 @@ void Terrain::CreateChunks()
 			terrainChunks[xi][yi] = new Object(terrainLod0Mesh);
 			terrainChunks[xi][yi]->Paint(glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
 			terrainChunks[xi][yi]->Move(glm::vec3(x, 0, y) * terrainChunkSize);
-			//terrainChunks[xi][yi]->GetMesh()->GetShader()->setMatrix4("model", terrainChunks[xi][yi]->Translation());
-			//terrainChunks[xi][yi]->GetMesh()->GetShader()->setFloat4("color", terrainChunks[xi][yi]->Color());
+			// terrainChunks[xi][yi]->GetMesh()->GetShader()->setMatrix4("model", terrainChunks[xi][yi]->Translation());
+			// terrainChunks[xi][yi]->GetMesh()->GetShader()->setFloat4("color", terrainChunks[xi][yi]->Color());
 			Manager::AddObject(terrainChunks[xi][yi]);
 		}
 	}
@@ -260,6 +279,13 @@ void Terrain::GenerateOcclusionMap()
 	glDispatchCompute(terrainOcclusionResolution / 4, terrainOcclusionResolution / 4, 1);
 }
 
+void Terrain::GenerateShadowMap()
+{
+	shadowMapComputeShader->useShader();
+	shadowMapTexture->BindImage(0);
+	glDispatchCompute(shadowMapTexture->Resolution() / 4, shadowMapTexture->Resolution() / 4, 1);
+}
+
 bool InView(const glm::vec3 &position, float tolerance, const glm::mat4 &projection, const glm::mat4 &view)
 {
 	glm::vec4 viewSpace = projection * view * glm::vec4(position, 1.0);
@@ -271,30 +297,31 @@ bool InView(const glm::vec3 &position, float tolerance, const glm::mat4 &project
 	clipSpace.y = clipSpace.y * 0.5f + 0.5f;
 	clipSpace.z = viewSpace.w;
 
-	if (clipSpace.z <= 0.0 || clipSpace.z >= Manager::camera.far) return false;
+	if (clipSpace.z <= 0.0 || clipSpace.z >= Manager::camera.far)
+		return false;
 
 	return !(clipSpace.x < -tolerance || clipSpace.x > 1.0f + tolerance ||
-			clipSpace.y < -tolerance || clipSpace.y > 1.0f + tolerance ||
-			clipSpace.z <= -(tolerance * 0.5f));
+			 clipSpace.y < -tolerance || clipSpace.y > 1.0f + tolerance ||
+			 clipSpace.z <= -(tolerance * 0.5f));
 }
 
 bool ChunkInView(const glm::vec3 &position, float tolerance, const glm::mat4 &projection, const glm::mat4 &view, bool main = true)
 {
-	//position.y += Terrain::terrainHeight * 0.5;
-	if (InView(position, tolerance, projection, view)) 
+	// position.y += Terrain::terrainHeight * 0.5;
+	if (InView(position, tolerance, projection, view))
 		return true;
-	else if (InView(position + glm::vec3(Terrain::terrainChunkSize * 0.5, 0, Terrain::terrainChunkSize * 0.5), 
-		tolerance, projection, view)) 
-			return true;
-	else if (InView(position + glm::vec3(Terrain::terrainChunkSize * -0.5, 0, Terrain::terrainChunkSize * -0.5), 
-		tolerance, projection, view)) 
-			return true;
-	else if (InView(position + glm::vec3(Terrain::terrainChunkSize * -0.5, 0, Terrain::terrainChunkSize * 0.5), 
-		tolerance, projection, view)) 
-			return true;
-	else if (InView(position + glm::vec3(Terrain::terrainChunkSize * 0.5, 0, Terrain::terrainChunkSize * -0.5), 
-		tolerance, projection, view)) 
-			return true;
+	else if (InView(position + glm::vec3(Terrain::terrainChunkSize * 0.5, 0, Terrain::terrainChunkSize * 0.5),
+					tolerance, projection, view))
+		return true;
+	else if (InView(position + glm::vec3(Terrain::terrainChunkSize * -0.5, 0, Terrain::terrainChunkSize * -0.5),
+					tolerance, projection, view))
+		return true;
+	else if (InView(position + glm::vec3(Terrain::terrainChunkSize * -0.5, 0, Terrain::terrainChunkSize * 0.5),
+					tolerance, projection, view))
+		return true;
+	else if (InView(position + glm::vec3(Terrain::terrainChunkSize * 0.5, 0, Terrain::terrainChunkSize * -0.5),
+					tolerance, projection, view))
+		return true;
 	else if (main)
 		return ChunkInView(position + glm::vec3(0, Terrain::terrainHeight * 0.5, 0), tolerance, projection, view, false);
 	return false;
@@ -319,28 +346,32 @@ void Terrain::RenderTerrain()
 		{
 			int ix = x + terrainRadius;
 			int iz = z + terrainRadius;
-			float distance = glm::clamp(glm::distance(glm::vec2(x, z), glm::vec2(sx, sz)), 0.0f, float(terrainLength));
+			float fx = float(x);
+			float fz = float(z);
+			float distance = glm::clamp(glm::distance(glm::vec2(fx, fz), glm::vec2(sx, sz)), 0.0f, float(terrainLength));
 			bool inView = ChunkInView(terrainChunks[ix][iz]->Position(), 0, projection, view);
-			
-			if (distance < 0.75)
+
+			if (distance < 1.0)
 			{
 				terrainChunks[ix][iz]->GetPosition().y = 0;
-				//terrainShader->useShader();
 				terrainMesh->UseMesh();
 				terrainShader->setMatrix4("model", terrainChunks[ix][iz]->Translation());
+				//terrainShader->setFloat("tesselationFactor", 10);
 				glDrawElements(GL_PATCHES, terrainMesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0);
 			}
 			else if (inView)
 			{
-				//terrainLodShader->useShader();
-				terrainChunks[ix][iz]->GetPosition().y = pow(distance / float(terrainLength), 0.5) * -10;
-				//terrainShader->useShader();
+				float factor = 1.0 - (distance - 1) / float(terrainLength - 1);
+
+				terrainChunks[ix][iz]->GetPosition().y = pow(factor, 0.5) * -10;
 				terrainLod0Mesh->UseMesh();
 				terrainShader->setMatrix4("model", terrainChunks[ix][iz]->Translation());
+				//terrainShader->setFloat("tesselationFactor", 10.0 + pow(factor, 2) * 10);
+
 				glDrawElements(GL_PATCHES, terrainLod0Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0);
 				amount++;
 			}
-			//else if (inView)
+			// else if (inView)
 			//{
 			//	//terrainLodShader->useShader();
 			//	terrainChunks[ix][iz]->GetPosition().y = -20;
@@ -349,7 +380,7 @@ void Terrain::RenderTerrain()
 			//	terrainLodShader->setMatrix4("model", terrainChunks[ix][iz]->Translation());
 			//	glDrawElements(GL_TRIANGLES, terrainLod1Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0);
 			//	amount++;
-			//}
+			// }
 		}
 	}
 }
@@ -366,28 +397,38 @@ void Terrain::NewFrame()
 		GenerateHeightMapArray();
 	}
 
+	if (Time::newSubTick)
+		CheckTerrainOffset();
+	else
+		RenderTerrain();
+}
+
+void Terrain::CheckTerrainOffset()
+{
 	float xw = Manager::camera.Position().x;
 	float zw = Manager::camera.Position().z;
 
 	bool moveTerrain = false;
 	bool moveLod0 = false;
 	bool moveLod1 = false;
+	float terrainStep = 1;
 
-	
-	if (abs(xw) >= terrainChunkSize * 0.5 || abs(zw) >= terrainChunkSize * 0.5) moveTerrain = true;
+	if (abs(xw) >= terrainChunkSize * terrainStep || abs(zw) >= terrainChunkSize * terrainStep)
+		moveTerrain = true;
 
 	if (moveTerrain)
 	{
-		//RenderTerrain();
-		glm::vec2 newOffset = glm::vec2(Utilities::Fits(terrainChunkSize * 0.5, xw), Utilities::Fits(terrainChunkSize * 0.5, zw)) * terrainChunkSize * 0.5f;
+		// RenderTerrain();
+		glm::vec2 newOffset = glm::vec2(Utilities::Fits(terrainChunkSize * terrainStep, xw), 
+			Utilities::Fits(terrainChunkSize * terrainStep, zw)) * terrainChunkSize * terrainStep;
 		terrainOffset += newOffset;
-		//Shader::setFloat2Global("terrainWorldOffset", terrainOffset);
 		offsetLod0 = glm::vec2(0);
 		offsetLod1 = glm::vec2(0);
 		Manager::camera.Move(-glm::vec3(newOffset.x, 0, newOffset.y));
 		xw = Manager::camera.Position().x;
 		zw = Manager::camera.Position().z;
-		//std::cout << "terrain regenerated" << std::endl;
+
+		// std::cout << "terrain regenerated" << std::endl;
 	}
 
 	float x0 = xw - offsetLod0.x;
@@ -397,73 +438,27 @@ void Terrain::NewFrame()
 	float lod0Step = 0.125;
 	float lod1Step = 0.25;
 
-	if (moveTerrain || abs(x0) >= terrainLod0Size * lod0Step || abs(z0) >= terrainLod0Size * lod0Step) moveLod0 = true;
-	if (moveTerrain || abs(x1) >= terrainLod1Size * lod1Step || abs(z1) >= terrainLod1Size * lod1Step) moveLod1 = true;
+	if (moveTerrain || abs(x0) >= terrainLod0Size * lod0Step || abs(z0) >= terrainLod0Size * lod0Step)
+		moveLod0 = true;
+	if (moveTerrain || abs(x1) >= terrainLod1Size * lod1Step || abs(z1) >= terrainLod1Size * lod1Step)
+		moveLod1 = true;
 
 	if (moveLod0 && computePartLod0 == 0)
 	{
 		glm::vec2 newOffset = glm::vec2(Utilities::Fits(terrainLod0Size * lod0Step, x0), Utilities::Fits(terrainLod0Size * lod0Step, z0)) * terrainLod0Size * lod0Step;
 		offsetLod0 += newOffset;
 		GenerateHeightMap(0);
-		//computePartLod0 = 1;
-		//Shader::setFloat2Global("terrainOffsetLod0", offsetLod0);
-		//Shader::setIntGlobal("lod0Ready", 0);
-		//std::cout << "lod0 regenerated" << std::endl;
 	}
-
 	if (moveLod1 && computePartLod1 == 0)
 	{
 		glm::vec2 newOffset = glm::vec2(Utilities::Fits(terrainLod1Size * lod1Step, x1), Utilities::Fits(terrainLod1Size * lod1Step, z1)) * terrainLod1Size * lod1Step;
 		offsetLod1 += newOffset;
 		GenerateHeightMap(1);
-		//Shader::setFloat2Global("terrainOffsetLod1", offsetLod1);
-		//computePartLod1 = 1;
-		
-		//Shader::setIntGlobal("lod1Ready", 0);
-		//std::cout << "lod1 regenerated" << std::endl;
 	}
 
 	RenderTerrain();
-	if (moveTerrain) Shader::setFloat2Global("terrainWorldOffset", terrainOffset);
-
-	//if (abs(xw) > terrainChunkSize * 0.5)
-	//{
-	//	terrainOffset += glm::vec2(xw, 0);
-	//	Shader::setFloat2Global("terrainWorldOffset", terrainOffset);
-	//	offsetLod0 = glm::vec2(0);
-	//	offsetLod1 = glm::vec2(0);
-	//	GenerateHeightMap(0);
-	//	GenerateHeightMap(1);
-	//	Manager::camera.Move(-glm::vec3(xw, 0, 0));
-	//}
-	//else if (abs(zw) > terrainChunkSize * 0.5)
-	//{
-	//	terrainOffset += glm::vec2(0, zw);
-	//	Shader::setFloat2Global("terrainWorldOffset", terrainOffset);
-	//	offsetLod0 = glm::vec2(0);
-	//	offsetLod1 = glm::vec2(0);
-	//	GenerateHeightMap(0);
-	//	GenerateHeightMap(1);
-	//	Manager::camera.Move(-glm::vec3(0, 0, zw));
-	//}
-	//else if (abs(x0) > terrainLod0Size * 0.25)
-	//{
-	//	offsetLod0 += glm::vec2(x0, 0);
-	//	GenerateHeightMap(0);
-	//}
-	//else if (abs(x1) > terrainLod1Size * 0.25)
-	//{
-	//	offsetLod1 += glm::vec2(x1, 0);
-	//	GenerateHeightMap(1);
-	//}
-	//else if (abs(z0) > terrainLod0Size * 0.25)
-	//{
-	//	offsetLod0 += glm::vec2(0, z0);
-	//	GenerateHeightMap(0);
-	//}
-	//else if (abs(z1) > terrainLod1Size * 0.25)
-	//{
-	//	offsetLod1 += glm::vec2(0, z1);
-	//	GenerateHeightMap(1);
-	//}
+	if (moveTerrain)
+	{
+		Shader::setFloat2Global("terrainWorldOffset", terrainOffset);
+	}
 }

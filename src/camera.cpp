@@ -3,6 +3,7 @@
 #include "utilities.hpp"
 #include "input.hpp"
 #include "shader.hpp"
+#include <iostream>
 
 Camera::Camera()
 {
@@ -115,4 +116,10 @@ const glm::mat4 &Camera::View()
 const glm::mat4 &Camera::Projection()
 {
     return (projection);
+}
+
+void Camera::PrintStatus()
+{
+	std::cout << "position: (" << Position().x << ", " << Position().y << ", " << Position().z << 
+		") rotation: (" << Angles().x << ", " << Angles().y << ", " << Angles().z << ")" << std::endl;
 }

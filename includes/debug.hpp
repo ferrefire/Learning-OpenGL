@@ -16,6 +16,7 @@ class Debug
 		
 		static void NewFrame();
 		static void DurationCheck();
+		static void CalculateFramesPerSecond();
 };
 
 #endif
