@@ -8,14 +8,23 @@ layout (location = 0) in vec3 iPosition;
 
 struct datastruct
 {
-    vec3 pos;
-	vec3 norm;
-    vec2 rot;
+    //vec3 pos;
+	//vec3 norm;
+	uint posxz;
+	uint normxz;
+	uint posynormy;
+    //vec2 rot;
+    uint rot;
 };
 
 layout(std430, binding = 3) buffer iData
 {
     datastruct data[];
+};
+
+layout(std430, binding = 4) buffer iDataLod
+{
+    datastruct lodData[];
 };
 
 out vec2 UV;
@@ -32,6 +41,8 @@ float spacingMult = 4;
 #include "transformation.glsl"
 #include "functions.glsl"
 #include "shadow.glsl"
+
+uniform int lod;
 
 float random (vec2 st)
 {
@@ -54,25 +65,64 @@ mat4 rotationMatrix(vec3 axis, float angle)
 void main()
 {
     normal = normalize(mix(vec3(0, 0, -1), vec3(sign(iPosition.x) * 0.5, 0, 0), clamp(abs(iPosition.x) * 10, 0.0, 1.0)));
-	float ran = data[gl_InstanceID].rot.x;
+
+	vec2 rot;
+	if (lod == 0) rot = unpackHalf2x16(data[gl_InstanceID].rot);
+	else rot = unpackHalf2x16(lodData[gl_InstanceID].rot);
+
+	vec3 pos = vec3(0);
+	vec3 norm = vec3(0);
+	if (lod == 0)
+	{
+		pos.xz = unpackHalf2x16(data[gl_InstanceID].posxz) + viewPosition.xz;
+		norm.xz = unpackHalf2x16(data[gl_InstanceID].normxz);
+		vec2 yy = unpackHalf2x16(data[gl_InstanceID].posynormy);
+		pos.y = yy.x + viewPosition.y;
+		norm.y = yy.y;
+	}
+	else
+	{
+		pos.xz = unpackHalf2x16(lodData[gl_InstanceID].posxz) + viewPosition.xz;
+		norm.xz = unpackHalf2x16(lodData[gl_InstanceID].normxz);
+		vec2 yy = unpackHalf2x16(lodData[gl_InstanceID].posynormy);
+		pos.y = yy.x + viewPosition.y;
+		norm.y = yy.y;
+	}
+
+	float ran;
+	//if (lod == 0) ran = data[gl_InstanceID].rot.x;
+	//else ran = lodData[gl_InstanceID].rot.x;
+	ran = rot.x;
+
     mat4 rotation = rotationMatrix(vec3(1.0, 0.0, 0.0), radians(ran * (iPosition.y + 0.25)));
 	//float scale = 1.0 - pow(clamp(SquaredDistanceToViewPosition(data[gl_InstanceID].pos), 0.0, 1000000) * 0.000001, 3);
-	float scale = clamp(SquaredDistanceToViewPosition(data[gl_InstanceID].pos), 0.0, pow(2048 * 0.5 * spacing, 2)) * pow(0.000488281 * 2.0 * spacingMult, 2);
+
+	//vec3 pos;
+	//if (lod == 0) pos = data[gl_InstanceID].pos;
+	//else pos = lodData[gl_InstanceID].pos;
+
+	float scale = clamp(SquaredDistanceToViewPosition(pos), 0.0, pow(2048 * 0.5 * spacing, 2)) * pow(0.000488281 * 2.0 * spacingMult, 2);
 	scale = 1 + scale * 2;
 	vec3 position = iPosition * scale;
     position = (rotation * vec4(position, 1.0)).xyz;
     normal = (rotation * vec4(normal, 0.0)).xyz;
-	ran = data[gl_InstanceID].rot.y;
+
+	//if (lod == 0) ran = data[gl_InstanceID].rot.y;
+	//else ran = lodData[gl_InstanceID].rot.y;
+	ran = rot.y;
+
     rotation = rotationMatrix(vec3(0.0, 1.0, 0.0), radians(ran));
     position = (rotation * vec4(position, 1.0)).xyz;
     normal = (rotation * vec4(normal, 0.0)).xyz;
 
-	worldPosition = ObjectToWorld(position) + data[gl_InstanceID].pos;
+	worldPosition = ObjectToWorld(position) + pos;
     gl_Position = projection * view * vec4(worldPosition, 1.0);
 
 	UV = vec2(iPosition.x * 10 + 0.5, iPosition.y);
 
-	terrainNormal = data[gl_InstanceID].norm;
+	//if (lod == 0) terrainNormal = data[gl_InstanceID].norm;
+	//else terrainNormal = lodData[gl_InstanceID].norm;
+	terrainNormal = norm;
 
     Color = vec4(0.25, 0.6, 0.1, 1.0);
 	shadow = RayInShadow(worldPosition);

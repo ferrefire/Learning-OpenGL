@@ -11,17 +11,21 @@ class Grass
 		/* data */
 	public:
 		static unsigned int grassCount;
-		static unsigned int grassCountSqrRoot;
+		static unsigned int grassLodCount;
 		static unsigned int grassRenderCount;
+		static unsigned int grassLodRenderCount;
 
 		static Shader *grassShader;
 
 		static Shader *grassComputeShader;
 
 		static Buffer *grassBuffer;
+		static Buffer *grassLodBuffer;
 		static Buffer *countBuffer;
+		static Buffer *countLodBuffer;
 
 		static Mesh *grassMesh;
+		static Mesh *grassLodMesh;
 
 		static void CreateGrass();
 		static void CreateShaders();

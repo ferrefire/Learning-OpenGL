@@ -135,14 +135,18 @@ int Terrain::terrainLength = 7;
 int Terrain::terrainCount = 49;
 float Terrain::worldSampleDistance = 1;
 
-unsigned int Grass::grassCount = 4194304;
-unsigned int Grass::grassCountSqrRoot = 2048;
+unsigned int Grass::grassCount = 384;
+unsigned int Grass::grassLodCount = 1664;
 unsigned int Grass::grassRenderCount = 0;
+unsigned int Grass::grassLodRenderCount = 0;
 Shader *Grass::grassShader = NULL;
 Shader *Grass::grassComputeShader = NULL;
 Buffer *Grass::grassBuffer = NULL;
+Buffer *Grass::grassLodBuffer = NULL;
 Buffer *Grass::countBuffer = NULL;
+Buffer *Grass::countLodBuffer = NULL;
 Mesh *Grass::grassMesh = NULL;
+Mesh *Grass::grassLodMesh = NULL;
 
 bool makeCinematic = false;
 std::string makeCinName;
