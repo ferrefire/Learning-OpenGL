@@ -32,7 +32,7 @@ out vec3 normal;
 out vec3 terrainNormal;
 out vec3 worldPosition;
 out vec4 Color;
-out float shadow;
+//out float shadow;
 
 float spacing = 0.25;
 float spacingMult = 4;
@@ -40,7 +40,6 @@ float spacingMult = 4;
 #include "variables.glsl"
 #include "transformation.glsl"
 #include "functions.glsl"
-#include "shadow.glsl"
 
 uniform int instanceCount;
 uniform float instanceMult;
@@ -102,11 +101,8 @@ void main()
 	ran = rot.x;
 
     mat4 rotation = rotationMatrix(vec3(1.0, 0.0, 0.0), radians(ran * (iPosition.y + 0.25)));
-	//float scale = 1.0 - pow(clamp(SquaredDistanceToViewPosition(data[gl_InstanceID].pos), 0.0, 1000000) * 0.000001, 3);
+    //mat4 rotation = rotationMatrix(vec3(1.0, 0.0, 0.0), radians((iPosition.y * 0.5 - GrassCurve(rot.x, iPosition.y * 0.5).y) * 90.0));
 
-	//vec3 pos;
-	//if (lod == 0) pos = data[gl_InstanceID].pos;
-	//else pos = lodData[gl_InstanceID].pos;
 	float squaredDistance = SquaredDistanceToViewPosition(pos);
 	float maxDistance = pow(instanceCountSqrt * spacing, 2);
 	float maxDistanceMult = pow(instanceCountSqrtMult * spacingMult, 2);
@@ -136,6 +132,6 @@ void main()
 	terrainNormal = norm;
 
     Color = vec4(0.25, 0.6, 0.1, 1.0);
-	shadow = RayInShadow(worldPosition);
+	//shadow = RayInShadow(worldPosition);
 	//Color.rgb *= RayInShadow(worldPosition);
 }

@@ -7,7 +7,7 @@ in vec3 normal;
 in vec3 terrainNormal;
 in vec3 worldPosition;
 in vec4 Color;
-in float shadow;
+//in float shadow;
 
 out vec4 fragmentColor;
 
@@ -22,13 +22,13 @@ void main()
     if (!gl_FrontFacing) normal *= -1;
 
     vec3 viewDirection = normalize(viewPosition - worldPosition);
-    vec3 bladeColor = mix(Color.xyz * 0.5, Color.xyz, UV.y) * shadow;
+    vec3 bladeColor = mix(Color.xyz * 0.5, Color.xyz, UV.y);
     
 	float depth = GetDepth(gl_FragCoord.z, near, far);
 	vec3 diffuse = DiffuseLighting(terrainNormal, bladeColor);
 	vec3 bladeSpecular = SpecularLighting(normal, viewDirection, 8);
 	vec3 terrainSpecular = SpecularLighting(terrainNormal, viewDirection, 16);
-	vec3 endColor = diffuse + bladeSpecular * terrainSpecular * shadow;
+	vec3 endColor = diffuse + bladeSpecular * terrainSpecular;
 	
 	fragmentColor = vec4(endColor, 1);
 }

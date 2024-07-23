@@ -265,6 +265,17 @@ int main(int argc, char **argv)
 	Terrain::CreateTerrain();
 	Grass::CreateGrass();
 
+	/*Shader *quadShader = new Shader("screen_quad_vertex.glsl", "screen_quad_fragment.glsl");
+	Manager::AddShader(quadShader);
+
+	Shape *screenQuadShape = new Shape(SCREEN_QUAD);
+	Manager::AddShape(screenQuadShape);
+
+	Mesh *screenQuadMesh = new Mesh(screenQuadShape, quadShader);
+	Manager::AddMesh(screenQuadMesh);
+
+	quadShader->setInt("quadTexture", Terrain::heightMapLod0Texture->Index());*/
+
 	double lastTime = 0;
 
 	while (!glfwWindowShouldClose(window))
@@ -333,6 +344,8 @@ int main(int argc, char **argv)
 
         Manager::NewFrame();
 		if (Manager::firstFrame) Manager::firstFrame = false;
+
+		//renderMesh(*screenQuadMesh);
 
 		glBindVertexArray(0);
 

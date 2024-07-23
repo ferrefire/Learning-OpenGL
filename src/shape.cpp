@@ -65,7 +65,28 @@ Shape::Shape(int preset, int resolution)
         vertexCount = vertices.size();
         indiceCount = indices.size();
     }
-    else if (preset == CUBE)
+	else if (preset == SCREEN_QUAD)
+	{
+		vertexOnly = true;
+
+		name = std::string("screen quad");
+
+		vertices.push_back(glm::vec3(-0.5f, 0.5f, 0.0f));
+		vertices.push_back(glm::vec3(0.5f, -0.5f, 0.0f));
+		vertices.push_back(glm::vec3(-0.5f, -0.5f, 0.0f));
+		vertices.push_back(glm::vec3(0.5f, 0.5f, 0.0f));
+
+		indices.push_back(0);
+		indices.push_back(1);
+		indices.push_back(2);
+		indices.push_back(0);
+		indices.push_back(3);
+		indices.push_back(1);
+
+		vertexCount = vertices.size();
+		indiceCount = indices.size();
+	}
+	else if (preset == CUBE)
     {
         Shape front(QUAD);
         front.Translate(glm::vec3(0.0f, 0.0f, -0.5f));

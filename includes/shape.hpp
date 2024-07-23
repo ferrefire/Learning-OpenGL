@@ -12,6 +12,7 @@
 #define CUBE 2
 #define PLANE 3
 #define BLADE 4
+#define SCREEN_QUAD 5
 
 class Shape
 {

@@ -1,10 +1,14 @@
 #ifndef NOISE_INCLUDED
 #define NOISE_INCLUDED
 
+#include "curve.glsl"
+
 uniform int noiseLayers;
 uniform float noiseScale;
 uniform float noiseSampleDistance;
 uniform float noiseSampleDistanceMult;
+
+float blendDistance = 1.0;
 
 //float steepnessStepSize = 0.0003;
 
@@ -113,6 +117,19 @@ float GenerateNoise(vec2 uv, int layers)
 	//maxNoise = pow(maxNoise, 0.5);
     noise = InvLerp(0.0, maxNoise, noise);
     //noise = noise * noise;
+	
+	//float biome = max(abs(uv.x), abs(uv.y)) - 2.0;
+	//if (biome >= -blendDistance)
+	//{
+	//	if (biome <= blendDistance)
+	//	{
+	//		noise = mix(noise, CubicCurve(LOWLANDS, noise), (biome / blendDistance) * 0.5 + 0.5);
+	//	}
+	//	else
+	//	{
+	//		noise = CubicCurve(LOWLANDS, noise);
+	//	}
+	//}
 
     return (noise);
 }

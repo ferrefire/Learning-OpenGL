@@ -89,7 +89,7 @@ void main()
 	float maxDistance = pow(instanceCountSqrt * spacing, 2);
 	float maxDistanceMult = pow(instanceCountSqrtMult * spacingMult, 2);
 
-	float falloff = clamp(squaredDistance, 0.0, maxDistance) * maxDistanceMult;
+	float falloff = clamp(clamp(squaredDistance, 0.0, maxDistance) * maxDistanceMult, 0.0, 1.0);
 	falloff = 1.0 - pow(1.0 - falloff, 16);
 	//falloff = falloff * 1.025 - 0.025;
     //falloff = pow(falloff, 0.2);
