@@ -42,7 +42,14 @@ float spacingMult = 4;
 #include "functions.glsl"
 #include "shadow.glsl"
 
+uniform int instanceCount;
+uniform float instanceMult;
+uniform int instanceCountSqrt;
+uniform float instanceCountSqrtMult;
+
 uniform int lod;
+uniform vec3 computeViewPosition;
+uniform vec3 computeViewPositionLod;
 
 float random (vec2 st)
 {
@@ -74,18 +81,18 @@ void main()
 	vec3 norm = vec3(0);
 	if (lod == 0)
 	{
-		pos.xz = unpackHalf2x16(data[gl_InstanceID].posxz) + viewPosition.xz;
+		pos.xz = unpackHalf2x16(data[gl_InstanceID].posxz) + computeViewPosition.xz;
 		norm.xz = unpackHalf2x16(data[gl_InstanceID].normxz);
 		vec2 yy = unpackHalf2x16(data[gl_InstanceID].posynormy);
-		pos.y = yy.x + viewPosition.y;
+		pos.y = yy.x + computeViewPosition.y;
 		norm.y = yy.y;
 	}
 	else
 	{
-		pos.xz = unpackHalf2x16(lodData[gl_InstanceID].posxz) + viewPosition.xz;
+		pos.xz = unpackHalf2x16(lodData[gl_InstanceID].posxz) + computeViewPositionLod.xz;
 		norm.xz = unpackHalf2x16(lodData[gl_InstanceID].normxz);
 		vec2 yy = unpackHalf2x16(lodData[gl_InstanceID].posynormy);
-		pos.y = yy.x + viewPosition.y;
+		pos.y = yy.x + computeViewPositionLod.y;
 		norm.y = yy.y;
 	}
 
@@ -100,9 +107,13 @@ void main()
 	//vec3 pos;
 	//if (lod == 0) pos = data[gl_InstanceID].pos;
 	//else pos = lodData[gl_InstanceID].pos;
+	float squaredDistance = SquaredDistanceToViewPosition(pos);
+	float maxDistance = pow(instanceCountSqrt * spacing, 2);
+	float maxDistanceMult = pow(instanceCountSqrtMult * spacingMult, 2);
 
-	float scale = clamp(SquaredDistanceToViewPosition(pos), 0.0, pow(2048 * 0.5 * spacing, 2)) * pow(0.000488281 * 2.0 * spacingMult, 2);
-	scale = 1 + scale * 2;
+	float scale = clamp(squaredDistance, 0.0, maxDistance) * maxDistanceMult;
+	scale = 1.0 - pow(1.0 - scale, 4);
+	scale = 1.0 + scale * 2;
 	vec3 position = iPosition * scale;
     position = (rotation * vec4(position, 1.0)).xyz;
     normal = (rotation * vec4(normal, 0.0)).xyz;

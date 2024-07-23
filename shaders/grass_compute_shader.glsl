@@ -40,6 +40,7 @@ uniform float instanceMult;
 uniform int instanceCountSqrt;
 uniform float instanceCountSqrtMult;
 uniform float lodRange = 256.0;
+uniform int specificLod = -1;
 
 float spacing = 0.25;
 float spacingMult = 4;
@@ -68,6 +69,7 @@ void main()
 
 	int lod = Inside(vec2(x, z));
 
+	if (lod == specificLod) return ;
 	//uint packedv2 = packHalf2x16(vec2(0.5, 1.75));
 
 	//uint index = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * instanceCountSqrt;
@@ -78,10 +80,19 @@ void main()
 
     float y = SampleDynamic(vec2(x, z)) * heightMapHeight;
     
-    float falloff = SquaredDistanceToViewPosition(vec3(x, y, z)) * pow(instanceCountSqrtMult * 2.0 * spacingMult, 2);
-	if (InView(vec3(x, y, z) + vec3(0, 0.5, 0), pow(1.0 - falloff, 2) * 0.5) == 0) return ;
-	falloff = falloff * 1.025 - 0.025;
-    falloff = pow(falloff, 0.2);
+	float squaredDistance = SquaredDistanceToViewPosition(vec3(x, y, z));
+
+	float viewTolerance = 1.0 - clamp(squaredDistance, 0.0, 250.0) * 0.004;
+	viewTolerance = pow(viewTolerance, 4);
+	if (InView(vec3(x, y, z) + vec3(0, 0.5, 0), viewTolerance) == 0) return ;
+
+	float maxDistance = pow(instanceCountSqrt * spacing, 2);
+	float maxDistanceMult = pow(instanceCountSqrtMult * spacingMult, 2);
+
+	float falloff = clamp(squaredDistance, 0.0, maxDistance) * maxDistanceMult;
+	falloff = 1.0 - pow(1.0 - falloff, 16);
+	//falloff = falloff * 1.025 - 0.025;
+    //falloff = pow(falloff, 0.2);
 
     float ranMult = 1.0 - (abs(x) + abs(z)) * terrainSizeMult * 0.5;
     float ran = random(vec2(x, z) * ranMult);

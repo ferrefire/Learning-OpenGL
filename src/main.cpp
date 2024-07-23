@@ -136,7 +136,7 @@ int Terrain::terrainCount = 49;
 float Terrain::worldSampleDistance = 1;
 
 unsigned int Grass::grassCount = 384;
-unsigned int Grass::grassLodCount = 1664;
+unsigned int Grass::grassLodCount = 1664 + 384;
 unsigned int Grass::grassRenderCount = 0;
 unsigned int Grass::grassLodRenderCount = 0;
 Shader *Grass::grassShader = NULL;

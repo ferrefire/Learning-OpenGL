@@ -33,7 +33,7 @@ class Grass
 		static void CreateMeshes(); 
 
 		static void RenderGrass();
-		static void ComputeGrass();
+		static void ComputeGrass(int lod = -1);
 
 		static void NewFrame();
 };

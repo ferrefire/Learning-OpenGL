@@ -12,8 +12,15 @@ void Grass::CreateGrass()
 
 void Grass::CreateShaders()
 {
+	int totalGrassCount = grassCount + grassLodCount;
+
 	grassShader = new Shader("grass_vertex.glsl", "grass_fragment.glsl");
 	Manager::AddShader(grassShader);
+	grassShader->setInt("instanceCount", totalGrassCount * totalGrassCount);
+	grassShader->setFloat("instanceMult", 1.0 / float(totalGrassCount * totalGrassCount));
+	grassShader->setInt("instanceCountSqrt", totalGrassCount);
+	grassShader->setFloat("instanceCountSqrtMult", 1.0 / float(totalGrassCount));
+	grassShader->setFloat("lodRange", float(grassCount) * 0.5);
 	grassShader->setInt(Terrain::heightMapLod0Texture->Name().c_str(), Terrain::heightMapLod0Texture->Index());
 	grassShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
 	grassShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());
@@ -21,9 +28,6 @@ void Grass::CreateShaders()
 
 	grassComputeShader = new Shader("grass_compute_shader.glsl");
 	Manager::AddShader(grassComputeShader);
-
-	int totalGrassCount = grassCount + grassLodCount;
-
 	grassComputeShader->setInt("instanceCount", totalGrassCount * totalGrassCount);
 	grassComputeShader->setFloat("instanceMult", 1.0 / float(totalGrassCount * totalGrassCount));
 	grassComputeShader->setInt("instanceCountSqrt", totalGrassCount);
@@ -37,8 +41,6 @@ void Grass::CreateShaders()
 
 void Grass::CreateBuffers()
 {
-
-
 	grassBuffer = new Buffer(3, (grassCount * grassCount) * sizeof(float) * 4);
 	grassBuffer->CreateBuffer();
 	Manager::AddBuffer(grassBuffer);
@@ -85,27 +87,38 @@ void Grass::RenderGrass()
 	glDrawElementsInstanced(GL_TRIANGLES, grassLodMesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0, grassLodRenderCount);
 }
 
-void Grass::ComputeGrass()
+void Grass::ComputeGrass(int lod)
 {
 	int totalGrassCount = grassCount + grassLodCount;
 
 	grassComputeShader->useShader();
+	grassComputeShader->setInt("specificLod", lod);
 	glDispatchCompute(totalGrassCount / 4, totalGrassCount / 4, 1);
 
-	void *countPointer = countBuffer->GetPointer();
-	grassRenderCount = *(unsigned int *)countPointer;
-	*(unsigned int *)countPointer = 0;
-	countBuffer->UnMapBuffer();
+	if (lod == 0 || lod == -1)
+	{
+		void *countPointer = countBuffer->GetPointer();
+		grassRenderCount = *(unsigned int *)countPointer;
+		*(unsigned int *)countPointer = 0;
+		countBuffer->UnMapBuffer();
 
-	void *countLodPointer = countLodBuffer->GetPointer();
-	grassLodRenderCount = *(unsigned int *)countLodPointer;
-	*(unsigned int *)countLodPointer = 0;
-	countLodBuffer->UnMapBuffer();
+		grassShader->setFloat3("computeViewPosition", Manager::camera.Position());
+	}
+	if (lod == 1 || lod == -1)
+	{
+		void *countLodPointer = countLodBuffer->GetPointer();
+		grassLodRenderCount = *(unsigned int *)countLodPointer;
+		*(unsigned int *)countLodPointer = 0;
+		countLodBuffer->UnMapBuffer();
+
+		grassShader->setFloat3("computeViewPositionLod", Manager::camera.Position());
+	}
 }
 
 void Grass::NewFrame()
 {
 	//maybe every tick
-	if (Time::newFrameTick) ComputeGrass();
+	if (Time::newFrameTick) ComputeGrass(-1);
+	//if (Time::newTick) ComputeGrass(1);
 	RenderGrass();
 }
