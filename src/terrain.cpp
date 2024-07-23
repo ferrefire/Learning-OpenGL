@@ -5,28 +5,19 @@
 #include "rendering.hpp"
 #include "input.hpp"
 #include "time.hpp"
+#include <iostream>
 
-void Terrain::CreateTerrain(float terrainSize, float terrainChunkSize, float terrainHeight,
-							int terrainLod0Resolution, int terrainChunkResolution, int chunkRadius, int terrainRadius)
+void Terrain::CreateTerrain()
 {
-	// if (terrainSize != -1) Terrain::terrainSize = terrainSize;
-	// if (terrainChunkSize != -1) Terrain::terrainChunkSize = terrainChunkSize;
-	// if (terrainLod0Resolution != -1) Terrain::terrainLod0Resolution = terrainLod0Resolution;
-	// if (terrainChunkResolution != -1) Terrain::terrainChunkResolution = terrainChunkResolution;
-	// if (chunkRadius != -1)
-	//{
-	//	Terrain::chunkRadius = chunkRadius;
-	//	Terrain::chunksLength = Terrain::chunkRadius * 2 + 1;
-	//	Terrain::chunkCount = Terrain::chunksLength * Terrain::chunksLength;
-	// }
-	// if (terrainRadius != -1)
-	//{
-	//	Terrain::terrainRadius = terrainRadius;
-	//	Terrain::terrainLength = terrainRadius * 2 + 1;
-	//	Terrain::terrainCount = Terrain::terrainLength * Terrain::terrainLength;
-	// }
+	chunksLength = chunkRadius * 2 + 1;
+	chunkCount = chunksLength * chunksLength;
 
-	// Terrain::worldSampleDistance *= Terrain::terrainScale;
+	terrainLength = terrainRadius * 2 + 1;
+	terrainCount = terrainLength * terrainLength;
+
+	terrainSize = chunksLength * terrainChunkSize;
+
+	std::cout << "terrain size: " << terrainSize / 1000.0 << "km2" << std::endl;
 
 	CreateTextures();
 	CreateShaders();
@@ -351,7 +342,7 @@ void Terrain::RenderTerrain()
 			float distance = glm::clamp(glm::distance(glm::vec2(fx, fz), glm::vec2(sx, sz)), 0.0f, float(terrainLength));
 			bool inView = ChunkInView(terrainChunks[ix][iz]->Position(), 0, projection, view);
 
-			if (distance < 1.0)
+			if ((inView && distance < 1.0) || distance <= 0.75)
 			{
 				terrainChunks[ix][iz]->GetPosition().y = 0;
 				terrainMesh->UseMesh();

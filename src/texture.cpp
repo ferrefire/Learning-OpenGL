@@ -3,7 +3,7 @@
 
 Texture::Texture(std::string name, int index, GLenum unit, int width, int height, GLenum dataType)
 {
-	glGenTextures(1, &this->ID);
+	glGenTextures(1, &ID);
 
 	this->name = name;
 	this->index = index;
@@ -12,15 +12,15 @@ Texture::Texture(std::string name, int index, GLenum unit, int width, int height
 	this->height = height;
 	this->dataType = dataType;
 
-	this->textureType = GL_TEXTURE_2D;
-	this->wrapMode = GL_CLAMP_TO_EDGE;
-	this->filterMode = GL_LINEAR;
-	this->colorChannels = GL_RED;
+	textureType = GL_TEXTURE_2D;
+	wrapMode = GL_CLAMP_TO_EDGE;
+	filterMode = GL_LINEAR;
+	colorChannels = GL_RED;
 }
 
 Texture::~Texture()
 {
-	glDeleteTextures(1, &this->ID);
+	glDeleteTextures(1, &ID);
 }
 
 void Texture::SetDimensions(int width, int height)
@@ -74,8 +74,8 @@ void Texture::CreateTexture()
 	glTexParameteri(textureType, GL_TEXTURE_WRAP_T, wrapMode);
 	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, filterMode);
 	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, filterMode);
-	if (textureType == GL_TEXTURE_2D_ARRAY) glTexImage3D(textureType, 0, dataType, width, height, depth, 0, colorChannels, GL_FLOAT, NULL);
-	else glTexImage2D(textureType, 0, dataType, width, height, 0, colorChannels, GL_FLOAT, NULL);
+	if (textureType == GL_TEXTURE_2D_ARRAY) glTexImage3D(textureType, 0, dataType, width, height, depth, 0, colorChannels, GL_HALF_FLOAT, NULL);
+	else glTexImage2D(textureType, 0, dataType, width, height, 0, colorChannels, GL_HALF_FLOAT, NULL);
 	glActiveTexture(0);
 }
 

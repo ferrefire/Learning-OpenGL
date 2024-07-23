@@ -85,7 +85,7 @@ Camera &Manager::camera = cam;
 GLFWwindow *Manager::window = NULL;
 Cinematic Manager::activeCinematic;
 
-float Terrain::terrainSize = 90000.0;
+float Terrain::terrainSize = 0;
 float Terrain::terrainShadowSize = 25000.0;
 float Terrain::terrainLod0Size = 2500.0;
 float Terrain::terrainLod1Size = 5000.0;
@@ -101,8 +101,8 @@ int Terrain::terrainOcclusionResolution = 1024;
 int Terrain::terrainShadowResolution = 512;
 int Terrain::terrainChunkResolution = 1024;
 int Terrain::chunkRadius = 4;
-int Terrain::chunksLength = 9;
-int Terrain::chunkCount = 81;
+int Terrain::chunksLength = 0;
+int Terrain::chunkCount = 0;
 int Terrain::computePartLod0 = 0;
 int Terrain::computePartLod1 = 0;
 glm::vec2 Terrain::terrainOffset = glm::vec2(0.0, 0.0);
@@ -131,8 +131,8 @@ Mesh *Terrain::terrainLod0Mesh = NULL;
 Mesh *Terrain::terrainLod1Mesh = NULL;
 Object ***Terrain::terrainChunks = NULL;
 int Terrain::terrainRadius = 3;
-int Terrain::terrainLength = 7;
-int Terrain::terrainCount = 49;
+int Terrain::terrainLength = 0;
+int Terrain::terrainCount = 0;
 float Terrain::worldSampleDistance = 1;
 
 unsigned int Grass::grassCount = 384;
@@ -225,11 +225,8 @@ void GetArguments(int argc, char **argv)
 		else if (Utilities::Contains(arg, "CIN=")) 
 		{
 			std::string path = std::filesystem::current_path();
-			//Cinematic cinematic;
 			Manager::activeCinematic.Load((path + "/cinematics/" + (argv[i] + arg.find('=') + 1) + ".txt").c_str());
 			Manager::activeCinematic.speed = 1;
-			//Manager::activeCinematic.Start();
-			//Manager::SetCinematic(cinematic);
 		}
 		else if (Utilities::Contains(arg, "TERRAIN_RES=")) Terrain::terrainLod0Resolution = std::stof(argv[i] + arg.find('=') + 1);
 		else if (Utilities::Contains(arg, "TERRAIN_CHUNK_RES=")) Terrain::terrainChunkResolution = std::stof(argv[i] + arg.find('=') + 1);
@@ -257,53 +254,10 @@ int main(int argc, char **argv)
 	const GLubyte *renderer = glGetString(GL_RENDERER);
 	printf("%s\n", (char *)renderer);
 
-	//Terrain::CreateTerrain(90000, 10000, 2500, 1024, 1024, 4, 1);
 	Terrain::CreateTerrain();
 	Grass::CreateGrass();
 
-	//int count = 1048576;
-    //int count = 4194304;
-
-    
-	//computeShader->setInt("occlusionMap", 3);
-	//computeShader.setInt("frameBuffer", 2);
-
-	
-
-	//Manager::AddInstanceBatch(&instanceMesh, count);
-
-    
-
-	//glGenFramebuffers(1, &Manager::depthBuffer);
-	//glBindFramebuffer(GL_FRAMEBUFFER, Manager::depthBuffer);
-//
-	//unsigned int depthTexture;
-	//glGenTextures(1, &depthTexture);
-	//glActiveTexture(GL_TEXTURE2);
-	//glBindTexture(GL_TEXTURE_2D, depthTexture);
-	////Change color type
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Input::width, Input::height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//glBindTexture(GL_TEXTURE_2D, 0);
-	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, depthTexture, 0);
-//
-	//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	//	std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	//int inssqrt = sqrt(count);
-    //Print(count);
-    //Print(inssqrt);
-
-	//Cinematic cinematic;
-	//cinematic.Load((path + "/cinematics/grassCin.txt").c_str());
-	//Manager::SetCinematic(cinematic);
-	//cinematic.Start();
-
 	double lastTime = 0;
-	//std::vector<glm::vec4> pos;
-	//std::vector<glm::vec4> rot;
 
 	while (!glfwWindowShouldClose(window))
     {
@@ -316,7 +270,6 @@ int main(int argc, char **argv)
 
 		if (makeCinematic && Input::GetKey(GLFW_MOUSE_BUTTON_RIGHT, true).pressed)
 		{
-			//std::cout << std::endl;
 			glm::vec3 newPosKey;
 			float newPosDur;
 			newPosDur = glfwGetTime() - lastTime;
@@ -332,9 +285,6 @@ int main(int argc, char **argv)
 			newRotKey.y = Manager::camera.Angles().y;
 			newRotKey.z = Manager::camera.Angles().z;
 			Manager::activeCinematic.AddKeyRotation(newRotKey, newRotDur);
-			//rot.push_back(newRotKey);
-			//Utilities::PrintVec3(Manager::camera.Position());
-			//Utilities::PrintVec3(Manager::camera.Angles());
 			lastTime = glfwGetTime();
 		}
 

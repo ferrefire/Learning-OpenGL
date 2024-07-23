@@ -77,8 +77,7 @@ class Terrain
 
 		static Object ***terrainChunks;
 
-		static void CreateTerrain(float terrainSize = -1, float terrainChunkSize = -1, float terrainHeight = -1, 
-			int terrainResolution = -1, int terrainChunkResolution = -1, int chunkRadius = -1, int terrainRadius = -1);
+		static void CreateTerrain();
 
 		static void CreateTextures();
 		static void CreateShaders();

@@ -6,47 +6,31 @@ void Time::NewFrame()
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 
-	if (timeLastSecond == 0)
-	{
-		newSecond = false;
-		timeLastSecond = currentFrame;
-	}
-	if (currentFrame - timeLastSecond > 1.0)
+	if (newSecond) newSecond = false;
+	if (currentFrame - timeLastSecond >= 1.0)
 	{
 		newSecond = true;
-		timeLastSecond = 0;
+		timeLastSecond = currentFrame;
 	}
 
-	if (timeLastTick == 0)
-	{
-		newTick = false;
-		timeLastTick = currentFrame;
-	}
-	if (currentFrame - timeLastTick > 0.1)
+	if (newTick) newTick = false;
+	if (currentFrame - timeLastTick >= 0.1)
 	{
 		newTick = true;
-		timeLastTick = 0;
+		timeLastTick = currentFrame;
 	}
 
-	if (timeLastSubTick == 0)
-	{
-		newSubTick = false;
-		timeLastSubTick = currentFrame;
-	}
-	if (currentFrame - timeLastSubTick > 0.25)
+	if (newSubTick) newSubTick = false;
+	if (currentFrame - timeLastSubTick >= 0.25)
 	{
 		newSubTick = true;
-		timeLastSubTick = 0;
+		timeLastSubTick = currentFrame;
 	}
 
-	if (timeLastFrameTick == 0)
-	{
-		newFrameTick = false;
-		timeLastFrameTick = currentFrame;
-	}
-	if (currentFrame - timeLastFrameTick > 0.015)
+	if (newFrameTick) newFrameTick = false;
+	if (currentFrame - timeLastFrameTick >= 0.016666667)
 	{
 		newFrameTick = true;
-		timeLastFrameTick = 0;
+		timeLastFrameTick = currentFrame;
 	}
 }
