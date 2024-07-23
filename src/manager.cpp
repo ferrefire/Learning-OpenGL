@@ -117,9 +117,7 @@ void Manager::NewFrame()
     //    renderObject(objects[i]);
     //}
 
-	
-
-	if (Manager::activeCinematic.running)
+	if (!Manager::firstFrame && !Terrain::Generating() && Manager::activeCinematic.running)
 	{
 		Manager::activeCinematic.Play();
 	}

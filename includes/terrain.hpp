@@ -11,7 +11,11 @@
 class Terrain
 {
 	private:
-		
+		static int xi;
+		static int yi;
+		static int index;
+		static bool generating;
+
 	public:
 		static float terrainSize;
 		static float terrainOccludeSize;
@@ -86,12 +90,15 @@ class Terrain
 		static void GenerateHeightMap(int lod);
 		static void GenerateHeightMapParts(int lod, glm::vec2 part);
 		static void GenerateHeightMapArray();
+		static void GenerateHeightMapArrayPart();
 		static void GenerateOcclusionMap();
 		static void GenerateShadowMap();
 
 		static void RenderTerrain();
 		static void CheckTerrainOffset();
 		static void NewFrame();
+
+		static bool Generating();
 };
 
 #endif

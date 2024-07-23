@@ -105,6 +105,10 @@ int Terrain::chunksLength = 0;
 int Terrain::chunkCount = 0;
 int Terrain::computePartLod0 = 0;
 int Terrain::computePartLod1 = 0;
+int Terrain::xi = 0;
+int Terrain::yi = 0;
+int Terrain::index = 0;
+bool Terrain::generating = false;
 glm::vec2 Terrain::terrainOffset = glm::vec2(0.0, 0.0);
 glm::vec2 Terrain::offsetLod0 = glm::vec2(0.0, 0.0);
 glm::vec2 Terrain::offsetLod1 = glm::vec2(0.0, 0.0);
@@ -253,6 +257,10 @@ int main(int argc, char **argv)
 
 	const GLubyte *renderer = glGetString(GL_RENDERER);
 	printf("%s\n", (char *)renderer);
+
+	GLint max_layers;
+	glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_layers);
+	std::cout << "max texture array layers: " << max_layers << std::endl;
 
 	Terrain::CreateTerrain();
 	Grass::CreateGrass();

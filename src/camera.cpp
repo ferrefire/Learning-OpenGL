@@ -12,8 +12,8 @@ Camera::Camera()
 	position.x = 0;
 	position.z = 0;
 	position.y = 2000;
-	Move(glm::vec3(0.0f));
-    Rotate(glm::vec3(25.0f, -90.0f, 0.0f));
+	Move(glm::vec3(0.0));
+    Rotate(glm::vec3(-25.0, -90.0, 0.0));
 }
 
 Camera::~Camera()

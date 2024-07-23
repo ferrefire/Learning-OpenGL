@@ -11,12 +11,14 @@ uniform vec2 seed;
 uniform int resolution;
 uniform float resolutionMult;
 uniform int chunksRadius;
+uniform int chunkIndex = 0;
+uniform vec2 chunkCoordinates = vec2(0);
 
 #include "noise.glsl"
 
 void main()
 {
-	int index = 0;
+	/*int index = 0;
 
 	for (int xi = -chunksRadius; xi <= chunksRadius; xi++)
 	{
@@ -28,5 +30,9 @@ void main()
 
 			index++;
 		}
-	}
+	}*/
+
+	imageStore(heightMapArray, ivec3(gl_GlobalInvocationID.xy, chunkIndex), 
+				vec4(GenerateNoise((vec2(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y) * resolutionMult - 0.5 + chunkCoordinates) 
+					+ offset + seed, noiseLayers)));
 }
