@@ -28,7 +28,7 @@ void Time::NewFrame()
 	}
 
 	if (newFrameTick) newFrameTick = false;
-	if (currentFrame - timeLastFrameTick >= 0.016666667)
+	if (currentFrame - timeLastFrameTick >= 0.01666666)
 	{
 		newFrameTick = true;
 		timeLastFrameTick = currentFrame;

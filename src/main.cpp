@@ -30,6 +30,7 @@
 #include "cinematic.hpp"
 #include "grass.hpp"
 #include "buffer.hpp"
+#include "trees.hpp"
 
 unsigned int Debug::totalFramesThisSecond = 0;
 unsigned int Debug::totalFramesLastSecond = 0;
@@ -152,6 +153,14 @@ Buffer *Grass::countLodBuffer = NULL;
 Mesh *Grass::grassMesh = NULL;
 Mesh *Grass::grassLodMesh = NULL;
 
+unsigned int Trees::treeCount = 1024;
+unsigned int Trees::treeRenderCount = 0;
+Shader *Trees::treeShader = NULL;
+Shader *Trees::treeComputeShader = NULL;
+Mesh *Trees::treeMesh = NULL;
+Buffer *Trees::treeRenderBuffer = NULL;
+Buffer *Trees::treeCountBuffer = NULL;
+
 bool makeCinematic = false;
 std::string makeCinName;
 
@@ -264,6 +273,7 @@ int main(int argc, char **argv)
 
 	Terrain::CreateTerrain();
 	Grass::CreateGrass();
+	Trees::CreateTrees();
 
 	/*Shader *quadShader = new Shader("screen_quad_vertex.glsl", "screen_quad_fragment.glsl");
 	Manager::AddShader(quadShader);
@@ -341,6 +351,7 @@ int main(int argc, char **argv)
 		
 		Terrain::NewFrame();
 		Grass::NewFrame();
+		Trees::NewFrame();
 
         Manager::NewFrame();
 		if (Manager::firstFrame) Manager::firstFrame = false;

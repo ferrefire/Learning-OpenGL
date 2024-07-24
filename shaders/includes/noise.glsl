@@ -119,17 +119,14 @@ float GenerateNoise(vec2 uv, int layers)
     //noise = noise * noise;
 	
 	//float biome = max(abs(uv.x), abs(uv.y)) - 2.0;
-	//if (biome >= -blendDistance)
+	//if (biome >= -blendDistance && biome <= blendDistance)
 	//{
-	//	if (biome <= blendDistance)
-	//	{
-	//		noise = mix(noise, CubicCurve(LOWLANDS, noise), (biome / blendDistance) * 0.5 + 0.5);
-	//	}
-	//	else
-	//	{
-	//		noise = CubicCurve(LOWLANDS, noise);
-	//	}
+	//	noise = mix(CubicCurve(LOWLANDS, noise), noise, (biome / blendDistance) * 0.5 + 0.5);
 	//}
+    //else if (biome <= -blendDistance)
+    //{
+    //    noise = CubicCurve(LOWLANDS, noise);
+    //}
 
     return (noise);
 }

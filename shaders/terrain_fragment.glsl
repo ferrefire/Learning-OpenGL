@@ -26,6 +26,7 @@ uniform vec4 color;
 void main()
 {
     float depth = GetDepth(gl_FragCoord.z, near, far);
+    float normalDepth = GetDepth(gl_FragCoord.z, near, 25000.0);
 
 	vec3 normal = SampleNormalDynamic(worldPosition, 1.0);
 	//vec3 normal = terrainNormal;
@@ -35,7 +36,7 @@ void main()
 	steepness = 1.0 - pow(1.0 - steepness, 15);
     vec4 terrainColor = mix(color, vec4(0.25, 0.25, 0.25, 1), steepness);
 
-    float power = mix(0.25, 1.0, 1.0 - pow(1.0 - depth, 4));
+    float power = mix(0.25, 1.0, 1.0 - pow(1.0 - normalDepth, 4));
 	normal = NormalPower(normal, power);
 
 	vec3 diffuse = DiffuseLighting(normal, terrainColor.xyz);
