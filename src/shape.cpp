@@ -1,5 +1,6 @@
 #include "shape.hpp"
 #include <iostream>
+#include "utilities.hpp"
 
 Shape::Shape()
 {
@@ -113,35 +114,57 @@ Shape::Shape(int preset, int resolution)
         Join(up);
         Join(down);
     }
-    else if (preset == TRUNK)
+    else if (preset == CYLINDER)
     {
-        Shape front(QUAD);
-        front.Translate(glm::vec3(0.0f, 0.0f, -0.5f));
-        Shape right(QUAD);
-        right.Rotate(-90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-        right.Translate(glm::vec3(0.5f, 0.0f, 0.0f));
-        Shape left(QUAD);
-        left.Rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-        left.Translate(glm::vec3(-0.5f, 0.0f, 0.0f));
-        Shape back(QUAD);
-		back.Rotate(-180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-		back.Translate(glm::vec3(0.0f, 0.0f, 0.5f));
-        Shape up(QUAD);
-        up.Rotate(90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-        up.Translate(glm::vec3(0.0f, 0.5f, 0.0f));
-        Shape down(QUAD);
-        down.Rotate(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-        down.Translate(glm::vec3(0.0f, -0.5f, 0.0f));
+        Shape plane(PLANE, resolution);
+		plane.Rotate(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 
-        Join(front);
-        Join(right);
-        Join(left);
-        Join(back);
-        Join(up);
-        Join(down);
+		vertexOnly = true;
+		Join(plane);
+		vertexOnly = false;
+
+		RecalculateUV();
+
+		std::vector<int> startVertices;
+		std::vector<int> endVertices;
+
+		int index = 0;
+
+		for (glm::vec3 &vert : vertices)
+		{
+			float x = round((vert.x + 0.5) * (resolution - 1));
+			float y = round((vert.y + 0.5) * (resolution - 1));
+
+			if (x == 0) startVertices.push_back(index);
+			else if (x == (resolution - 1)) endVertices.push_back(index);
+
+			glm::vec3 newVert = glm::normalize(Utilities::RotateNewVec3(glm::vec3(0, 0, -1), (360.0 / resolution) * -x, glm::vec3(0, 1, 0)));
+
+			float trunkWidth = 2.0 - (y / (resolution - 1));
+
+			vert.x = newVert.x * trunkWidth;
+			vert.z = newVert.z * trunkWidth;
+
+			vert += (glm::vec3(Utilities::Random11(), 0, Utilities::Random11()) * 0.2f);
+
+			index++;
+		}
+
+		for (int i = 0; i < startVertices.size() - 1; i++)
+		{
+			indices.push_back(endVertices[i + 1]);
+			indices.push_back(startVertices[i]);
+			indices.push_back(endVertices[i]);
+
+			indices.push_back(endVertices[i + 1]);
+			indices.push_back(startVertices[i + 1]);
+			indices.push_back(startVertices[i]);
+		}
+
+		RecalculateNormals();
 
         Translate(glm::vec3(0, 0.5, 0));
-        Scale(glm::vec3(3, 25, 3));
+        Scale(glm::vec3(2, 50, 2));
     }
     else if (preset == PLANE)
     {
@@ -370,8 +393,11 @@ void Shape::Join(Shape &joinShape)
     for (int i = 0; i < addSize; i++)
     {
         vertices.push_back(addVertices[i]);
-        uvs.push_back(addUvs[i]);
-		normals.push_back(addNormals[i]);
+        if (!joinShape.vertexOnly)
+		{
+			uvs.push_back(addUvs[i]);
+			normals.push_back(addNormals[i]);
+		}
 	}
     
     addSize = addIndices.size();
@@ -381,4 +407,43 @@ void Shape::Join(Shape &joinShape)
     }
 
     RecalculateData();
+}
+
+glm::vec4 Shape::GetBounds()
+{
+	glm::vec4 bounds;
+
+	for (const glm::vec3 &vert : vertices)
+	{
+		if (vert.x < bounds.x) bounds.x = vert.x;
+		if (vert.x > bounds.y) bounds.y = vert.x;
+		if (vert.y < bounds.z) bounds.z = vert.y;
+		if (vert.y > bounds.w) bounds.w = vert.y;
+	}
+
+	return bounds;
+}
+
+void Shape::RecalculateUV()
+{
+	uvs.clear();
+
+	glm::vec4 bounds = GetBounds();
+
+	for (const glm::vec3 &vert : vertices)
+	{
+		float x = (vert.x - bounds.x) / (bounds.y - bounds.x);
+		float y = (vert.y - bounds.z) / (bounds.w - bounds.z);
+		uvs.push_back(glm::vec2(x, y));
+	}
+}
+
+void Shape::RecalculateNormals()
+{
+	normals.clear();
+
+	for (const glm::vec3 &vert : vertices)
+	{
+		normals.push_back(glm::normalize(glm::vec3(vert.x, 0, vert.z)));
+	}
 }

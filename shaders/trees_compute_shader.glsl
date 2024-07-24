@@ -80,9 +80,9 @@ void main()
 	position.z += (ran - 0.5) * 50.0;
 	position.y = SampleDynamic(position.xz) * heightMapHeight;
 
-    float viewTolerance = 1.0 - clamp(squaredDistance, 0.0, 10000.0) * 0.0001;
+    float viewTolerance = 1.0 - clamp(squaredDistance, 0.0, 1000000.0) * 0.000001;
 	viewTolerance = pow(viewTolerance, 4);
-	if (InView(position + vec3(0, 10, 0), viewTolerance) == 0) return ;
+	if (InView(position + vec3(0, 25, 0), viewTolerance) == 0) return ;
 
     vec3 norm = SampleNormalDynamic(position, 0.5);
     float steepness = GetSteepness(norm);

@@ -74,7 +74,7 @@ void main()
 
 	//uint index = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * instanceCountSqrt;
 
-	vec2 flooredViewPosition = vec2(floor(viewPosition.x), floor(viewPosition.z));
+	vec2 flooredViewPosition = vec2(floor(viewPosition.x * spacingMult) * spacing, floor(viewPosition.z * spacingMult) * spacing);
     x = x * spacing + flooredViewPosition.x;
     z = z * spacing + flooredViewPosition.y;
 

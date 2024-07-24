@@ -48,7 +48,7 @@ void Trees::CreateBuffers()
 
 void Trees::CreateMeshes()
 {
-    Shape *treeShape = new Shape(TRUNK);
+    Shape *treeShape = new Shape(CYLINDER, 12);
     Manager::AddShape(treeShape);
 
     treeMesh = new Mesh(treeShape, treeShader);
@@ -70,7 +70,7 @@ void Trees::ComputeTrees()
 
 void Trees::RenderTrees()
 {
-    Manager::EnableCulling(false);
+    Manager::EnableCulling(true);
 	treeShader->useShader();
 
 	treeMesh->UseMesh();

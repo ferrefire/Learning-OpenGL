@@ -153,7 +153,7 @@ Buffer *Grass::countLodBuffer = NULL;
 Mesh *Grass::grassMesh = NULL;
 Mesh *Grass::grassLodMesh = NULL;
 
-unsigned int Trees::treeCount = 256;
+unsigned int Trees::treeCount = 128;
 unsigned int Trees::treeRenderCount = 0;
 Shader *Trees::treeShader = NULL;
 Shader *Trees::treeComputeShader = NULL;
@@ -350,8 +350,8 @@ int main(int argc, char **argv)
 		}
 		
 		Terrain::NewFrame();
-		Grass::NewFrame();
 		Trees::NewFrame();
+		Grass::NewFrame();
 
         Manager::NewFrame();
 		if (Manager::firstFrame) Manager::firstFrame = false;

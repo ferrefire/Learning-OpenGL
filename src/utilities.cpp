@@ -21,6 +21,14 @@ glm::vec3 Utilities::RotateVec3(glm::vec3 &vec, float angle, glm::vec3 axis)
 	return (vec);
 }
 
+glm::vec3 Utilities::RotateNewVec3(glm::vec3 vec, float angle, glm::vec3 axis)
+{
+	glm::mat4 rotation = glm::mat4(1.0f);
+	rotation = glm::rotate(rotation, glm::radians(angle), axis);
+	vec = rotation * glm::vec4(vec, 0.0f);
+	return (vec);
+}
+
 void Utilities::Replace(std::string &str, const std::string &from, const std::string &to)
 {
     size_t startPosition = str.find(from);
@@ -69,11 +77,13 @@ bool Utilities::Contains(const std::string &str, const std::string &find)
 
 float Utilities::Random11()
 {
+	srand(rand());
 	return (((float(rand() % 100000) * 0.00001) - 0.5f) * 2.0f);
 }
 
 float Utilities::Random01()
 {
+	srand(rand());
 	return float(rand() % 100000) * 0.00001;
 }
 

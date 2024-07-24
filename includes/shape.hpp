@@ -13,7 +13,7 @@
 #define PLANE 3
 #define BLADE 4
 #define SCREEN_QUAD 5
-#define TRUNK 6
+#define CYLINDER 6
 
 class Shape
 {
@@ -56,7 +56,11 @@ class Shape
         void Scale(const glm::vec3 &scale);
 
         void RecalculateData();
+		void RecalculateUV();
+		void RecalculateNormals();
         void Join(Shape &joinShape);
+
+		glm::vec4 GetBounds();
 };
 
 #endif
