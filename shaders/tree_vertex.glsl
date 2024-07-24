@@ -21,8 +21,8 @@ out vec2 UV;
 out vec3 normal;
 out vec3 worldPosition;
 
-float spacing = 10.0;
-float spacingMult = 0.1;
+float spacing = 50;
+float spacingMult = 0.02;
 
 #include "variables.glsl"
 #include "transformation.glsl"
@@ -92,7 +92,7 @@ void main()
     vec3 position = iPosition;
     normal = iNormal;
 
-    rotation = rotationMatrix(vec3(0.0, 1.0, 0.0), radians(ran));
+    mat4 rotation = rotationMatrix(vec3(0.0, 1.0, 0.0), radians(ran));
     position = (rotation * vec4(position, 1.0)).xyz;
     normal = (rotation * vec4(normal, 0.0)).xyz;
 

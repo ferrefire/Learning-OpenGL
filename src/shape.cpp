@@ -113,6 +113,36 @@ Shape::Shape(int preset, int resolution)
         Join(up);
         Join(down);
     }
+    else if (preset == TRUNK)
+    {
+        Shape front(QUAD);
+        front.Translate(glm::vec3(0.0f, 0.0f, -0.5f));
+        Shape right(QUAD);
+        right.Rotate(-90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        right.Translate(glm::vec3(0.5f, 0.0f, 0.0f));
+        Shape left(QUAD);
+        left.Rotate(90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        left.Translate(glm::vec3(-0.5f, 0.0f, 0.0f));
+        Shape back(QUAD);
+		back.Rotate(-180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+		back.Translate(glm::vec3(0.0f, 0.0f, 0.5f));
+        Shape up(QUAD);
+        up.Rotate(90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+        up.Translate(glm::vec3(0.0f, 0.5f, 0.0f));
+        Shape down(QUAD);
+        down.Rotate(-90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+        down.Translate(glm::vec3(0.0f, -0.5f, 0.0f));
+
+        Join(front);
+        Join(right);
+        Join(left);
+        Join(back);
+        Join(up);
+        Join(down);
+
+        Translate(glm::vec3(0, 0.5, 0));
+        Scale(glm::vec3(3, 25, 3));
+    }
     else if (preset == PLANE)
     {
         name = std::string("plane");

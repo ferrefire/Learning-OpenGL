@@ -153,7 +153,7 @@ Buffer *Grass::countLodBuffer = NULL;
 Mesh *Grass::grassMesh = NULL;
 Mesh *Grass::grassLodMesh = NULL;
 
-unsigned int Trees::treeCount = 1024;
+unsigned int Trees::treeCount = 256;
 unsigned int Trees::treeRenderCount = 0;
 Shader *Trees::treeShader = NULL;
 Shader *Trees::treeComputeShader = NULL;

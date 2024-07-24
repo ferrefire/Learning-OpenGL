@@ -23,7 +23,7 @@ void Trees::CreateShaders()
 	treeShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
 	treeShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());
 
-    treeComputeShader = new Shader("tree_compute_shader.glsl");
+    treeComputeShader = new Shader("trees_compute_shader.glsl");
     Manager::AddShader(treeComputeShader);
     treeComputeShader->setInt("instanceCount", treeCount * treeCount);
 	treeComputeShader->setFloat("instanceMult", 1.0 / float(treeCount * treeCount));
@@ -48,7 +48,7 @@ void Trees::CreateBuffers()
 
 void Trees::CreateMeshes()
 {
-    Shape *treeShape = new Shape(CUBE);
+    Shape *treeShape = new Shape(TRUNK);
     Manager::AddShape(treeShape);
 
     treeMesh = new Mesh(treeShape, treeShader);

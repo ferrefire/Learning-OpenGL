@@ -26,8 +26,8 @@ uniform int instanceCountSqrt;
 uniform float instanceCountSqrtMult;
 uniform float lodRange = 256.0;
 
-float spacing = 10;
-float spacingMult = 0.1;
+float spacing = 50;
+float spacingMult = 0.02;
 
 #include "variables.glsl"
 #include "culling.glsl"
@@ -53,7 +53,7 @@ void main()
 
 	//int lod = Inside(vec2(x, z));
 
-	vec2 flooredViewPosition = vec2(floor(viewPosition.x), floor(viewPosition.z));
+	vec2 flooredViewPosition = vec2(floor(viewPosition.x * spacingMult) * spacing, floor(viewPosition.z * spacingMult) * spacing);
     x = x * spacing + flooredViewPosition.x;
     z = z * spacing + flooredViewPosition.y;
 
@@ -61,32 +61,30 @@ void main()
     
 	float squaredDistance = SquaredDistanceToViewPosition(vec3(x, y, z));
 
-	float viewTolerance = 1.0 - clamp(squaredDistance, 0.0, 250.0) * 0.004;
-	viewTolerance = pow(viewTolerance, 4);
-	if (InView(vec3(x, y, z) + vec3(0, 0.5, 0), viewTolerance) == 0) return ;
-
 	float maxDistance = pow(instanceCountSqrt * spacing, 2);
 	float maxDistanceMult = pow(instanceCountSqrtMult * spacingMult, 2);
 
-	float falloff = clamp(clamp(squaredDistance, 0.0, maxDistance) * maxDistanceMult, 0.0, 1.0);
-	falloff = 1.0 - pow(1.0 - falloff, 16);
-	//falloff = falloff * 1.025 - 0.025;
-    //falloff = pow(falloff, 0.2);
+	//float falloff = clamp(clamp(squaredDistance, 0.0, maxDistance) * maxDistanceMult, 0.0, 1.0);
+	//falloff = 1.0 - pow(1.0 - falloff, 16);
 
     float ranMult = 1.0 - (abs(x) + abs(z)) * terrainSizeMult * 0.5;
     float ran = random(vec2(x, z) * ranMult);
 
-    if (falloff > ran) return ;
+    //if (falloff > ran) return ;
 	//if (RayOccluded(vec3(x, y, z)) == 1) return ;
 
     vec3 position = vec3(x, y, z);
     ran = random(vec2(ran * 100, ran * 200));
-	position.x += (ran - 0.5) * 10.0;
+	position.x += (ran - 0.5) * 50.0;
     ran = random(vec2(ran * 200, ran * 100));
-	position.z += (ran - 0.5) * 10.0;
+	position.z += (ran - 0.5) * 50.0;
 	position.y = SampleDynamic(position.xz) * heightMapHeight;
-    vec3 norm = SampleNormalDynamic(position, 0.5);
 
+    float viewTolerance = 1.0 - clamp(squaredDistance, 0.0, 10000.0) * 0.0001;
+	viewTolerance = pow(viewTolerance, 4);
+	if (InView(position + vec3(0, 10, 0), viewTolerance) == 0) return ;
+
+    vec3 norm = SampleNormalDynamic(position, 0.5);
     float steepness = GetSteepness(norm);
     steepness = 1.0 - pow(1.0 - steepness, 15);
     if (steepness > 0.5 + (ran - 0.5) * 0.25) return ;
@@ -104,7 +102,7 @@ void main()
 
     uint index = atomicAdd(count, 1);
 	data[index].posxz = packHalf2x16(position.xz - viewPosition.xz);
-	data[index].posyroty = packHalf2x16(vec2(position.y - viewPosition.y, rot)); //maybe pos.y * terrainHeightMult for better precision
+	data[index].posyroty = packHalf2x16(vec2(position.y - viewPosition.y, rotation)); //maybe pos.y * terrainHeightMult for better precision
 
 	//if (lod == 1)
 	//{

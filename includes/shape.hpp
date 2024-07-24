@@ -13,6 +13,7 @@
 #define PLANE 3
 #define BLADE 4
 #define SCREEN_QUAD 5
+#define TRUNK 6
 
 class Shape
 {

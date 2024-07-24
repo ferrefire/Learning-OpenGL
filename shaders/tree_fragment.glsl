@@ -23,7 +23,7 @@ void main()
 	vec3 diffuse = DiffuseLighting(normal, treeColor);
 	//vec3 bladeSpecular = SpecularLighting(normal, viewDirection, 8);
 	//vec3 terrainSpecular = SpecularLighting(terrainNormal, viewDirection, 16);
-	vec3 endColor = diffuse;
+	vec3 endColor = Fog(diffuse, depth);
 	
 	fragmentColor = vec4(endColor, 1);
 }
