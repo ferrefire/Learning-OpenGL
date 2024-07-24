@@ -84,7 +84,7 @@ void main()
 
 	float viewTolerance = 1.0 - clamp(squaredDistance, 0.0, 250.0) * 0.004;
 	viewTolerance = pow(viewTolerance, 4);
-	if (InView(vec3(x, y, z) + vec3(0, 0.5, 0), viewTolerance) == 0) return ;
+	if (InView(vec3(x, y, z) + vec3(0, 0.5, 0), vec3(viewTolerance * 0.1, viewTolerance, 0)) == 0) return ;
 
 	float maxDistance = pow(instanceCountSqrt * spacing, 2);
 	float maxDistanceMult = pow(instanceCountSqrtMult * spacingMult, 2);

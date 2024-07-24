@@ -140,12 +140,8 @@ Shape::Shape(int preset, int resolution)
 
 			glm::vec3 newVert = glm::normalize(Utilities::RotateNewVec3(glm::vec3(0, 0, -1), (360.0 / resolution) * -x, glm::vec3(0, 1, 0)));
 
-			float trunkWidth = 2.0 - (y / (resolution - 1));
-
-			vert.x = newVert.x * trunkWidth;
-			vert.z = newVert.z * trunkWidth;
-
-			vert += (glm::vec3(Utilities::Random11(), 0, Utilities::Random11()) * 0.2f);
+			vert.x = newVert.x;
+			vert.z = newVert.z;
 
 			index++;
 		}

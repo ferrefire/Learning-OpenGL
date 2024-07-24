@@ -54,10 +54,10 @@ void main()
         //vec2 uv = (tUV[0] + tUV[1] + tUV[2]) * (1.0 / 3.0);
         //vec2 uv = UV[gl_InvocationID];
         float disSqr = dot(viewPosition - center, viewPosition - center);
-		float tolerance = pow(1.0 - disSqr * (farMult * farMult), 2);
-		//vec3 normal = SampleNormal(uv, 1);
-		//float angled = 1.0 - pow(1.0 - NormalToViewDot(viewDirection, normal), 3);
-		//float angled = PositionToViewDot(gl_in[0].gl_Position.xyz, gl_in[1].gl_Position.xyz, gl_in[2].gl_Position.xyz);
+		float tolerance = 1.0 - disSqr * (farMult * farMult);
+		if (disSqr > pow(terrainChunkSize * 0.5, 2)) tolerance = pow(tolerance, 16);
+		else tolerance = pow(tolerance, 128);
+
         if (disSqr > 10000 && (
 			(InView(center, tolerance) == 0 && 
             InView(p0, tolerance) == 0 &&

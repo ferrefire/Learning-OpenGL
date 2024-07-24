@@ -8,22 +8,29 @@
 
 uniform sampler2D occlusionMap;
 
-int InView(vec3 position, float tolerance)
+int InView(vec3 position, vec3 tolerance)
 {
     vec4 viewSpace = projection * view * vec4(position, 1.0);
 
     vec3 clipSpace = viewSpace.xyz;
     clipSpace /= -viewSpace.w;
 
-    clipSpace.x = clipSpace.x * 0.5f + 0.5f;
-    clipSpace.y = clipSpace.y * 0.5f + 0.5f;
+    clipSpace.x = clipSpace.x * 0.5 + 0.5;
+    clipSpace.y = clipSpace.y * 0.5 + 0.5;
     clipSpace.z = viewSpace.w;
 
-    if (clipSpace.z <= 0.0 || clipSpace.z > far) return (0);
+    if (clipSpace.z > far) return (0);
 
-    return (clipSpace.x < -tolerance || clipSpace.x > 1.0f + tolerance ||
-        clipSpace.y < -tolerance || clipSpace.y > 1.0f + tolerance ||
-        clipSpace.z <= -(tolerance * 0.5f)) ? 0 : 1;
+    return (clipSpace.x < -tolerance.x || clipSpace.x > 1.0 + tolerance.x ||
+        clipSpace.y < -tolerance.y || clipSpace.y > 1.0 + tolerance.y ||
+        clipSpace.z < -tolerance.z) ? 0 : 1;
+	//return ((clipSpace.x > -tolerance.x && clipSpace.x < 1.0 + tolerance.x) ||
+    //    (clipSpace.y > -tolerance.y && clipSpace.y < 1.0 + tolerance.y)) ? 1 : 0;
+}
+
+int InView(vec3 position, float tolerance)
+{
+    return InView(position, vec3(tolerance, tolerance, 0));
 }
 
 float MapOccluded(vec3 position)
