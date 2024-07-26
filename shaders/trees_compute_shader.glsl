@@ -53,12 +53,13 @@ void main()
 
 	//int lod = Inside(vec2(x, z));
 
-	vec2 flooredViewPosition = vec2(floor(viewPosition.x * spacingMult) * spacing, floor(viewPosition.z * spacingMult) * spacing);
+	vec2 flooredViewPosition = vec2(floor(viewPosition.x * spacingMult) * spacing, 
+		floor(viewPosition.z * spacingMult) * spacing);
     x = x * spacing + flooredViewPosition.x;
     z = z * spacing + flooredViewPosition.y;
 
     //float y = SampleDynamic(vec2(x, z)) * heightMapHeight;
-    float y = SampleArray(vec2(x, z) * terrainSizeMult + 0.5) * heightMapHeight;
+    float y = SampleArray((vec2(x, z) + terrainWorldOffset) * terrainSizeMult + 0.5) * heightMapHeight;
     
 	float squaredDistance = SquaredDistanceToViewPosition(vec3(x, y, z));
 
@@ -80,14 +81,14 @@ void main()
     ran = random(vec2(ran * 200, ran * 100));
 	position.z += (ran - 0.5) * 50.0;
 	//position.y = SampleDynamic(position.xz) * heightMapHeight;
-	position.y = SampleArray(position.xz * terrainSizeMult + 0.5) * heightMapHeight;
+	position.y = SampleArray((position.xz + terrainWorldOffset) * terrainSizeMult + 0.5) * heightMapHeight;
 
     float viewTolerance = 1.0 - clamp(squaredDistance, 0.0, 1000000.0) * 0.000001;
 	viewTolerance = pow(viewTolerance, 8);
 	if (squaredDistance > 10000 && InView(position + vec3(0, 25, 0), vec3(viewTolerance * 0.1, viewTolerance, 0)) == 0) return ;
 
     //vec3 norm = SampleNormalDynamic(position, 0.5);
-    vec3 norm = SampleArrayNormal(position, 0.5);
+    vec3 norm = SampleArrayNormal(position + vec3(terrainWorldOffset.x, 0, terrainWorldOffset.y), 0.5);
     float steepness = GetSteepness(norm);
     steepness = 1.0 - pow(1.0 - steepness, 15);
     if (steepness > 0.5 + (ran - 0.5) * 0.25) return ;

@@ -6,6 +6,7 @@
 #include "input.hpp"
 #include "time.hpp"
 #include <iostream>
+#include "trees.hpp"
 
 void Terrain::CreateTerrain()
 {
@@ -429,9 +430,13 @@ void Terrain::CheckTerrainOffset()
 		glm::vec2 newOffset = glm::vec2(Utilities::Fits(terrainChunkSize * terrainStep, xw), 
 			Utilities::Fits(terrainChunkSize * terrainStep, zw)) * terrainChunkSize * terrainStep;
 		terrainOffset += newOffset;
+		//terrainOffset += glm::vec2(Manager::camera.Position().x, Manager::camera.Position().z);
 		offsetLod0 = glm::vec2(0);
 		offsetLod1 = glm::vec2(0);
 		Manager::camera.Move(-glm::vec3(newOffset.x, 0, newOffset.y));
+		//Shader::setFloat3Global("viewPosition", Manager::camera.Position());
+		//Manager::camera.SetPosition(glm::vec3(0, Manager::camera.Position().y, 0));
+		//Terrain::terrainShader->setFloat3("computeViewPosition", Manager::camera.Position());
 		xw = Manager::camera.Position().x;
 		zw = Manager::camera.Position().z;
 

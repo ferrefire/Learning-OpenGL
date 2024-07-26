@@ -237,7 +237,7 @@ void GetArguments(int argc, char **argv)
 		else if (Utilities::Contains(arg, "CIN=")) 
 		{
 			Manager::activeCinematic.Load((Utilities::GetPath() + "/cinematics/" + (argv[i] + arg.find('=') + 1) + ".txt").c_str());
-			Manager::activeCinematic.speed = 5;
+			Manager::activeCinematic.speed = 1;
 		}
 		else if (Utilities::Contains(arg, "TERRAIN_RES=")) Terrain::terrainLod0Resolution = std::stof(argv[i] + arg.find('=') + 1);
 		else if (Utilities::Contains(arg, "TERRAIN_CHUNK_RES=")) Terrain::terrainChunkResolution = std::stof(argv[i] + arg.find('=') + 1);
@@ -346,7 +346,7 @@ int main(int argc, char **argv)
 		}
 		
 		Terrain::NewFrame();
-		//Trees::NewFrame();
+		Trees::NewFrame();
 		Grass::NewFrame();
 
         Manager::NewFrame();

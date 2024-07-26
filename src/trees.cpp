@@ -58,14 +58,14 @@ void Trees::CreateMeshes()
 void Trees::ComputeTrees()
 {
     treeComputeShader->useShader();
-    glDispatchCompute(treeCount / 4, treeCount / 4, 1);
+	glDispatchCompute(treeCount / 4, treeCount / 4, 1);
 
     void *countPointer = treeCountBuffer->GetPointer();
 	treeRenderCount = *(unsigned int *)countPointer;
 	*(unsigned int *)countPointer = 0;
 	treeCountBuffer->UnMapBuffer();
 
-    treeShader->setFloat3("computeViewPosition", Manager::camera.Position());
+	treeShader->setFloat3("computeViewPosition", Manager::camera.Position());
 }
 
 void Trees::RenderTrees()
