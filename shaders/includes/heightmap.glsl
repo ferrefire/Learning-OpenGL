@@ -35,17 +35,31 @@ float SampleArray(vec2 uvPosition)
 	return textureLod(heightMapArray, vec3(uvPosition, indexUV.x * chunksLength + indexUV.y), 0).r;
 }
 
-vec3 SampleArrayNormal(vec2 uvPosition)
+//vec3 SampleArrayNormal(vec2 uvPosition)
+//{
+//	vec2 chunkUV = vec2(ceil(uvPosition.x * chunksLength), ceil(uvPosition.y * chunksLength));
+//	chunkUV = chunkUV * chunksLengthMult - chunksLengthMult * 0.5;
+//
+//	vec2 indexUV = vec2(floor(chunkUV.x * chunksLength), floor(chunkUV.y * chunksLength));
+//
+//	uvPosition -= chunkUV;
+//	uvPosition = (uvPosition * chunksLength * 2.0) * 0.5 + 0.5; //+ uv offset
+//
+//	return textureLod(heightMapArrayNormal, vec3(uvPosition, indexUV.x * chunksLength + indexUV.y), 0).rgb;
+//}
+
+vec3 SampleArrayNormal(vec3 worldPosition, float power)
 {
-	vec2 chunkUV = vec2(ceil(uvPosition.x * chunksLength), ceil(uvPosition.y * chunksLength));
-	chunkUV = chunkUV * chunksLengthMult - chunksLengthMult * 0.5;
+	float left = SampleArray((worldPosition.xz - vec2(worldSampleDistance, 0)) * terrainSizeMult + 0.5);
+    float right = SampleArray((worldPosition.xz + vec2(worldSampleDistance, 0)) * terrainSizeMult + 0.5);
+    float down = SampleArray((worldPosition.xz - vec2(0, worldSampleDistance)) * terrainSizeMult + 0.5);
+    float up = SampleArray((worldPosition.xz + vec2(0, worldSampleDistance)) * terrainSizeMult + 0.5);
+    vec3 normalTS = vec3((left - right) / worldSampleDistanceMult, 1, (down - up) / worldSampleDistanceMult);
 
-	vec2 indexUV = vec2(floor(chunkUV.x * chunksLength), floor(chunkUV.y * chunksLength));
+	if (power == 1) return (normalTS);
 
-	uvPosition -= chunkUV;
-	uvPosition = (uvPosition * chunksLength * 2.0) * 0.5 + 0.5; //+ uv offset
-
-	return textureLod(heightMapArrayNormal, vec3(uvPosition, indexUV.x * chunksLength + indexUV.y), 0).rgb;
+    normalTS.xz *= power;
+    return (normalize(normalTS));
 }
 
 float Sample(vec2 uv, int lod)

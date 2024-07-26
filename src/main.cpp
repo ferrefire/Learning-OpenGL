@@ -350,7 +350,7 @@ int main(int argc, char **argv)
 		}
 		
 		Terrain::NewFrame();
-		Trees::NewFrame();
+		//Trees::NewFrame();
 		Grass::NewFrame();
 
         Manager::NewFrame();

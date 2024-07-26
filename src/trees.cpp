@@ -48,7 +48,7 @@ void Trees::CreateBuffers()
 
 void Trees::CreateMeshes()
 {
-    Shape *treeShape = new Shape(CYLINDER, 12);
+    Shape *treeShape = new Shape(TRUNK, 12);
     Manager::AddShape(treeShape);
 
     treeMesh = new Mesh(treeShape, treeShader);

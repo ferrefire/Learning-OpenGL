@@ -14,6 +14,7 @@
 #define BLADE 4
 #define SCREEN_QUAD 5
 #define CYLINDER 6
+#define TRUNK 7
 
 class Shape
 {
@@ -61,6 +62,8 @@ class Shape
         void Join(Shape &joinShape);
 
 		glm::vec4 GetBounds();
+		//std::vector<int> GetEndVertices();
+		//std::vector<int> GetStartVertices();
 };
 
 #endif
