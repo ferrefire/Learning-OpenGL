@@ -229,16 +229,14 @@ void GetArguments(int argc, char **argv)
 	{
 		std::string arg = argv[i];
 		if (Utilities::Contains(arg, "FULL")) Manager::fullScreen = true;
-		else if (Utilities::Contains(arg, "MAKECIN=")) 
+		else if (Utilities::Contains(arg, "MAKECIN="))
 		{
 			makeCinematic = true;
-			std::string path = std::filesystem::current_path();
-			makeCinName = (path + "/cinematics/" + (argv[i] + arg.find('=') + 1) + ".txt");
+			makeCinName = (Utilities::GetPath() + "/cinematics/" + (argv[i] + arg.find('=') + 1) + ".txt");
 		}
 		else if (Utilities::Contains(arg, "CIN=")) 
 		{
-			std::string path = std::filesystem::current_path();
-			Manager::activeCinematic.Load((path + "/cinematics/" + (argv[i] + arg.find('=') + 1) + ".txt").c_str());
+			Manager::activeCinematic.Load((Utilities::GetPath() + "/cinematics/" + (argv[i] + arg.find('=') + 1) + ".txt").c_str());
 			Manager::activeCinematic.speed = 1;
 		}
 		else if (Utilities::Contains(arg, "TERRAIN_RES=")) Terrain::terrainLod0Resolution = std::stof(argv[i] + arg.find('=') + 1);
@@ -256,8 +254,6 @@ void Print(int val)
 
 int main(int argc, char **argv)
 {
-	std::string path = std::filesystem::current_path();
-
 	GetArguments(argc, argv);
 	GLFWwindow *window = setupGLFW();
     if (window == NULL) return (quit(EXIT_FAILURE));

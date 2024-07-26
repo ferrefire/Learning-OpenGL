@@ -26,7 +26,7 @@ void replaceShaderIncludes(std::string &shaderString, std::string &currentPath)
 
 long compileShader(int type, const char *path)
 {
-    std::string currentPath = std::filesystem::current_path();
+    std::string currentPath = Utilities::GetPath();
     std::string shaderString = Utilities::FileToString((currentPath + "/shaders/" + path).c_str());
     //std::string includeString = Utilities::FileToString((currentPath + "/shaders/includes/culling.glsl").c_str());
 

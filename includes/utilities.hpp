@@ -29,6 +29,7 @@ class Utilities
 		static float Random01();
         static int Fits(float part, float whole);
         static float SignedFloor(float x);
+		static std::string GetPath();
 };
 
 #endif

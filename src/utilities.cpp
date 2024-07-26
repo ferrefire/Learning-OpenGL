@@ -99,3 +99,10 @@ int Utilities::Fits(float part, float whole)
     int result = SignedFloor(times);
     return result;
 }
+
+std::string Utilities::GetPath()
+{
+	std::string path = std::filesystem::current_path().parent_path();
+	
+	return path;
+}
