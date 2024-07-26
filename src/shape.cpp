@@ -416,7 +416,7 @@ void Shape::Join(Shape &joinShape)
 
 glm::vec4 Shape::GetBounds()
 {
-	glm::vec4 bounds;
+	glm::vec4 bounds = glm::vec4(0);
 
 	for (const glm::vec3 &vert : vertices)
 	{

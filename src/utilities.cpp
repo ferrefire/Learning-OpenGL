@@ -102,7 +102,7 @@ int Utilities::Fits(float part, float whole)
 
 std::string Utilities::GetPath()
 {
-	std::string path = std::filesystem::current_path().parent_path();
+    std::string path = std::filesystem::current_path().parent_path().string();
 	
 	return path;
 }

@@ -16,7 +16,7 @@ void Buffer::CreateBuffer()
 {
 	glGenBuffers(1, &ID);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ID);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, size, __null, GL_STATIC_COPY);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, size, nullptr, GL_STATIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index, ID);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
