@@ -347,7 +347,7 @@ int main(int argc, char **argv)
 		
 		Terrain::NewFrame();
 		//Trees::NewFrame();
-		//Grass::NewFrame();
+		Grass::NewFrame();
 
         Manager::NewFrame();
 		if (Manager::firstFrame) Manager::firstFrame = false;

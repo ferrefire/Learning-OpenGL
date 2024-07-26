@@ -40,37 +40,37 @@ void Terrain::CreateShaders()
 	heightMapComputeShader = new Shader("heightmap_compute.glsl");
 	Manager::AddShader(heightMapComputeShader);
 
-	shadowMapComputeShader = new Shader("terrain_shadows_compute.glsl");
-	Manager::AddShader(shadowMapComputeShader);
-	shadowMapComputeShader->setFloat("resolution", terrainShadowResolution);
-	shadowMapComputeShader->setFloat("resolutionMult", 1.0 / float(terrainShadowResolution));
-	shadowMapComputeShader->setInt(heightMapLod0Texture->Name().c_str(), heightMapLod0Texture->Index());
-	shadowMapComputeShader->setInt(heightMapLod1Texture->Name().c_str(), heightMapLod1Texture->Index());
-	shadowMapComputeShader->setInt(heightMapArrayTexture->Name().c_str(), heightMapArrayTexture->Index());
+	//shadowMapComputeShader = new Shader("terrain_shadows_compute.glsl");
+	//Manager::AddShader(shadowMapComputeShader);
+	//shadowMapComputeShader->setFloat("resolution", terrainShadowResolution);
+	//shadowMapComputeShader->setFloat("resolutionMult", 1.0 / float(terrainShadowResolution));
+	//shadowMapComputeShader->setInt(heightMapLod0Texture->Name().c_str(), heightMapLod0Texture->Index());
+	//shadowMapComputeShader->setInt(heightMapLod1Texture->Name().c_str(), heightMapLod1Texture->Index());
+	//shadowMapComputeShader->setInt(heightMapArrayTexture->Name().c_str(), heightMapArrayTexture->Index());
 
-	heightMapNormalComputeShader = new Shader("heightmap_normal_compute.glsl");
-	Manager::AddShader(heightMapNormalComputeShader);
+	//heightMapNormalComputeShader = new Shader("heightmap_normal_compute.glsl");
+	//Manager::AddShader(heightMapNormalComputeShader);
 
 	heightMapArrayComputeShader = new Shader("heightmapArray_compute.glsl");
 	Manager::AddShader(heightMapArrayComputeShader);
-	heightMapArrayComputeShader->setFloat("resolution", terrainChunkResolution);
-	heightMapArrayComputeShader->setFloat("resolutionMult", 1.0 / float(terrainChunkResolution));
+	heightMapArrayComputeShader->setInt("resolution", heightMapArrayTexture->Resolution());
+	heightMapArrayComputeShader->setFloat("resolutionMult", heightMapArrayTexture->ResolutionMultiplier());
 	heightMapArrayComputeShader->setInt("chunksRadius", chunkRadius);
 
-	heightMapArrayNormalComputeShader = new Shader("heightmapArrayNormal_compute.glsl");
-	Manager::AddShader(heightMapArrayNormalComputeShader);
-	heightMapArrayNormalComputeShader->setFloat("resolution", terrainNormalResolution);
-	heightMapArrayNormalComputeShader->setFloat("resolutionMult", 1.0 / float(terrainNormalResolution));
-	heightMapArrayNormalComputeShader->setInt("chunksRadius", chunkRadius);
+	//heightMapArrayNormalComputeShader = new Shader("heightmapArrayNormal_compute.glsl");
+	//Manager::AddShader(heightMapArrayNormalComputeShader);
+	//heightMapArrayNormalComputeShader->setFloat("resolution", terrainNormalResolution);
+	//heightMapArrayNormalComputeShader->setFloat("resolutionMult", 1.0 / float(terrainNormalResolution));
+	//heightMapArrayNormalComputeShader->setInt("chunksRadius", chunkRadius);
 
-	occlusionMapComputeShader = new Shader("occlusion_compute.glsl");
-	Manager::AddShader(occlusionMapComputeShader);
-	occlusionMapComputeShader->setInt(heightMapLod0Texture->Name().c_str(), 0);
-	occlusionMapComputeShader->setInt(heightMapLod1Texture->Name().c_str(), 1);
-	// occlusionMapComputeShader->setInt("heightMapLod1", 1);
-	occlusionMapComputeShader->setInt("heightMapArray", 2);
-	occlusionMapComputeShader->setFloat("resolution", terrainOcclusionResolution);
-	occlusionMapComputeShader->setFloat("resolutionMult", 1.0 / float(terrainOcclusionResolution));
+	//occlusionMapComputeShader = new Shader("occlusion_compute.glsl");
+	//Manager::AddShader(occlusionMapComputeShader);
+	//occlusionMapComputeShader->setInt(heightMapLod0Texture->Name().c_str(), 0);
+	//occlusionMapComputeShader->setInt(heightMapLod1Texture->Name().c_str(), 1);
+	//// occlusionMapComputeShader->setInt("heightMapLod1", 1);
+	//occlusionMapComputeShader->setInt("heightMapArray", 2);
+	//occlusionMapComputeShader->setFloat("resolution", terrainOcclusionResolution);
+	//occlusionMapComputeShader->setFloat("resolutionMult", 1.0 / float(terrainOcclusionResolution));
 
 	terrainShader = new Shader("terrain_vertex.glsl", "tesselation_control.glsl", "tesselation_evaluation.glsl",
 							   "terrain_fragment.glsl");
@@ -176,30 +176,30 @@ void Terrain::CreateChunks()
 
 void Terrain::GenerateHeightMapParts(int lod, glm::vec2 part)
 {
-	if (lod == 0)
-	{
-		heightMapComputeShader->useShader();
-		heightMapLod0Texture->BindImage(0);
-		heightMapComputeShader->setInt("resolution", heightMapLod0Texture->Resolution());
-		heightMapComputeShader->setFloat("resolutionMult", heightMapLod0Texture->ResolutionMultiplier());
-		heightMapComputeShader->setFloat("mapScale", terrainLod0Size / terrainChunkSize);
-		heightMapComputeShader->setFloat2("offset", offsetLod0 / terrainLod0Size);
-		heightMapComputeShader->setFloat2("worldOffset", terrainOffset / terrainChunkSize);
-		heightMapComputeShader->setFloat2("part", part);
-		glDispatchCompute(heightMapLod0Texture->Resolution() / 8, heightMapLod0Texture->Resolution() / 8, 1);
-	}
-	else if (lod == 1)
-	{
-		heightMapComputeShader->useShader();
-		heightMapLod1Texture->BindImage(0);
-		heightMapComputeShader->setInt("resolution", heightMapLod1Texture->Resolution());
-		heightMapComputeShader->setFloat("resolutionMult", heightMapLod1Texture->ResolutionMultiplier());
-		heightMapComputeShader->setFloat("mapScale", terrainLod1Size / terrainChunkSize);
-		heightMapComputeShader->setFloat2("offset", offsetLod1 / terrainLod1Size);
-		heightMapComputeShader->setFloat2("worldOffset", terrainOffset / terrainChunkSize);
-		heightMapComputeShader->setFloat2("part", 0, 0);
-		glDispatchCompute(heightMapLod1Texture->Resolution() / 4, heightMapLod1Texture->Resolution() / 32, 1);
-	}
+	//if (lod == 0)
+	//{
+	//	heightMapComputeShader->useShader();
+	//	heightMapLod0Texture->BindImage(0);
+	//	heightMapComputeShader->setInt("resolution", heightMapLod0Texture->Resolution());
+	//	heightMapComputeShader->setFloat("resolutionMult", heightMapLod0Texture->ResolutionMultiplier());
+	//	heightMapComputeShader->setFloat("mapScale", terrainLod0Size / terrainChunkSize);
+	//	heightMapComputeShader->setFloat2("offset", offsetLod0 / terrainLod0Size);
+	//	heightMapComputeShader->setFloat2("worldOffset", terrainOffset / terrainChunkSize);
+	//	//heightMapComputeShader->setFloat2("part", part);
+	//	glDispatchCompute(heightMapLod0Texture->Resolution() / 8, heightMapLod0Texture->Resolution() / 8, 1);
+	//}
+	//else if (lod == 1)
+	//{
+	//	heightMapComputeShader->useShader();
+	//	heightMapLod1Texture->BindImage(0);
+	//	heightMapComputeShader->setInt("resolution", heightMapLod1Texture->Resolution());
+	//	heightMapComputeShader->setFloat("resolutionMult", heightMapLod1Texture->ResolutionMultiplier());
+	//	heightMapComputeShader->setFloat("mapScale", terrainLod1Size / terrainChunkSize);
+	//	heightMapComputeShader->setFloat2("offset", offsetLod1 / terrainLod1Size);
+	//	heightMapComputeShader->setFloat2("worldOffset", terrainOffset / terrainChunkSize);
+	//	//heightMapComputeShader->setFloat2("part", 0, 0);
+	//	glDispatchCompute(heightMapLod1Texture->Resolution() / 4, heightMapLod1Texture->Resolution() / 32, 1);
+	//}
 }
 
 void Terrain::GenerateHeightMap(int lod)
@@ -290,12 +290,12 @@ void Terrain::GenerateHeightMapArrayPart()
 	heightMapArrayComputeShader->setInt("chunkIndex", index);
 	heightMapArrayComputeShader->setFloat2("chunkCoordinates", xi, yi);
 	glDispatchCompute(heightMapArrayTexture->Resolution() / 4, heightMapArrayTexture->Resolution() / 4, 1);
+	//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 	index++;
 	if (index >= chunkCount) 
 	{
 		generating = false;
-		//Manager::EnableVsync(true);
 	}
 
 	if (yi < chunkRadius)
@@ -423,15 +423,15 @@ void Terrain::RenderTerrain()
 
 void Terrain::NewFrame()
 {
-	if (Input::GetKey(GLFW_KEY_G).pressed)
-	{
-		seed = glm::vec2(int(Utilities::Random11() * 100), int(Utilities::Random11() * 100));
-		heightMapComputeShader->setFloat2("seed", seed);
-		heightMapArrayComputeShader->setFloat2("seed", seed);
-		GenerateHeightMap(0);
-		GenerateHeightMap(1);
-		GenerateHeightMapArray();
-	}
+	//if (Input::GetKey(GLFW_KEY_G).pressed)
+	//{
+	//	seed = glm::vec2(int(Utilities::Random11() * 100), int(Utilities::Random11() * 100));
+	//	heightMapComputeShader->setFloat2("seed", seed);
+	//	heightMapArrayComputeShader->setFloat2("seed", seed);
+	//	GenerateHeightMap(0);
+	//	GenerateHeightMap(1);
+	//	GenerateHeightMapArray();
+	//}
 
 	if (generating) GenerateHeightMapArrayPart();
 
