@@ -11,12 +11,12 @@ uniform float farMult;
 uniform float width;
 uniform float height;
 
-uniform mat4 view;
-uniform mat4 projection;
+uniform mat4 view = mat4(1.0);
+uniform mat4 projection = mat4(1.0);
 uniform mat4 model = mat4(1.0);
 
-uniform vec3 viewPosition;
-uniform vec3 viewDirection;
+uniform vec3 viewPosition = vec3(0);
+uniform vec3 viewDirection = vec3(0);
 
 uniform vec3 lightPosition;
 uniform vec3 lightDirection;

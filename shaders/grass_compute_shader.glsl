@@ -82,7 +82,7 @@ void main()
     
 	float squaredDistance = SquaredDistanceToViewPosition(vec3(x, y, z));
 
-	float viewTolerance = 1.0 - clamp(squaredDistance, 0.0, 250.0) * 0.004;
+	float viewTolerance = clamp(1.0 - clamp(squaredDistance, 0.0, 250.0) * 0.004, 0.0, 1.0);
 	viewTolerance = pow(viewTolerance, 4);
 	if (InView(vec3(x, y, z) + vec3(0, 0.5, 0), vec3(viewTolerance * 0.1, viewTolerance, 0)) == 0) return ;
 

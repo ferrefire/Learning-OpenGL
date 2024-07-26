@@ -68,17 +68,18 @@ void main()
             gl_TessLevelOuter[1] = 0;
             gl_TessLevelOuter[2] = 0;
             gl_TessLevelInner[0] = 0;
-            return ;
         }
+		else
+		{
+			float tessLevel1 = TessellationFactor(p1, p2);
+        	float tessLevel2 = TessellationFactor(p2, p0);
+        	float tessLevel3 = TessellationFactor(p0, p1);
 
-        float tessLevel1 = TessellationFactor(p1, p2);
-        float tessLevel2 = TessellationFactor(p2, p0);
-        float tessLevel3 = TessellationFactor(p0, p1);
+        	gl_TessLevelOuter[0] = tessLevel1;
+        	gl_TessLevelOuter[1] = tessLevel2;
+        	gl_TessLevelOuter[2] = tessLevel3;
 
-        gl_TessLevelOuter[0] = tessLevel1;
-        gl_TessLevelOuter[1] = tessLevel2;
-        gl_TessLevelOuter[2] = tessLevel3;
-
-        gl_TessLevelInner[0] = (tessLevel1 + tessLevel2 + tessLevel3) * (1.0 / 3.0);
+        	gl_TessLevelInner[0] = (tessLevel1 + tessLevel2 + tessLevel3) * (1.0 / 3.0);
+		}
     }
 }
