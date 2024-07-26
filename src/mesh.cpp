@@ -15,10 +15,10 @@ Mesh::Mesh(Shape *shape, Shader *shader)
 	currentActiveVAO = VAO;
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, shape->DataCount() * sizeof(float), shape->GetData(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, shape->DataCount() * sizeof(float), shape->GetData(), GL_STATIC_COPY);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape->IndiceCount() * sizeof(unsigned int), shape->GetIndices(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape->IndiceCount() * sizeof(unsigned int), shape->GetIndices(), GL_STATIC_COPY);
 
     if (shape->vertexOnly)
     {
@@ -38,7 +38,9 @@ Mesh::Mesh(Shape *shape, Shader *shader)
 
 Mesh::~Mesh()
 {
-	
+	glDeleteBuffers(1, &EBO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &VAO);
 }
 
 unsigned int Mesh::GetVAO()

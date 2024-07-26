@@ -24,7 +24,7 @@ void Grass::CreateShaders()
 	grassShader->setInt(Terrain::heightMapLod0Texture->Name().c_str(), Terrain::heightMapLod0Texture->Index());
 	grassShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
 	grassShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());
-	grassShader->setInt(Terrain::shadowMapTexture->Name().c_str(), Terrain::shadowMapTexture->Index());
+	//grassShader->setInt(Terrain::shadowMapTexture->Name().c_str(), Terrain::shadowMapTexture->Index());
 
 	grassComputeShader = new Shader("grass_compute_shader.glsl");
 	Manager::AddShader(grassComputeShader);
@@ -36,7 +36,7 @@ void Grass::CreateShaders()
 	grassComputeShader->setInt(Terrain::heightMapLod0Texture->Name().c_str(), Terrain::heightMapLod0Texture->Index());
 	grassComputeShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
 	grassComputeShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());
-	grassComputeShader->setInt(Terrain::shadowMapTexture->Name().c_str(), Terrain::shadowMapTexture->Index());
+	//grassComputeShader->setInt(Terrain::shadowMapTexture->Name().c_str(), Terrain::shadowMapTexture->Index());
 }
 
 void Grass::CreateBuffers()
@@ -94,6 +94,7 @@ void Grass::ComputeGrass(int lod)
 	grassComputeShader->useShader();
 	grassComputeShader->setInt("specificLod", lod);
 	glDispatchCompute(totalGrassCount / 4, totalGrassCount / 4, 1);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_ATOMIC_COUNTER_BARRIER_BIT);
 
 	if (lod == 0 || lod == -1)
 	{

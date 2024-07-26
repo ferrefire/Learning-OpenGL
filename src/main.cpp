@@ -237,7 +237,7 @@ void GetArguments(int argc, char **argv)
 		else if (Utilities::Contains(arg, "CIN=")) 
 		{
 			Manager::activeCinematic.Load((Utilities::GetPath() + "/cinematics/" + (argv[i] + arg.find('=') + 1) + ".txt").c_str());
-			Manager::activeCinematic.speed = 1;
+			Manager::activeCinematic.speed = 5;
 		}
 		else if (Utilities::Contains(arg, "TERRAIN_RES=")) Terrain::terrainLod0Resolution = std::stof(argv[i] + arg.find('=') + 1);
 		else if (Utilities::Contains(arg, "TERRAIN_CHUNK_RES=")) Terrain::terrainChunkResolution = std::stof(argv[i] + arg.find('=') + 1);
@@ -286,6 +286,8 @@ int main(int argc, char **argv)
 
 	while (!glfwWindowShouldClose(window))
     {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		Time::NewFrame();
 		Debug::NewFrame();
         Input::ProcessInput();
@@ -312,8 +314,6 @@ int main(int argc, char **argv)
 			Manager::activeCinematic.AddKeyRotation(newRotKey, newRotDur);
 			lastTime = glfwGetTime();
 		}
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		bool sunMoved = false;
 		if (Input::GetKey(GLFW_KEY_DOWN).down)
@@ -355,6 +355,9 @@ int main(int argc, char **argv)
 		//renderMesh(*screenQuadMesh);
 
 		glBindVertexArray(0);
+		Mesh::currentActiveVAO = 0;
+		glUseProgram(0);
+		Shader::currentActiveShader = 0;		
 
         glfwSwapBuffers(window);
         glfwPollEvents();

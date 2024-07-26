@@ -6,8 +6,6 @@
 #include "heightmap.glsl"
 #include "functions.glsl"
 
-uniform sampler2D occlusionMap;
-
 int InView(vec3 position, vec3 tolerance)
 {
     vec4 viewSpace = projection * view * vec4(position, 1.0);
@@ -33,11 +31,11 @@ int InView(vec3 position, float tolerance)
     return InView(position, vec3(tolerance, tolerance, 0));
 }
 
-float MapOccluded(vec3 position)
-{
-	vec2 uv = (position.xz - viewPosition.xz) * terrainOccludeSizeMult + 0.5;
-	return textureLod(occlusionMap, uv, 0).r;
-}
+//float MapOccluded(vec3 position)
+//{
+//	vec2 uv = (position.xz - viewPosition.xz) * terrainOccludeSizeMult + 0.5;
+//	return textureLod(occlusionMap, uv, 0).r;
+//}
 
 int RayOccluded(vec3 position)
 {
