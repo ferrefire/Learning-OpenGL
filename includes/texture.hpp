@@ -43,6 +43,7 @@ class Texture
 		float ResolutionMultiplier();
 
 		void BindImage(int imageIndex);
+		void ClearImage();
 };
 
 #endif

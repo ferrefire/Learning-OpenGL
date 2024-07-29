@@ -78,11 +78,11 @@ Shape::Shape(int preset, int resolution)
 		vertices.push_back(glm::vec3(0.5f, 0.5f, 0.0f));
 
 		indices.push_back(0);
-		indices.push_back(1);
 		indices.push_back(2);
-		indices.push_back(0);
-		indices.push_back(3);
 		indices.push_back(1);
+		indices.push_back(0);
+		indices.push_back(1);
+		indices.push_back(3);
 
 		vertexCount = vertices.size();
 		indiceCount = indices.size();

@@ -9,5 +9,8 @@ out vec2 UV;
 void main()
 {
 	UV = iPosition.xy + 0.5;
-    gl_Position = vec4(iPosition, 1.0);
+	vec3 position = iPosition;
+	//position.x *= 0.625;
+	//position.y *= 1.111;
+    gl_Position = vec4(position, 1.0);
 }

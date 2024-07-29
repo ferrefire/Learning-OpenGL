@@ -31,6 +31,8 @@ void Manager::SetShaderVariables(Shader *shader)
 	shader->setMatrix4("view", camera.View());
 	shader->setFloat3("viewPosition", camera.Position());
 	shader->setFloat3("viewDirection", camera.Front());
+	shader->setFloat3("viewRight", camera.Side());
+	shader->setFloat3("viewUp", camera.Up());
 	shader->setMatrix4("projection", camera.Projection());
     shader->setFloat3("lightPosition", 25000.0f, 25000.0f, 50000.0f);
 	shader->setFloat3("lightDirection", sunDirection);
@@ -53,8 +55,6 @@ void Manager::SetShaderVariables(Shader *shader)
 	shader->setFloat("terrainChunkSizeMult", 1.0 / Terrain::terrainChunkSize);
 	shader->setFloat("terrainHeight", Terrain::terrainHeight);
 	shader->setFloat("terrainHeightMult", 1.0 / Terrain::terrainHeight);
-	shader->setFloat("terrainOccludeSize", Terrain::terrainOccludeSize);
-	shader->setFloat("terrainOccludeSizeMult", 1.0 / Terrain::terrainOccludeSize);
 	shader->setFloat("terrainLod0Size", Terrain::terrainLod0Size);
 	shader->setFloat("terrainLod0SizeMult", 1.0 / Terrain::terrainLod0Size);
 	shader->setFloat("terrainLod1Size", Terrain::terrainLod1Size);

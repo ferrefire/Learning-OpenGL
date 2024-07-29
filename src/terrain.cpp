@@ -60,27 +60,13 @@ void Terrain::CreateShaders()
 	heightMapArrayComputeShader->setInt(heightMapLod0Texture->Name().c_str(), heightMapLod0Texture->Index());
 	heightMapArrayComputeShader->setInt(heightMapLod1Texture->Name().c_str(), heightMapLod1Texture->Index());
 
-	//heightMapArrayNormalComputeShader = new Shader("heightmapArrayNormal_compute.glsl");
-	//Manager::AddShader(heightMapArrayNormalComputeShader);
-	//heightMapArrayNormalComputeShader->setFloat("resolution", terrainNormalResolution);
-	//heightMapArrayNormalComputeShader->setFloat("resolutionMult", 1.0 / float(terrainNormalResolution));
-	//heightMapArrayNormalComputeShader->setInt("chunksRadius", chunkRadius);
-
-	//occlusionMapComputeShader = new Shader("occlusion_compute.glsl");
-	//Manager::AddShader(occlusionMapComputeShader);
-	//occlusionMapComputeShader->setInt(heightMapLod0Texture->Name().c_str(), 0);
-	//occlusionMapComputeShader->setInt(heightMapLod1Texture->Name().c_str(), 1);
-	//// occlusionMapComputeShader->setInt("heightMapLod1", 1);
-	//occlusionMapComputeShader->setInt("heightMapArray", 2);
-	//occlusionMapComputeShader->setFloat("resolution", terrainOcclusionResolution);
-	//occlusionMapComputeShader->setFloat("resolutionMult", 1.0 / float(terrainOcclusionResolution));
-
 	terrainShader = new Shader("terrain_vertex.glsl", "tesselation_control.glsl", "tesselation_evaluation.glsl",
 							   "terrain_fragment.glsl");
 	Manager::AddShader(terrainShader);
 	terrainShader->setInt(heightMapLod0Texture->Name().c_str(), heightMapLod0Texture->Index());
 	terrainShader->setInt(heightMapLod1Texture->Name().c_str(), heightMapLod1Texture->Index());
 	terrainShader->setInt(heightMapArrayTexture->Name().c_str(), heightMapArrayTexture->Index());
+	//terrainShader->setInt(depthMapTexture->Name().c_str(), depthMapTexture->Index());
 	terrainShader->setFloat4("color", glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
 
 	terrainLodShader = new Shader("terrain_vertex_lod.glsl", "terrain_fragment_lod.glsl");
@@ -89,8 +75,6 @@ void Terrain::CreateShaders()
 	terrainLodShader->setInt(heightMapLod1Texture->Name().c_str(), heightMapLod1Texture->Index());
 	terrainLodShader->setInt(heightMapArrayTexture->Name().c_str(), heightMapArrayTexture->Index());
 	terrainLodShader->setFloat4("color", glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
-
-	// terrainShader->setInt("occlusionMap", 3);
 }
 
 void Terrain::CreateTextures()
@@ -99,19 +83,9 @@ void Terrain::CreateTextures()
 	heightMapLod0Texture->CreateTexture();
 	Manager::AddTexture(heightMapLod0Texture);
 
-	// heightMapLod0Normal = new Texture("heightMapLod0Normal", 4, GL_TEXTURE4, terrainLod0Resolution, terrainLod0Resolution, GL_RGBA16_SNORM);
-	// heightMapLod0Normal->SetColorChannels(GL_RGBA);
-	// heightMapLod0Normal->CreateTexture();
-	// Manager::AddTexture(heightMapLod0Normal);
-
 	heightMapLod1Texture = new Texture("heightMapLod1", 1, GL_TEXTURE1, terrainLod1Resolution, terrainLod1Resolution, GL_R16_SNORM);
 	heightMapLod1Texture->CreateTexture();
 	Manager::AddTexture(heightMapLod1Texture);
-
-	// heightMapLod1Normal = new Texture("heightMapLod1Normal", 5, GL_TEXTURE5, terrainLod1Resolution, terrainLod1Resolution, GL_RGBA16_SNORM);
-	// heightMapLod1Normal->SetColorChannels(GL_RGBA);
-	// heightMapLod1Normal->CreateTexture();
-	// Manager::AddTexture(heightMapLod1Normal);
 
 	heightMapArrayTexture = new Texture("heightMapArray", 2, GL_TEXTURE2, terrainChunkResolution, terrainChunkResolution, GL_R16_SNORM);
 	heightMapArrayTexture->SetDimensions(terrainChunkResolution, terrainChunkResolution, chunkCount);
@@ -119,16 +93,14 @@ void Terrain::CreateTextures()
 	heightMapArrayTexture->CreateTexture();
 	Manager::AddTexture(heightMapArrayTexture);
 
-	// heightMapArrayNormal = new Texture("heightMapArrayNormal", 3, GL_TEXTURE3, terrainNormalResolution, terrainNormalResolution, GL_RGBA16_SNORM);
-	// heightMapArrayNormal->SetDimensions(terrainNormalResolution, terrainNormalResolution, chunkCount);
-	// heightMapArrayNormal->SetTextureType(GL_TEXTURE_2D_ARRAY);
-	// heightMapArrayNormal->SetColorChannels(GL_RGBA);
-	// heightMapArrayNormal->CreateTexture();
-	// Manager::AddTexture(heightMapArrayNormal);
-
 	shadowMapTexture = new Texture("shadowMap", 3, GL_TEXTURE3, terrainShadowResolution, terrainShadowResolution, GL_R16_SNORM);
 	shadowMapTexture->CreateTexture();
 	Manager::AddTexture(shadowMapTexture);
+
+	depthMapTexture = new Texture("depthMap", 4, GL_TEXTURE4, Input::width, Input::height, GL_R32F);
+	//depthMapTexture->SetFilterMode(GL_NEAREST);
+	depthMapTexture->CreateTexture();
+	Manager::AddTexture(depthMapTexture);
 }
 
 void Terrain::CreateChunks()
@@ -232,7 +204,6 @@ void Terrain::GenerateHeightMapArray()
 {
 	heightMapArrayComputeShader->useShader();
 	heightMapArrayTexture->BindImage(0);
-	//glDispatchCompute(heightMapArrayTexture->Resolution() / 4, heightMapArrayTexture->Resolution() / 4, 1);
 
 	int index = 0;
 	for (int xi = -chunkRadius; xi <= chunkRadius; xi++)
@@ -245,13 +216,6 @@ void Terrain::GenerateHeightMapArray()
 			index++;
 		}
 	}
-
-	//if (heightMapArrayNormal)
-	//{
-	//	heightMapArrayNormalComputeShader->useShader();
-	//	heightMapArrayNormal->BindImage(0);
-	//	glDispatchCompute(heightMapArrayNormal->Resolution() / 4, heightMapArrayNormal->Resolution() / 4, 1);
-	//}
 }
 
 void Terrain::GenerateHeightMapArrayPart()
@@ -279,12 +243,6 @@ void Terrain::GenerateHeightMapArrayPart()
 		yi = -chunkRadius;
 		xi++;
 	}
-}
-
-void Terrain::GenerateOcclusionMap()
-{
-	occlusionMapComputeShader->useShader();
-	glDispatchCompute(terrainOcclusionResolution / 4, terrainOcclusionResolution / 4, 1);
 }
 
 void Terrain::GenerateShadowMap()
@@ -337,6 +295,7 @@ void Terrain::RenderTerrain()
 {
 	Manager::EnableCulling(true);
 	terrainShader->useShader();
+	depthMapTexture->BindImage(0);
 
 	float sx = Manager::camera.Position().x / float(terrainChunkSize);
 	float sz = Manager::camera.Position().z / float(terrainChunkSize);
@@ -404,6 +363,16 @@ void Terrain::NewFrame()
 	//}
 
 	if (generating) GenerateHeightMapArrayPart();
+
+	if (Time::newFrameTick)
+	{
+		depthMapTexture->ClearImage();
+		terrainShader->setInt("newFrame", 1);
+	}
+	else
+	{
+		terrainShader->setInt("newFrame", 0);
+	}
 
 	if (Time::newSubTick)
 		CheckTerrainOffset();

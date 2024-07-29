@@ -2,6 +2,7 @@
 #include "manager.hpp"
 #include "terrain.hpp"
 #include "time.hpp"
+#include <iostream>
 
 void Trees::CreateTrees()
 {
@@ -33,6 +34,7 @@ void Trees::CreateShaders()
 	treeComputeShader->setInt(Terrain::heightMapLod0Texture->Name().c_str(), Terrain::heightMapLod0Texture->Index());
 	treeComputeShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
 	treeComputeShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());
+	treeComputeShader->setInt(Terrain::depthMapTexture->Name().c_str(), Terrain::depthMapTexture->Index());
 }
 
 void Trees::CreateBuffers()
@@ -81,4 +83,6 @@ void Trees::NewFrame()
 {
     if (Time::newFrameTick) ComputeTrees();
     RenderTrees();
+
+	if (Time::newSecond) std::cout << treeRenderCount << std::endl;
 }

@@ -3,33 +3,33 @@
 
 #include "variables.glsl"
 
-vec3 WorldToClip(vec3 position)
+vec4 WorldToView(vec3 position)
 {
     vec4 viewSpace = view * vec4(position, 1.0);
 
-    vec3 clipSpace = viewSpace.xyz;
-    clipSpace /= -viewSpace.w;
+    return (viewSpace);
+}
 
-    clipSpace.x = clipSpace.x * 0.5f + 0.5f;
-    clipSpace.y = clipSpace.y * 0.5f + 0.5f;
+vec3 WorldToClip(vec3 position)
+{
+    vec4 viewSpace = projection * WorldToView(position);
+
+    vec3 clipSpace = viewSpace.xyz;
+    clipSpace /= viewSpace.w;
+
+    clipSpace.x = clipSpace.x * 0.5 + 0.5;
+    clipSpace.y = clipSpace.y * 0.5 + 0.5;
     clipSpace.z = viewSpace.w;
 
     return (clipSpace);
 }
 
-vec4 WorldToView(vec3 position)
-{
-    vec4 ViewSpace = projection * view * vec4(position, 1.0);
-
-    return (ViewSpace);
-}
-
-vec4 ObjectToView(vec3 position)
-{
-    vec4 ViewSpace = projection * view * model * vec4(position, 1.0);
-
-    return (ViewSpace);
-}
+//vec4 WorldToClip(vec3 position)
+//{
+//    vec4 clipSpace = projection * WorldToView(position);
+//
+//    return (clipSpace);
+//}
 
 vec3 ObjectToWorld(vec3 position)
 {

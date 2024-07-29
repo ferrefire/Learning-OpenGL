@@ -24,7 +24,7 @@ void main()
     vec3 viewDirection = normalize(viewPosition - worldPosition);
     vec3 bladeColor = mix(Color.xyz * 0.5, Color.xyz, UV.y);
     
-	float depth = GetDepth(gl_FragCoord.z, near, far);
+	//float depth = GetDepth(gl_FragCoord.z, near, far);
 	vec3 diffuse = DiffuseLighting(terrainNormal, bladeColor);
 	vec3 bladeSpecular = SpecularLighting(normal, viewDirection, 8);
 	vec3 terrainSpecular = SpecularLighting(terrainNormal, viewDirection, 16);

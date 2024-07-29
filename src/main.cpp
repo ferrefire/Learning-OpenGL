@@ -90,15 +90,12 @@ float Terrain::terrainSize = 0;
 float Terrain::terrainShadowSize = 25000.0;
 float Terrain::terrainLod0Size = 2500.0;
 float Terrain::terrainLod1Size = 5000.0;
-float Terrain::terrainOccludeSize = 1000.0;
 float Terrain::terrainHeight = 5000.0;
 float Terrain::terrainScale = 0.75;
 int Terrain::terrainLayers = 8;
 float Terrain::terrainChunkSize = 10000.0;
 int Terrain::terrainLod0Resolution = 1024;
 int Terrain::terrainLod1Resolution = 1024;
-int Terrain::terrainNormalResolution = 512;
-int Terrain::terrainOcclusionResolution = 1024;
 int Terrain::terrainShadowResolution = 512;
 int Terrain::terrainChunkResolution = 1024;
 int Terrain::chunkRadius = 4;
@@ -115,21 +112,14 @@ glm::vec2 Terrain::offsetLod0 = glm::vec2(0.0, 0.0);
 glm::vec2 Terrain::offsetLod1 = glm::vec2(0.0, 0.0);
 glm::vec2 Terrain::seed = glm::vec2(0.0, 0.0);
 Texture *Terrain::heightMapLod0Texture = NULL;
-Texture *Terrain::heightMapLod0Normal = NULL;
 Texture *Terrain::heightMapLod1Texture = NULL;
-Texture *Terrain::heightMapLod1Normal = NULL;
 Texture *Terrain::heightMapArrayTexture = NULL;
-Texture *Terrain::heightMapArrayNormal = NULL;
 Texture *Terrain::shadowMapTexture = NULL;
-//unsigned int Terrain::occlusionMapTexture = 0;
-//unsigned int Terrain::heightMapArrayTexture = 0;
+Texture *Terrain::depthMapTexture = NULL;
 Shader *Terrain::terrainShader = NULL;
 Shader *Terrain::terrainLodShader = NULL;
 Shader *Terrain::heightMapComputeShader = NULL;
-Shader *Terrain::heightMapNormalComputeShader = NULL;
-Shader *Terrain::occlusionMapComputeShader = NULL;
 Shader *Terrain::heightMapArrayComputeShader = NULL;
-Shader *Terrain::heightMapArrayNormalComputeShader = NULL;
 Shader *Terrain::shadowMapComputeShader = NULL;
 Mesh *Terrain::terrainMesh = NULL;
 Mesh *Terrain::terrainLod0Mesh = NULL;
@@ -271,7 +261,7 @@ int main(int argc, char **argv)
 	Grass::CreateGrass();
 	Trees::CreateTrees();
 
-	/*Shader *quadShader = new Shader("screen_quad_vertex.glsl", "screen_quad_fragment.glsl");
+	Shader *quadShader = new Shader("screen_quad_vertex.glsl", "screen_quad_fragment.glsl");
 	Manager::AddShader(quadShader);
 
 	Shape *screenQuadShape = new Shape(SCREEN_QUAD);
@@ -280,7 +270,7 @@ int main(int argc, char **argv)
 	Mesh *screenQuadMesh = new Mesh(screenQuadShape, quadShader);
 	Manager::AddMesh(screenQuadMesh);
 
-	quadShader->setInt("quadTexture", Terrain::heightMapLod0Texture->Index());*/
+	quadShader->setInt("quadTexture", Terrain::depthMapTexture->Index());
 
 	double lastTime = 0;
 
@@ -346,13 +336,15 @@ int main(int argc, char **argv)
 		}
 		
 		Terrain::NewFrame();
-		Trees::NewFrame();
+		//Trees::NewFrame();
 		Grass::NewFrame();
 
-        Manager::NewFrame();
-		if (Manager::firstFrame) Manager::firstFrame = false;
+		//quadShader->useShader();
+		//screenQuadMesh->UseMesh();
+		//glDrawElements(GL_TRIANGLES, screenQuadMesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0);
 
-		//renderMesh(*screenQuadMesh);
+		Manager::NewFrame();
+		if (Manager::firstFrame) Manager::firstFrame = false;
 
 		glBindVertexArray(0);
 		Mesh::currentActiveVAO = 0;

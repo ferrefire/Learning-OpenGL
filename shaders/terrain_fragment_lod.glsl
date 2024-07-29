@@ -20,7 +20,7 @@ uniform vec4 color;
 
 void main()
 {
-    float depth = GetDepth(gl_FragCoord.z, near, far);
+    /*float depth = GetDepth(gl_FragCoord.z, near, far);
 
 	vec3 normal = SampleNormalDynamic(worldPosition, 0.5);
 	float steepness = GetSteepness(normal);
@@ -36,5 +36,6 @@ void main()
 	vec3 diffuse = DiffuseLighting(normal, terrainColor.xyz);
 	vec3 endColor = Fog(diffuse, depth);
 
-    fragmentColor = vec4(endColor, 1);
+    fragmentColor = vec4(endColor, 1);*/
+	fragmentColor = vec4(1);
 }

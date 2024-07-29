@@ -110,3 +110,8 @@ float Texture::ResolutionMultiplier()
 {
 	return (1.0 / float(width));
 }
+
+void Texture::ClearImage()
+{
+	glClearTexImage(ID, 0, colorChannels, GL_HALF_FLOAT, NULL);
+}

@@ -17,6 +17,8 @@ uniform mat4 model = mat4(1.0);
 
 uniform vec3 viewPosition = vec3(0);
 uniform vec3 viewDirection = vec3(0);
+uniform vec3 viewRight = vec3(0);
+uniform vec3 viewUp = vec3(0);
 
 uniform vec3 lightPosition;
 uniform vec3 lightDirection;

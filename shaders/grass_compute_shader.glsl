@@ -79,12 +79,15 @@ void main()
     z = z * spacing + flooredViewPosition.y;
 
     float y = SampleDynamic(vec2(x, z)) * heightMapHeight;
+
+	if (InView(vec3(x, y + 0.5, z), 0) == 0) return ;
+	if (MapOccluded(vec3(x, y + 0.25, z)) == 1) return ;
     
 	float squaredDistance = SquaredDistanceToViewPosition(vec3(x, y, z));
 
-	float viewTolerance = clamp(1.0 - clamp(squaredDistance, 0.0, 250.0) * 0.004, 0.0, 1.0);
-	viewTolerance = pow(viewTolerance, 4);
-	if (InView(vec3(x, y, z) + vec3(0, 0.5, 0), vec3(viewTolerance * 0.1, viewTolerance, 0)) == 0) return ;
+	//float viewTolerance = clamp(1.0 - clamp(squaredDistance, 0.0, 250.0) * 0.004, 0.0, 1.0);
+	//viewTolerance = pow(viewTolerance, 4);
+	//if (InView(vec3(x, y, z) + vec3(0, 0.5, 0), vec3(viewTolerance * 0.1, viewTolerance, 0)) == 0) return ;
 
 	float maxDistance = pow(instanceCountSqrt * spacing, 2);
 	float maxDistanceMult = pow(instanceCountSqrtMult * spacingMult, 2);
@@ -98,7 +101,9 @@ void main()
     float ran = random(vec2(x, z) * ranMult);
 
     if (falloff > ran) return ;
-	if (RayOccluded(vec3(x, y, z)) == 1) return ;
+	
+	//if (MapOccluded(vec3(x, y + 0.5, z)) == 1) return ;
+	//if (RayOccluded(vec3(x, y, z)) == 1) return ;
 
     vec3 position = vec3(x, y, z);
     ran = random(vec2(ran * 100, ran * 200));

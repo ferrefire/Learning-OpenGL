@@ -5,25 +5,25 @@
 #include "transformation.glsl"
 #include "heightmap.glsl"
 #include "functions.glsl"
+#include "depth.glsl"
+
+uniform sampler2D depthMap;
 
 int InView(vec3 position, vec3 tolerance)
 {
-    vec4 viewSpace = projection * view * vec4(position, 1.0);
+    vec3 clipSpacePosition = WorldToClip(position);
 
-    vec3 clipSpace = viewSpace.xyz;
-    clipSpace /= -viewSpace.w;
+    //if (clipSpacePosition.z > far) return (0);
 
-    clipSpace.x = clipSpace.x * 0.5 + 0.5;
-    clipSpace.y = clipSpace.y * 0.5 + 0.5;
-    clipSpace.z = viewSpace.w;
+    //return (clipSpacePosition.x < -tolerance.x || clipSpacePosition.x > 1.0 + tolerance.x ||
+    //    clipSpacePosition.y < -tolerance.y || clipSpacePosition.y > 1.0 + tolerance.y ||
+    //    clipSpacePosition.z < -tolerance.z) ? 0 : 1;
 
-    if (clipSpace.z > far) return (0);
+	bool xInView = clipSpacePosition.x > 0.0 - tolerance.x && clipSpacePosition.x < 1.0 + tolerance.x;
+	bool yInView = clipSpacePosition.y > 0.0 - tolerance.y && clipSpacePosition.y < 1.0 + tolerance.y;
+	bool zInView = clipSpacePosition.z > 0.0 && clipSpacePosition.z < far;
 
-    return (clipSpace.x < -tolerance.x || clipSpace.x > 1.0 + tolerance.x ||
-        clipSpace.y < -tolerance.y || clipSpace.y > 1.0 + tolerance.y ||
-        clipSpace.z < -tolerance.z) ? 0 : 1;
-	//return ((clipSpace.x > -tolerance.x && clipSpace.x < 1.0 + tolerance.x) ||
-    //    (clipSpace.y > -tolerance.y && clipSpace.y < 1.0 + tolerance.y)) ? 1 : 0;
+	return ((xInView && yInView && zInView) ? 1 : 0);
 }
 
 int InView(vec3 position, float tolerance)
@@ -31,11 +31,41 @@ int InView(vec3 position, float tolerance)
     return InView(position, vec3(tolerance, tolerance, 0));
 }
 
-//float MapOccluded(vec3 position)
-//{
-//	vec2 uv = (position.xz - viewPosition.xz) * terrainOccludeSizeMult + 0.5;
-//	return textureLod(occlusionMap, uv, 0).r;
-//}
+int AreaInView(vec3 position, vec2 areaSize)
+{
+	vec3 rightOffset = viewRight * areaSize.x;
+	vec3 upOffset = viewUp * areaSize.y;
+	float inDistance = pow((areaSize.x * areaSize.y) * 2, 2);
+
+	if (SquaredDistanceToViewPosition(position) <= inDistance) return (1);
+
+	vec3 areaPosition = position - rightOffset - upOffset;
+    if (InView(areaPosition, 0) == 1) return (1);
+
+	areaPosition = position + rightOffset + upOffset;
+    if (InView(areaPosition, 0) == 1) return (1);
+
+	areaPosition = position + rightOffset - upOffset;
+    if (InView(areaPosition, 0) == 1) return (1);
+
+	areaPosition = position - rightOffset + upOffset;
+    if (InView(areaPosition, 0) == 1) return (1);
+
+	return (0);
+}
+
+float MapOccluded(vec3 position)
+{
+	float occluded = 0;
+	
+	vec3 clipSpacePosition = WorldToClip(position);
+
+	float depth = 1.0 - (clipSpacePosition.z * farMult);
+
+	if (textureLod(depthMap, clipSpacePosition.xy, 0).r >= depth) occluded = 1; 
+	
+	return (occluded);
+}
 
 int RayOccluded(vec3 position)
 {
