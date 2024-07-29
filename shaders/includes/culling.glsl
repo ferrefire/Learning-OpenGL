@@ -61,10 +61,14 @@ float MapOccluded(vec3 position)
 	vec3 clipSpacePosition = WorldToClip(position);
 
 	float depth = 1.0 - (clipSpacePosition.z * farMult);
+	//float mapValue = textureLod(depthMap, clipSpacePosition.xy, 0).r;
 
-	if (textureLod(depthMap, clipSpacePosition.xy, 0).r >= depth) occluded = 1; 
-	
-	return (occluded);
+	ivec2 screenUv = ivec2(0);
+	screenUv.x = int(floor(clipSpacePosition.x * width));
+	screenUv.y = int(floor(clipSpacePosition.y * height));
+	float mapValue = GetDepthMap(screenUv);
+
+	return (depth - mapValue);
 }
 
 int RayOccluded(vec3 position)

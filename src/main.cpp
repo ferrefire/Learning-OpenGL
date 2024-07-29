@@ -54,6 +54,7 @@ bool Time::newSecond = false;
 bool Time::newTick = false;
 bool Time::newSubTick = false;
 bool Time::newFrameTick = false;
+int Time::framesSinceLastFrameTick = 0;
 
 float Input::height = 900.0;
 float Input::width = 1600.0;
@@ -261,7 +262,7 @@ int main(int argc, char **argv)
 	Grass::CreateGrass();
 	Trees::CreateTrees();
 
-	Shader *quadShader = new Shader("screen_quad_vertex.glsl", "screen_quad_fragment.glsl");
+	/*Shader *quadShader = new Shader("screen_quad_vertex.glsl", "screen_quad_fragment.glsl");
 	Manager::AddShader(quadShader);
 
 	Shape *screenQuadShape = new Shape(SCREEN_QUAD);
@@ -270,7 +271,7 @@ int main(int argc, char **argv)
 	Mesh *screenQuadMesh = new Mesh(screenQuadShape, quadShader);
 	Manager::AddMesh(screenQuadMesh);
 
-	quadShader->setInt("quadTexture", Terrain::depthMapTexture->Index());
+	quadShader->setInt("quadTexture", Terrain::depthMapTexture->Index());*/
 
 	double lastTime = 0;
 
@@ -336,7 +337,7 @@ int main(int argc, char **argv)
 		}
 		
 		Terrain::NewFrame();
-		//Trees::NewFrame();
+		Trees::NewFrame();
 		Grass::NewFrame();
 
 		//quadShader->useShader();

@@ -66,6 +66,7 @@ void Terrain::CreateShaders()
 	terrainShader->setInt(heightMapLod0Texture->Name().c_str(), heightMapLod0Texture->Index());
 	terrainShader->setInt(heightMapLod1Texture->Name().c_str(), heightMapLod1Texture->Index());
 	terrainShader->setInt(heightMapArrayTexture->Name().c_str(), heightMapArrayTexture->Index());
+	depthMapTexture->BindImage(9);
 	//terrainShader->setInt(depthMapTexture->Name().c_str(), depthMapTexture->Index());
 	terrainShader->setFloat4("color", glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
 
@@ -98,7 +99,8 @@ void Terrain::CreateTextures()
 	Manager::AddTexture(shadowMapTexture);
 
 	depthMapTexture = new Texture("depthMap", 4, GL_TEXTURE4, Input::width, Input::height, GL_R32F);
-	//depthMapTexture->SetFilterMode(GL_NEAREST);
+	depthMapTexture->SetFilterMode(GL_NEAREST);
+	depthMapTexture->SetFloatType(GL_FLOAT);
 	depthMapTexture->CreateTexture();
 	Manager::AddTexture(depthMapTexture);
 }
@@ -295,7 +297,7 @@ void Terrain::RenderTerrain()
 {
 	Manager::EnableCulling(true);
 	terrainShader->useShader();
-	depthMapTexture->BindImage(0);
+	
 
 	float sx = Manager::camera.Position().x / float(terrainChunkSize);
 	float sz = Manager::camera.Position().z / float(terrainChunkSize);
@@ -368,10 +370,12 @@ void Terrain::NewFrame()
 	{
 		depthMapTexture->ClearImage();
 		terrainShader->setInt("newFrame", 1);
+		Trees::treeShader->setInt("newFrame", 1);
 	}
 	else
 	{
 		terrainShader->setInt("newFrame", 0);
+		Trees::treeShader->setInt("newFrame", 0);
 	}
 
 	if (Time::newSubTick)

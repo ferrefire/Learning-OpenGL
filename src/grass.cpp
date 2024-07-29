@@ -36,7 +36,8 @@ void Grass::CreateShaders()
 	grassComputeShader->setInt(Terrain::heightMapLod0Texture->Name().c_str(), Terrain::heightMapLod0Texture->Index());
 	grassComputeShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
 	grassComputeShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());
-	grassComputeShader->setInt(Terrain::depthMapTexture->Name().c_str(), Terrain::depthMapTexture->Index());
+	Terrain::depthMapTexture->BindImage(9);
+	//grassComputeShader->setInt(Terrain::depthMapTexture->Name().c_str(), Terrain::depthMapTexture->Index());
 	//grassComputeShader->setInt(Terrain::shadowMapTexture->Name().c_str(), Terrain::shadowMapTexture->Index());
 }
 

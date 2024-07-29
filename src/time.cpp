@@ -27,10 +27,17 @@ void Time::NewFrame()
 		timeLastSubTick = currentFrame;
 	}
 
+	framesSinceLastFrameTick++;
 	if (newFrameTick) newFrameTick = false;
 	if (currentFrame - timeLastFrameTick >= 0.01666666)
 	{
 		newFrameTick = true;
 		timeLastFrameTick = currentFrame;
+		framesSinceLastFrameTick = 0;
 	}
+}
+
+bool Time::NewFrameTickOffset(int frames)
+{
+	return (framesSinceLastFrameTick - frames == 0);
 }

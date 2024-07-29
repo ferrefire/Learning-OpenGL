@@ -16,11 +16,13 @@ class Time
 		static double timeLastTick;
 		static double timeLastSubTick;
 		static double timeLastFrameTick;
+		static int framesSinceLastFrameTick;
 
 		static bool newSecond;
 		static bool newTick;
 		static bool newSubTick;
 		static bool newFrameTick;
+		static bool NewFrameTickOffset(int frames);
 
 		static void NewFrame();
 };

@@ -20,6 +20,7 @@ class Texture
 		GLenum filterMode = GL_LINEAR;
 		GLenum dataType = GL_R16_SNORM;
 		GLenum colorChannels = GL_RED;
+		GLenum floatType = GL_HALF_FLOAT;
 
 	public:
 		Texture(std::string name, int index, GLenum unit, int width, int height, GLenum dataType);
@@ -33,6 +34,7 @@ class Texture
 		void SetFilterMode(GLenum filterMode);
 		void SetDataType(GLenum dataType);
 		void SetColorChannels(GLenum colorChannels);
+		void SetFloatType(GLenum floatType);
 
 		void CreateTexture();
 

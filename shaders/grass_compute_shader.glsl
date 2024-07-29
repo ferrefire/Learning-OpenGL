@@ -77,18 +77,17 @@ void main()
 	vec2 flooredViewPosition = vec2(floor(viewPosition.x * spacingMult) * spacing, floor(viewPosition.z * spacingMult) * spacing);
     x = x * spacing + flooredViewPosition.x;
     z = z * spacing + flooredViewPosition.y;
-
     float y = SampleDynamic(vec2(x, z)) * heightMapHeight;
 
-	if (InView(vec3(x, y + 0.5, z), 0) == 0) return ;
-	if (MapOccluded(vec3(x, y + 0.25, z)) == 1) return ;
+	vec3 position = vec3(x, y, z);
+
+	if (InView(position + vec3(0, 0.5, 0), 0) == 0) return ;
+
+	//float depth = GetWorldDepth(position);
+
+	if (MapOccluded(position) <= -0.0001) return ;
     
-	float squaredDistance = SquaredDistanceToViewPosition(vec3(x, y, z));
-
-	//float viewTolerance = clamp(1.0 - clamp(squaredDistance, 0.0, 250.0) * 0.004, 0.0, 1.0);
-	//viewTolerance = pow(viewTolerance, 4);
-	//if (InView(vec3(x, y, z) + vec3(0, 0.5, 0), vec3(viewTolerance * 0.1, viewTolerance, 0)) == 0) return ;
-
+	float squaredDistance = SquaredDistanceToViewPosition(position);
 	float maxDistance = pow(instanceCountSqrt * spacing, 2);
 	float maxDistanceMult = pow(instanceCountSqrtMult * spacingMult, 2);
 
@@ -97,15 +96,14 @@ void main()
 	//falloff = falloff * 1.025 - 0.025;
     //falloff = pow(falloff, 0.2);
 
-    float ranMult = 1.0 - (abs(x) + abs(z)) * terrainSizeMult * 0.5;
-    float ran = random(vec2(x, z) * ranMult);
+    float ranMult = 1.0 - (abs(position.x) + abs(position.z)) * terrainSizeMult * 0.5;
+    float ran = random(position.xz * ranMult);
 
     if (falloff > ran) return ;
 	
 	//if (MapOccluded(vec3(x, y + 0.5, z)) == 1) return ;
 	//if (RayOccluded(vec3(x, y, z)) == 1) return ;
 
-    vec3 position = vec3(x, y, z);
     ran = random(vec2(ran * 100, ran * 200));
 	position.x += ran - 0.5;
     ran = random(vec2(ran * 200, ran * 100));

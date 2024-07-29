@@ -34,7 +34,8 @@ void Trees::CreateShaders()
 	treeComputeShader->setInt(Terrain::heightMapLod0Texture->Name().c_str(), Terrain::heightMapLod0Texture->Index());
 	treeComputeShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
 	treeComputeShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());
-	treeComputeShader->setInt(Terrain::depthMapTexture->Name().c_str(), Terrain::depthMapTexture->Index());
+	Terrain::depthMapTexture->BindImage(9);
+	//treeComputeShader->setInt(Terrain::depthMapTexture->Name().c_str(), Terrain::depthMapTexture->Index());
 }
 
 void Trees::CreateBuffers()
@@ -50,7 +51,7 @@ void Trees::CreateBuffers()
 
 void Trees::CreateMeshes()
 {
-    Shape *treeShape = new Shape(TRUNK, 12);
+    Shape *treeShape = new Shape(TRUNK, 6);
     Manager::AddShape(treeShape);
 
     treeMesh = new Mesh(treeShape, treeShader);
@@ -74,6 +75,7 @@ void Trees::RenderTrees()
 {
     Manager::EnableCulling(true);
 	treeShader->useShader();
+	
 
 	treeMesh->UseMesh();
 	glDrawElementsInstanced(GL_TRIANGLES, treeMesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0, treeRenderCount);
@@ -84,5 +86,5 @@ void Trees::NewFrame()
     if (Time::newFrameTick) ComputeTrees();
     RenderTrees();
 
-	if (Time::newSecond) std::cout << treeRenderCount << std::endl;
+	//if (Time::newSecond) std::cout << treeRenderCount << std::endl;
 }

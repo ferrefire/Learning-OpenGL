@@ -94,8 +94,9 @@ void main()
 	//viewTolerance = pow(viewTolerance, 8);
 	//if (squaredDistance > 10000 && InView(position + vec3(0, 25, 0), vec3(viewTolerance * 0.1, viewTolerance, 0)) == 0) return ;
 	//if (InView(position, 0) == 0) return ;
+	if (MapOccluded(position + vec3(0, 50, 0)) <= 0) return ;
 	if (AreaInView(position + vec3(0, 25, 0), vec2(2, 25)) == 0) return ;
-	if (MapOccluded(position + vec3(0, 25, 0)) == 1) return ;
+	
 
     //vec3 norm = SampleNormalDynamic(position, 0.5);
     vec3 norm = SampleArrayNormal(position + vec3(terrainWorldOffset.x, 0, terrainWorldOffset.y), 0.5);

@@ -66,6 +66,11 @@ void Texture::SetColorChannels(GLenum colorChannels)
 	this->colorChannels = colorChannels;
 }
 
+void Texture::SetFloatType(GLenum floatType)
+{
+	this->floatType = floatType;
+}
+
 void Texture::CreateTexture()
 {
 	glActiveTexture(unit);
@@ -74,8 +79,8 @@ void Texture::CreateTexture()
 	glTexParameteri(textureType, GL_TEXTURE_WRAP_T, wrapMode);
 	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, filterMode);
 	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, filterMode);
-	if (textureType == GL_TEXTURE_2D_ARRAY) glTexImage3D(textureType, 0, dataType, width, height, depth, 0, colorChannels, GL_HALF_FLOAT, NULL);
-	else glTexImage2D(textureType, 0, dataType, width, height, 0, colorChannels, GL_HALF_FLOAT, NULL);
+	if (textureType == GL_TEXTURE_2D_ARRAY) glTexImage3D(textureType, 0, dataType, width, height, depth, 0, colorChannels, floatType, NULL);
+	else glTexImage2D(textureType, 0, dataType, width, height, 0, colorChannels, floatType, NULL);
 	glActiveTexture(0);
 }
 
@@ -113,5 +118,5 @@ float Texture::ResolutionMultiplier()
 
 void Texture::ClearImage()
 {
-	glClearTexImage(ID, 0, colorChannels, GL_HALF_FLOAT, NULL);
+	glClearTexImage(ID, 0, colorChannels, floatType, NULL);
 }

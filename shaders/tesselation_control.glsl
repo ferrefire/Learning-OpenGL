@@ -18,6 +18,8 @@ layout (vertices = 3) out;
 #include "variables.glsl"
 #include "culling.glsl"
 #include "heightmap.glsl"
+#include "functions.glsl"
+#include "depth.glsl"
 
 uniform float tesselationFactor = 10;
 
@@ -53,16 +55,24 @@ void main()
         vec3 center = (p0 + p1 + p2) * (1.0 / 3.0);
         //vec2 uv = (tUV[0] + tUV[1] + tUV[2]) * (1.0 / 3.0);
         //vec2 uv = UV[gl_InvocationID];
-        float disSqr = dot(viewPosition - center, viewPosition - center);
-		float tolerance = 1.0 - disSqr * (farMult * farMult);
-		if (disSqr > pow(terrainChunkSize * 0.5, 2)) tolerance = pow(tolerance, 16);
-		else tolerance = pow(tolerance, 128);
+        //float disSqr = SquaredDistanceToViewPosition(center);
+		float depth = GetWorldDepth(center);
+		float tolerance = pow(1.0 - depth, 3);
 
-        if (disSqr > 10000 && (
-			(InView(center, tolerance) == 0 && 
-            InView(p0, tolerance) == 0 &&
-            InView(p1, tolerance) == 0 &&
-            InView(p2, tolerance) == 0)))
+		bool cull = false;
+		if (depth < 0.25) cull = (AreaInView(center, vec2(20 * tolerance)) == 0 && 
+            AreaInView(p0, vec2(20 * tolerance)) == 0 &&
+            AreaInView(p1, vec2(20 * tolerance)) == 0 &&
+            AreaInView(p2, vec2(20 * tolerance)) == 0);
+		else cull = (InView(center, 0) == 0 && 
+            InView(p0, 0) == 0 &&
+            InView(p1, 0) == 0 &&
+            InView(p2, 0) == 0);
+		//float tolerance = 1.0 - disSqr * (farMult * farMult);
+		//if (disSqr > pow(terrainChunkSize * 0.5, 2)) tolerance = pow(tolerance, 16);
+		//else tolerance = pow(tolerance, 128);
+
+        if (cull)
         {
             gl_TessLevelOuter[0] = 0;
             gl_TessLevelOuter[1] = 0;
