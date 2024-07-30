@@ -30,9 +30,10 @@ class Shape
 		std::vector<unsigned int> indices;
 
         std::vector<float> data;
-        
 
-    public:
+		int mergeIndex = 0;
+
+	public:
         Shape();
         Shape(int preset, int resolution = 5);
 		~Shape();
@@ -45,11 +46,16 @@ class Shape
 		std::vector<glm::vec3> Normals();
 		std::vector<unsigned int> Indices();
 
-        unsigned int VertexCount();
+		std::vector<glm::vec3> &GetVertices();
+
+		unsigned int VertexCount();
         unsigned int IndiceCount();
         unsigned int DataCount();
 
-        bool vertexOnly = false;
+		std::vector<unsigned int> mergeTopPoints;
+		std::vector<unsigned int> mergeBottomPoints;
+
+		bool vertexOnly = false;
 
         void Rotate(float degrees, const glm::vec3 &axis);
         void Translate(const glm::vec3 &translation);
@@ -58,9 +64,15 @@ class Shape
         void RecalculateData();
 		void RecalculateUV();
 		void RecalculateNormals();
-        void Join(Shape &joinShape);
+		void Join(Shape &joinShape);
+		void Join(Shape &joinShape, bool merge);
+		void AddIndice(unsigned int indice);
+
+		int ClosestMergeIndex(glm::vec3 position);
 
 		glm::vec4 GetBounds();
+		glm::vec3 BottomMergePointsCenter();
+		glm::vec3 TopMergePointsCenter();
 		//std::vector<int> GetEndVertices();
 		//std::vector<int> GetStartVertices();
 };

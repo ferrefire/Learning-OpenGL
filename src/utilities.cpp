@@ -78,6 +78,7 @@ bool Utilities::Contains(const std::string &str, const std::string &find)
 float Utilities::Random11()
 {
 	srand(rand());
+	//seed = rand();
 	return (((float(rand() % 100000) * 0.00001) - 0.5f) * 2.0f);
 }
 
@@ -112,4 +113,45 @@ std::string Utilities::GetPath()
     std::string path = currentPath.string();
 	
 	return path;
+}
+
+float Utilities::Dot(glm::vec2 p1, glm::vec2 p2)
+{
+	p1 = glm::normalize(p1);
+	p2 = glm::normalize(p2);
+
+	float dot = 0;
+	dot += p1.x * p2.x;
+	dot += p1.y * p2.y;
+
+	return (dot);
+}
+
+float Utilities::Angle(glm::vec2 p1, glm::vec2 p2)
+{
+	
+}
+
+glm::vec2 Utilities::Normalize(const glm::vec2 &vec)
+{
+	float unit = abs(vec.x) + abs(vec.y);
+	glm::vec2 result = glm::vec2(vec.x / unit, vec.y / unit);
+	return (result);
+}
+
+glm::vec3 Utilities::Normalize(const glm::vec3 &vec)
+{
+	float unit = abs(vec.x) + abs(vec.y) + abs(vec.z);
+	glm::vec3 result = glm::vec3(vec.x / unit, vec.y / unit, vec.z / unit);
+	return (result);
+}
+
+glm::vec3 Utilities::Direction(const glm::vec3 &from, const glm::vec3 &to)
+{
+	glm::vec3 direction = glm::vec3(0);
+
+	direction = to - from;
+	direction = Normalize(direction);
+
+	return (direction);
 }

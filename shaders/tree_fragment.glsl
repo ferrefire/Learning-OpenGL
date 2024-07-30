@@ -34,5 +34,6 @@ void main()
 		SetDepth(coordinates, 1.0 - depth);
 	}
 	
-	fragmentColor = vec4(endColor, 1);
+	//fragmentColor = vec4(endColor, 1);
+	fragmentColor = vec4(normal * 0.5 + 0.5, 1);
 }

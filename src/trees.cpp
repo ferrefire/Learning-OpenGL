@@ -51,11 +51,12 @@ void Trees::CreateBuffers()
 
 void Trees::CreateMeshes()
 {
-    Shape *treeShape = new Shape(CYLINDER, 12);
-    Manager::AddShape(treeShape);
+    //Shape *treeShape = new Shape(CYLINDER, 12);
+    //Manager::AddShape(treeShape);
 
-    treeMesh = new Mesh(treeShape, treeShader);
-    Manager::AddMesh(treeMesh);
+	//treeMesh = new Mesh(treeShape, treeShader);
+	treeMesh = GenerateTrunk();
+	Manager::AddMesh(treeMesh);
 }
 
 void Trees::ComputeTrees()
@@ -87,4 +88,79 @@ void Trees::NewFrame()
     RenderTrees();
 
 	//if (Time::newSecond) std::cout << treeRenderCount << std::endl;
+}
+
+float GetBranchAngle(glm::vec2 dir)
+{
+	float angle = 0;
+
+	int signX = glm::sign(dir.x);
+	int signZ = glm::sign(dir.y);
+
+	float angleX = signX * dir.x;
+	float angleZ = signZ * dir.y;
+
+	if (signX == -1 && signZ != -1)
+	{
+		angle = (1.0 - angleX) * 90.0 + 270.0;
+	}
+	else if (signX == -1 && signZ == -1)
+	{
+		angle = angleX * 90.0 + 180.0;
+	}
+	else if (signZ == -1)
+	{
+		angle = (1.0 - angleX) * 90.0 + 90.0;
+	}
+	else
+	{
+		angle = angleX * 90.0;
+	}
+
+	return (angle);
+}
+
+Shape GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec3 scale, float angle, int splitTimes)
+{
+	Shape branch = Shape(CYLINDER, resolution);
+	branch.Scale(scale);
+	branch.Rotate(angle, glm::vec3(1, 0, 0));
+	glm::vec2 vec2Offset = glm::vec2(offset.x, offset.z);
+	float sideAngle = GetBranchAngle(Utilities::Normalize(vec2Offset));
+	branch.Rotate(sideAngle, glm::vec3(0, 1, 0));
+	branch.Translate(base + offset);
+
+	if (splitTimes > 0)
+	{
+		splitTimes--;
+
+		glm::vec3 center = branch.TopMergePointsCenter();
+		int branchRes = int(glm::ceil(resolution * 0.5));
+
+		Shape subBranch = GenerateBranch(branchRes, center, 
+			glm::vec3(5, 7.5, -5), glm::vec3(0.45, 0.35, 0.45), angle * 1.5, splitTimes);
+		branch.Join(subBranch, true);
+		subBranch = GenerateBranch(branchRes, center, 
+			glm::vec3(-5, 7.5, 5), glm::vec3(0.45, 0.35, 0.45), angle * 1.5, splitTimes);
+		branch.Join(subBranch, true);
+	}
+	
+	return (branch);
+}
+
+Mesh *Trees::GenerateTrunk()
+{
+	Shape *treeShape = new Shape(CYLINDER, 12);
+	Manager::AddShape(treeShape);
+
+	glm::vec3 center = treeShape->TopMergePointsCenter();
+
+	Shape branch = GenerateBranch(7, center, glm::vec3(5, 7.5, -7), glm::vec3(0.625, 0.5, 0.625), 40, 1);
+	treeShape->Join(branch, true);
+
+	branch = GenerateBranch(7, center, glm::vec3(-5, 10, 5), glm::vec3(0.75, 0.625, 0.75), 25, 1);
+	treeShape->Join(branch, true);
+
+	Mesh *trunk = new Mesh(treeShape, treeShader);
+	return (trunk);
 }

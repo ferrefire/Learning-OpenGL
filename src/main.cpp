@@ -32,6 +32,8 @@
 #include "buffer.hpp"
 #include "trees.hpp"
 
+unsigned int Utilities::seed = 1;
+
 unsigned int Debug::totalFramesThisSecond = 0;
 unsigned int Debug::totalFramesLastSecond = 0;
 unsigned int Debug::totalFramesThisTick = 0;

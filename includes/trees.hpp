@@ -28,6 +28,7 @@ class Trees
         static void CreateShaders();
         static void CreateBuffers();
         static void CreateMeshes();
+		static Mesh *GenerateTrunk();
 
         static void ComputeTrees();
         static void RenderTrees();

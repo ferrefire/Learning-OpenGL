@@ -49,6 +49,17 @@ void main()
 {
 	if (gl_GlobalInvocationID.x >= instanceCountSqrt || gl_GlobalInvocationID.y >= instanceCountSqrt) return ;
 
+	if (gl_GlobalInvocationID.x == 0 && gl_GlobalInvocationID.y == 0)
+	{
+		float rotation = 0;
+		vec3 position = vec3(0, 2000, 0);
+
+		uint index = atomicAdd(count, 1);
+		data[index].posxz = packHalf2x16(position.xz - viewPosition.xz);
+		data[index].posyroty = packHalf2x16(vec2(position.y - viewPosition.y, rotation));
+		return ;
+	}
+
 	float x = float(gl_GlobalInvocationID.x) - instanceCountSqrt * 0.5;
     float z = float(gl_GlobalInvocationID.y) - instanceCountSqrt * 0.5;
 
