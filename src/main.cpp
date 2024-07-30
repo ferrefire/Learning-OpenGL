@@ -258,6 +258,15 @@ int main(int argc, char **argv)
 	glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_layers);
 	std::cout << "max texture array layers: " << max_layers << std::endl;
 
+	std::cout << "max compute groups: ";
+	GLint max_compute_groups;
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &max_compute_groups);
+	std::cout << max_compute_groups;
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &max_compute_groups);
+	std::cout << " " << max_compute_groups;
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &max_compute_groups);
+	std::cout << " " << max_compute_groups << std::endl;
+
 	Terrain::CreateTerrain();
 	Grass::CreateGrass();
 	Trees::CreateTrees();
@@ -337,7 +346,7 @@ int main(int argc, char **argv)
 		}
 		
 		Terrain::NewFrame();
-		Trees::NewFrame();
+		//Trees::NewFrame();
 		Grass::NewFrame();
 
 		//quadShader->useShader();
@@ -347,14 +356,14 @@ int main(int argc, char **argv)
 		Manager::NewFrame();
 		if (Manager::firstFrame) Manager::firstFrame = false;
 
-		glBindVertexArray(0);
-		Mesh::currentActiveVAO = 0;
-		glUseProgram(0);
-		Shader::currentActiveShader = 0;		
+		//glBindVertexArray(0);
+		//Mesh::currentActiveVAO = 0;
+		//glUseProgram(0);
+		//Shader::currentActiveShader = 0;
 
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
+		glfwPollEvents();
+		glfwSwapBuffers(window);
+	}
 
 	if (makeCinematic) Manager::activeCinematic.Create(makeCinName.c_str());
 

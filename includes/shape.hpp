@@ -14,7 +14,6 @@
 #define BLADE 4
 #define SCREEN_QUAD 5
 #define CYLINDER 6
-#define TRUNK 7
 
 class Shape
 {

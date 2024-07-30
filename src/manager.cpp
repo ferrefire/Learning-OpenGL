@@ -134,8 +134,10 @@ void Manager::EnableCulling(bool mode)
 
 void Manager::EnableVsync(bool mode)
 {
-	Manager::vSyncActive = mode;
-    glfwSwapInterval(Manager::vSyncActive ? 1 : 0);
+	if (vSyncActive == mode) return ;
+
+	vSyncActive = mode;
+    glfwSwapInterval(vSyncActive ? 1 : 0);
 }
 
 void Manager::Close()

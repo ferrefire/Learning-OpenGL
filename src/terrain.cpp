@@ -101,6 +101,7 @@ void Terrain::CreateTextures()
 	depthMapTexture = new Texture("depthMap", 4, GL_TEXTURE4, Input::width, Input::height, GL_R32F);
 	depthMapTexture->SetFilterMode(GL_NEAREST);
 	depthMapTexture->SetFloatType(GL_FLOAT);
+	depthMapTexture->SetResizable(true);
 	depthMapTexture->CreateTexture();
 	Manager::AddTexture(depthMapTexture);
 }

@@ -249,15 +249,6 @@ Shape::Shape(int preset, int resolution)
         vertexCount = vertices.size();
         indiceCount = indices.size();
     }
-	else if (preset == TRUNK)
-	{
-		Shape cylinder = Shape(CYLINDER, resolution);
-		//Shape cylinder2 = Shape(CYLINDER, resolution);
-
-		Join(cylinder);
-		//cylinder2.Translate(glm::vec3(5.0, 55.0, 0.0));
-		//Join(cylinder2);
-	}
 
     RecalculateData();
 }

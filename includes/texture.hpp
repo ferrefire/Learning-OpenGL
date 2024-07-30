@@ -21,6 +21,7 @@ class Texture
 		GLenum dataType = GL_R16_SNORM;
 		GLenum colorChannels = GL_RED;
 		GLenum floatType = GL_HALF_FLOAT;
+		bool resizable = false;
 
 	public:
 		Texture(std::string name, int index, GLenum unit, int width, int height, GLenum dataType);
@@ -35,6 +36,7 @@ class Texture
 		void SetDataType(GLenum dataType);
 		void SetColorChannels(GLenum colorChannels);
 		void SetFloatType(GLenum floatType);
+		void SetResizable(bool resizable);
 
 		void CreateTexture();
 

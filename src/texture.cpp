@@ -1,6 +1,8 @@
 #include "texture.hpp"
 #include "manager.hpp"
 
+//change all textures except depth to texstorage instead of teximage!!
+
 Texture::Texture(std::string name, int index, GLenum unit, int width, int height, GLenum dataType)
 {
 	glGenTextures(1, &ID);
@@ -71,6 +73,11 @@ void Texture::SetFloatType(GLenum floatType)
 	this->floatType = floatType;
 }
 
+void Texture::SetResizable(bool resizable)
+{
+	this->resizable = resizable;
+}
+
 void Texture::CreateTexture()
 {
 	glActiveTexture(unit);
@@ -81,6 +88,7 @@ void Texture::CreateTexture()
 	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, filterMode);
 	if (textureType == GL_TEXTURE_2D_ARRAY) glTexImage3D(textureType, 0, dataType, width, height, depth, 0, colorChannels, floatType, NULL);
 	else glTexImage2D(textureType, 0, dataType, width, height, 0, colorChannels, floatType, NULL);
+	//else glTexStorage2D(textureType, 0, dataType, width, height);
 	glActiveTexture(0);
 }
 
@@ -101,7 +109,6 @@ unsigned int Texture::TextureID()
 
 void Texture::BindImage(int imageIndex)
 {
-	//glActiveTexture(this->unit);
 	if (textureType == GL_TEXTURE_2D_ARRAY) glBindImageTexture(imageIndex, ID, 0, GL_TRUE, 0, GL_READ_WRITE, dataType);
 	else glBindImageTexture(imageIndex, ID, 0, GL_FALSE, 0, GL_READ_WRITE, dataType);
 }
