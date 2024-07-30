@@ -120,3 +120,13 @@ void Texture::ClearImage()
 {
 	glClearTexImage(ID, 0, colorChannels, floatType, NULL);
 }
+
+void Texture::Resize(int width, int height)
+{
+	SetDimensions(width, height);
+
+	glActiveTexture(unit);
+	glBindTexture(textureType, ID);
+	glTexImage2D(textureType, 0, dataType, width, height, 0, colorChannels, floatType, NULL);
+	glActiveTexture(0);
+}

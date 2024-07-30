@@ -4,6 +4,7 @@
 #include "input.hpp"
 #include "shader.hpp"
 #include <iostream>
+#include "terrain.hpp"
 
 Camera::Camera()
 {
@@ -24,9 +25,15 @@ Camera::~Camera()
 void Camera::UpdateProjection()
 {
 	projection = glm::perspective(glm::radians(FOV), Input::width / Input::height, near, far);
+
 	Shader::setFloatGlobal("width", Input::width);
 	Shader::setFloatGlobal("height", Input::height);
 	Shader::setMatrix4Global("projection", projection);
+
+	if (Terrain::depthMapTexture)
+	{
+		Terrain::depthMapTexture->Resize(Input::width, Input::height);
+	}
 }
 
 void Camera::Move(const glm::vec3 &amount)

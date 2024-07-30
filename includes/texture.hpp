@@ -46,6 +46,7 @@ class Texture
 
 		void BindImage(int imageIndex);
 		void ClearImage();
+		void Resize(int width, int height);
 };
 
 #endif
