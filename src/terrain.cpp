@@ -66,7 +66,7 @@ void Terrain::CreateShaders()
 	terrainShader->setInt(heightMapLod0Texture->Name().c_str(), heightMapLod0Texture->Index());
 	terrainShader->setInt(heightMapLod1Texture->Name().c_str(), heightMapLod1Texture->Index());
 	terrainShader->setInt(heightMapArrayTexture->Name().c_str(), heightMapArrayTexture->Index());
-	depthMapTexture->BindImage(9);
+	depthMapTexture->BindImage(1);
 	//terrainShader->setInt(depthMapTexture->Name().c_str(), depthMapTexture->Index());
 	terrainShader->setFloat4("color", glm::vec4(0.2f, 0.5f, 0.05f, 1.0f));
 

@@ -4,7 +4,7 @@
 #include "variables.glsl"
 #include "transformation.glsl"
 
-layout(r32f, binding = 9) uniform image2D depthMapImage;
+layout(r32f, binding = 1) uniform image2D depthMapImage;
 
 uniform int newFrame = 0;
 
