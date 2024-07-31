@@ -47,6 +47,7 @@ class Shape
 		std::vector<unsigned int> Indices();
 
 		std::vector<glm::vec3> &GetVertices();
+		std::vector<glm::vec2> &GetUVs();
 
 		unsigned int VertexCount();
         unsigned int IndiceCount();
@@ -57,8 +58,9 @@ class Shape
 
 		bool vertexOnly = false;
 
-        void Rotate(float degrees, const glm::vec3 &axis);
-        void Translate(const glm::vec3 &translation);
+		void Rotate(float degrees, const glm::vec3 &axis);
+		void RotateVert(int index, float degrees, const glm::vec3 &axis);
+		void Translate(const glm::vec3 &translation);
         void Scale(const glm::vec3 &scale);
 
         void RecalculateData();

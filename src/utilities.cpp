@@ -77,16 +77,14 @@ bool Utilities::Contains(const std::string &str, const std::string &find)
 
 float Utilities::Random11()
 {
-	srand(seed);
-	seed = rand();
-	return (((float(seed % 100000) * 0.00001) - 0.5f) * 2.0f);
+	return ((Random01() - 0.5f) * 2.0f);
 }
 
 float Utilities::Random01()
 {
-	srand(seed);
+	//srand(seed);
 	seed = rand();
-	return float(seed % 100000) * 0.00001;
+	return float(double(seed) / double(RAND_MAX));
 }
 
 float Utilities::SignedFloor(float x)

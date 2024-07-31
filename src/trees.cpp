@@ -3,6 +3,7 @@
 #include "terrain.hpp"
 #include "time.hpp"
 #include <iostream>
+#include "input.hpp"
 
 void Trees::CreateTrees()
 {
@@ -76,7 +77,6 @@ void Trees::RenderTrees()
 {
     Manager::EnableCulling(true);
 	treeShader->useShader();
-	
 
 	treeMesh->UseMesh();
 	glDrawElementsInstanced(GL_TRIANGLES, treeMesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0, treeRenderCount);
@@ -86,6 +86,13 @@ void Trees::NewFrame()
 {
     if (Time::newFrameTick) ComputeTrees();
     RenderTrees();
+
+	if (Input::GetKey(GLFW_KEY_G).pressed)
+	{
+		//srand(Time::GetTime());
+		treeMesh = GenerateTrunk();
+		Manager::AddMesh(treeMesh);
+	}
 
 	//if (Time::newSecond) std::cout << treeRenderCount << std::endl;
 }
@@ -132,19 +139,36 @@ glm::vec3 GetSubOffset(glm::vec3 base, glm::vec3 direction)
 	return (subOffset);
 }
 
-Shape GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2 scale, float angle, int splitTimes, bool main)
+Shape GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2 scale, glm::vec3 angles, int splitTimes, bool main)
 {
 	Shape branch = Shape(CYLINDER, resolution);
 	float sideAngle = 0;
-	if (!main)
+	branch.Scale(glm::vec3(scale.x, scale.y, scale.x));
+
+	int i = 0;
+	float angleDiff = angles.x - angles.y;
+	for (glm::vec3 &vert : branch.GetVertices())
 	{
-		branch.Scale(glm::vec3(scale.x, scale.y, scale.x));
-		branch.Rotate(angle, glm::vec3(1, 0, 0));
-		glm::vec2 vec2Offset = glm::vec2(offset.x, offset.z);
-		sideAngle = GetBranchAngle(Utilities::Normalize(vec2Offset));
-		branch.Rotate(sideAngle, glm::vec3(0, 1, 0));
-		branch.Translate(base + offset);
+		float a = branch.GetUVs()[i].y;
+		branch.RotateVert(i, angles.y + angleDiff * 0.5 + angleDiff * 0.5 * a, glm::vec3(1, 0, 0));
+		i++;
 	}
+	// branch.Rotate(angle, glm::vec3(1, 0, 0));
+	glm::vec2 vec2Offset = glm::vec2(offset.x, offset.z);
+	sideAngle = GetBranchAngle(Utilities::Normalize(vec2Offset));
+	if (sideAngle > 180.0) sideAngle = -(360.0 - sideAngle);
+	//if (sideAngle > 360.0) sideAngle -= 360.0;
+
+	i = 0;
+	for (glm::vec3 &vert : branch.GetVertices())
+	{
+		float a = branch.GetUVs()[i].y;
+		branch.RotateVert(i, glm::mix(angles.z, sideAngle, a), glm::vec3(0, 1, 0));
+		i++;
+	}
+
+	// branch.Rotate(sideAngle, glm::vec3(0, 1, 0));
+	branch.Translate(base + offset);
 
 	if (scale.x < 0.1) splitTimes = 0;
 
@@ -152,46 +176,45 @@ Shape GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2
 
 	float angleSpacing = 360.0 / splitTimes;
 	float angleMax = angleSpacing * 0.5;
+	//float startAngle = Utilities::Random01() * 360.0;
+
+	//int mainIndex = int(glm::ceil(Utilities::Random01() * splitTimes)) - 1;
 
 	for (int i = 0; i < splitTimes; i++)
 	{
-		int subResolution = glm::clamp(int(glm::ceil(resolution * 0.5)), 3, resolution);
+		int subResolution = glm::clamp(int(glm::ceil(resolution * 0.5)), 4, resolution);
+		//if (subResolution % 2 == 1) subResolution += 1;
 
 		float newSubAngle = (i * angleSpacing) + (Utilities::Random11() * angleMax);
+		//if (newSubAngle >= 360.0) newSubAngle -= 360.0;
 		glm::vec3 subOffset = glm::vec3(0, 0, -1);
 		Utilities::RotateVec3(subOffset, newSubAngle, glm::vec3(0, 1, 0));
-		
-		//if (!main)
-		//{
-		//	glm::vec2 normOffset = Utilities::Normalize(glm::vec2(offset.x, offset.z));
-		//	glm::vec2 averageOffset = Utilities::Normalize(glm::vec2(normOffset.x + subOffset.x, normOffset.y + subOffset.z));
-		//	subOffset.x = averageOffset.x;
-		//	subOffset.z = averageOffset.y;
-		//}
 
 		glm::vec3 subBase = branch.TopMergePointsCenter();
 
 		//if (!main) subOffset = GetSubOffset(offset, subOffset);
 
-		subOffset.y = 0.5 + Utilities::Random01();
+		subOffset.y = 2.0 + Utilities::Random01();
 		//subOffset.y = 0;
-		subOffset *= (scale.x + scale.y) * 3;
+		//subOffset.x *= (scale.x + scale.y) * 3;
+		//subOffset.y *= (scale.x + scale.y) * 3;
+		//subOffset.z *= (scale.x + scale.y) * 3;
+		subOffset *= (scale.x + scale.y) * (main ? 5 : 3);
 
 		float scaleMult = glm::mix(0.9, 1.1, Utilities::Random01());
 		glm::vec2 subScale = glm::vec2(scale.x * scaleMult * 0.6, scale.y * scaleMult * 0.75);
 		//glm::vec2 subScale = glm::vec2(1);
 
-		float subAngle = angle;
-		subAngle += glm::mix(5.0, 45.0, Utilities::Random01());
+		float subAngle = angles.x;
+		if (i == 0) subAngle += glm::mix(0.0, 5.0, Utilities::Random01());
+		else subAngle += glm::mix(5.0, 60.0, Utilities::Random01());
 		//float subAngle = angle + 45.0;
+		glm::vec3 subAngles = glm::vec3(subAngle, angles.x, sideAngle);
 
-		if (!main)
-		{
-			Utilities::RotateVec3(subOffset, subAngle, glm::vec3(1, 0, 0));
-			Utilities::RotateVec3(subOffset, sideAngle, glm::vec3(0, 1, 0));
-		}
+		Utilities::RotateVec3(subOffset, subAngle, glm::vec3(1, 0, 0));
+		Utilities::RotateVec3(subOffset, sideAngle, glm::vec3(0, 1, 0));
 
-		Shape subBranch = GenerateBranch(subResolution, subBase, subOffset, subScale, subAngle, 3, false);
+		Shape subBranch = GenerateBranch(subResolution, subBase, subOffset, subScale, subAngles, 2, false);
 
 		branch.Join(subBranch, true);
 	}
@@ -218,8 +241,10 @@ Mesh *Trees::GenerateTrunk()
 	Shape *treeShape = new Shape();
 	Manager::AddShape(treeShape);
 
-	Shape subBranch = GenerateBranch(24, glm::vec3(0), glm::vec3(0), glm::vec2(1), 0, 3, true);
+	Shape subBranch = GenerateBranch(24, glm::vec3(0), glm::vec3(0), glm::vec2(1), glm::vec3(0), 4, true);
  	treeShape->Join(subBranch);
+
+	//treeShape->Rotate(Utilities::Random11() * 180.0, glm::vec3(0, 1, 0));
 
 	std::cout << treeShape->VertexCount() << std::endl;
 

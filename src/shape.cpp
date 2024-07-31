@@ -276,6 +276,11 @@ std::vector<glm::vec2> Shape::Uvs()
     return (uvs);
 }
 
+std::vector<glm::vec2> &Shape::GetUVs()
+{
+	return (uvs);
+}
+
 std::vector<glm::vec3> Shape::Normals()
 {
 	return (normals);
@@ -324,6 +329,34 @@ void Shape::Rotate(float degrees, const glm::vec3 &axis)
 		glm::vec4 ri = glm::vec4(normals[i], 0.0f); //maybe set 1.0f to 0.0f becaus it is a direction
 		normals[i] = rotation * ri;
 	}
+
+	RecalculateData();
+}
+
+void Shape::RotateVert(int index, float degrees, const glm::vec3 &axis)
+{
+	glm::mat4 rotation = glm::mat4(1.0f);
+	rotation = glm::rotate(rotation, glm::radians(degrees), axis);
+
+	glm::vec4 ri = glm::vec4(vertices[index], 1.0f);
+	vertices[index] = rotation * ri;
+
+	//int size = vertices.size();
+	//for (int i = 0; i < size; i++)
+	//{
+	//	glm::vec4 ri = glm::vec4(vertices[i], 1.0f);
+	//	vertices[i] = rotation * ri;
+	//}
+
+	ri = glm::vec4(normals[index], 0.0f); // maybe set 1.0f to 0.0f becaus it is a direction
+	normals[index] = rotation * ri;
+
+	//size = normals.size();
+	//for (int i = 0; i < size; i++)
+	//{
+	//	glm::vec4 ri = glm::vec4(normals[i], 0.0f); // maybe set 1.0f to 0.0f becaus it is a direction
+	//	normals[i] = rotation * ri;
+	//}
 
 	RecalculateData();
 }
@@ -474,7 +507,7 @@ void Shape::Join(Shape &joinShape, bool merge)
 		//int i2 = i + 1 + furthestJoinPoint;
 
 		//if (i + 1 >= minPoints) i2 = furthestJoinPoint;
-		if (i + 1 >= minPoints) i2 = CalculateIndex(i - 1) + furthestJoinPoint;
+		//if (i + 1 >= minPoints) i2 = CalculateIndex(i - 1) + furthestJoinPoint;
 
 		if (i1 >= minPoints) i1 -= minPoints;
 		if (i2 >= minPoints) i2 -= minPoints;
@@ -487,7 +520,7 @@ void Shape::Join(Shape &joinShape, bool merge)
 		int mi1 = index + closestMainPoint;
 		int mi2 = index + 1 + closestMainPoint;
 
-		//if (i + 1 >= minPoints) mi1 = closestMainPoint - 1;
+		//if (i + 1 >= minPoints) mi1 = CalculateIndex(i - 1)closestMainPoint - 1;
 		if (i + 1 >= minPoints) mi2 = CalculateIndex(i - 1) + closestMainPoint;
 		//else if (i + 2 >= minPoints) mi2 = closestMainPoint - 1;
 

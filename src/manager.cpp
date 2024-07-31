@@ -149,32 +149,32 @@ void Manager::Clean()
 {
 	for (Shader *shader : shaders)
 	{
-		delete shader;
+		if (shader) delete shader;
 	}
 
 	for (Shape *shape : shapes)
 	{
-		delete shape;
+		if (shape) delete shape;
 	}
 
 	for (Mesh *mesh : meshes)
 	{
-		delete mesh;
+		if (mesh) delete mesh;
 	}
 
 	for (Texture *texture : textures)
 	{
-		delete texture;
+		if (texture) delete texture;
 	}
 
 	for (Object *object : objects)
 	{
-		delete object;
+		if (object) delete object;
 	}
 
 	for (Buffer *buffer : buffers)
 	{
-		delete buffer;
+		if (buffer) delete buffer;
 	}
 }
 
