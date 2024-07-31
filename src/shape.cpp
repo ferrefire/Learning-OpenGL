@@ -433,6 +433,22 @@ int Shape::ClosestMergeIndex(glm::vec3 position)
 	return (closestIndex);
 }
 
+int CalculateIndex(int i)
+{
+	int index = 0;
+
+	if (i % 2 == 0)
+	{
+		index += i / 2;
+	}
+	else
+	{
+		index -= i / 2 + 1;
+	}
+
+	return (index);
+}
+
 void Shape::Join(Shape &joinShape, bool merge)
 {
 	int vertOffset = vertices.size();
@@ -449,27 +465,36 @@ void Shape::Join(Shape &joinShape, bool merge)
 	{
 		//int targeti = ClosestMergeIndex(joinShape.GetVertices()[joinShape.mergeBottomPoints[i]]);
 
-		int i1 = i + furthestJoinPoint;
-		int i2 = i + 1 + furthestJoinPoint;
+		int index = CalculateIndex(i);
+
+		int i1 = index + furthestJoinPoint;
+		int i2 = index + 1 + furthestJoinPoint;
+
+		//int i1 = i + furthestJoinPoint;
+		//int i2 = i + 1 + furthestJoinPoint;
+
+		//if (i + 1 >= minPoints) i2 = furthestJoinPoint;
+		if (i + 1 >= minPoints) i2 = CalculateIndex(i - 1) + furthestJoinPoint;
 
 		if (i1 >= minPoints) i1 -= minPoints;
 		if (i2 >= minPoints) i2 -= minPoints;
+		if (i1 < 0) i1 += minPoints;
+		if (i2 < 0) i2 += minPoints;
 
-		if (i + 1 >= minPoints) i2 = furthestJoinPoint;
+		//int mi1 = i + closestMainPoint;
+		//int mi2 = i + 1 + closestMainPoint;
 
-		int mi1 = i + closestMainPoint;
-		int mi2 = i + 1 + closestMainPoint;
+		int mi1 = index + closestMainPoint;
+		int mi2 = index + 1 + closestMainPoint;
 
-		if (i + 1 >= minPoints) mi1 = closestMainPoint - 1;
-		if (i + 1 >= minPoints) mi2 = closestMainPoint;
-		else if (i + 2 >= minPoints) mi2 = closestMainPoint - 1;
+		//if (i + 1 >= minPoints) mi1 = closestMainPoint - 1;
+		if (i + 1 >= minPoints) mi2 = CalculateIndex(i - 1) + closestMainPoint;
+		//else if (i + 2 >= minPoints) mi2 = closestMainPoint - 1;
 
 		if (mi1 >= mainPoints) mi1 -= mainPoints;
 		if (mi1 < 0) mi1 += mainPoints;
 		if (mi2 >= mainPoints) mi2 -= mainPoints;
 		if (mi2 < 0) mi2 += mainPoints;
-
-		
 
 		indices.push_back(joinShape.mergeBottomPoints[i1] + vertOffset);
 		indices.push_back(mergeTopPoints[mi2]);
@@ -479,9 +504,9 @@ void Shape::Join(Shape &joinShape, bool merge)
 		indices.push_back(joinShape.mergeBottomPoints[i2] + vertOffset);
 		indices.push_back(mergeTopPoints[mi2]);
 
-		glm::vec3 direction = Utilities::Direction(vertices[mergeTopPoints[mi1]], joinShape.GetVertices()[joinShape.mergeBottomPoints[i1]]);
-		vertices[mergeTopPoints[mi1]] += direction * 2.0f;
-		joinShape.GetVertices()[joinShape.mergeBottomPoints[i1]] -= direction * 2.0f; 
+		glm::vec3 direction = joinShape.GetVertices()[joinShape.mergeBottomPoints[i1]] - vertices[mergeTopPoints[mi1]];
+		vertices[mergeTopPoints[mi1]] += direction * 0.125f;
+		joinShape.GetVertices()[joinShape.mergeBottomPoints[i1]] -= direction * 0.125f; 
 	}
 
 	mergeIndex += minPoints;

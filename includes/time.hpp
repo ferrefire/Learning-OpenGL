@@ -23,6 +23,7 @@ class Time
 		static bool newSubTick;
 		static bool newFrameTick;
 		static bool NewFrameTickOffset(int frames);
+		static unsigned int GetTime();
 
 		static void NewFrame();
 };

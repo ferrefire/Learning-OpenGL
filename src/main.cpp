@@ -101,7 +101,7 @@ int Terrain::terrainLod0Resolution = 1024;
 int Terrain::terrainLod1Resolution = 1024;
 int Terrain::terrainShadowResolution = 512;
 int Terrain::terrainChunkResolution = 1024;
-int Terrain::chunkRadius = 4;
+int Terrain::chunkRadius = 1;
 int Terrain::chunksLength = 0;
 int Terrain::chunkCount = 0;
 int Terrain::computePartLod0 = 0;
@@ -128,7 +128,7 @@ Mesh *Terrain::terrainMesh = NULL;
 Mesh *Terrain::terrainLod0Mesh = NULL;
 Mesh *Terrain::terrainLod1Mesh = NULL;
 Object ***Terrain::terrainChunks = NULL;
-int Terrain::terrainRadius = 3;
+int Terrain::terrainRadius = 1;
 int Terrain::terrainLength = 0;
 int Terrain::terrainCount = 0;
 float Terrain::worldSampleDistance = 1;
@@ -146,7 +146,7 @@ Buffer *Grass::countLodBuffer = NULL;
 Mesh *Grass::grassMesh = NULL;
 Mesh *Grass::grassLodMesh = NULL;
 
-unsigned int Trees::treeCount = 128;
+unsigned int Trees::treeCount = 8;
 unsigned int Trees::treeRenderCount = 0;
 Shader *Trees::treeShader = NULL;
 Shader *Trees::treeComputeShader = NULL;
@@ -247,6 +247,11 @@ void Print(int val)
 
 int main(int argc, char **argv)
 {
+	//std::cout << glm::mix(25.0f, 45.0f, 0.5f) << std::endl;
+	//return 0;
+
+	// Utilities::seed = Time::GetTime();
+	Utilities::seed = rand();
 	GetArguments(argc, argv);
 	GLFWwindow *window = setupGLFW();
     if (window == NULL) return (quit(EXIT_FAILURE));

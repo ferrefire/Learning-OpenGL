@@ -21,8 +21,8 @@ out vec2 UV;
 out vec3 normal;
 out vec3 worldPosition;
 
-float spacing = 50;
-float spacingMult = 0.02;
+float spacing = 100;
+float spacingMult = 0.01;
 
 #include "variables.glsl"
 #include "transformation.glsl"

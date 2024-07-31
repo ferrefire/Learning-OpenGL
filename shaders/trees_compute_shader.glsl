@@ -26,8 +26,8 @@ uniform int instanceCountSqrt;
 uniform float instanceCountSqrtMult;
 uniform float lodRange = 256.0;
 
-float spacing = 50;
-float spacingMult = 0.02;
+float spacing = 100;
+float spacingMult = 0.01;
 
 #include "variables.glsl"
 #include "culling.glsl"
@@ -65,8 +65,8 @@ void main()
 
 	//int lod = Inside(vec2(x, z));
 
-	vec2 flooredViewPosition = vec2(floor(viewPosition.x * spacingMult) * spacing, 
-		floor(viewPosition.z * spacingMult) * spacing);
+	vec2 flooredViewPosition = vec2(round(viewPosition.x * spacingMult) * spacing, 
+		round(viewPosition.z * spacingMult) * spacing);
     x = x * spacing + flooredViewPosition.x;
     z = z * spacing + flooredViewPosition.y;
 

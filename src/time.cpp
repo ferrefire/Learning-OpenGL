@@ -1,4 +1,6 @@
 #include "time.hpp"
+#include <chrono>
+#include <ctime>
 
 void Time::NewFrame()
 {
@@ -40,4 +42,10 @@ void Time::NewFrame()
 bool Time::NewFrameTickOffset(int frames)
 {
 	return (framesSinceLastFrameTick - frames == 0);
+}
+
+unsigned int Time::GetTime()
+{
+	std::time_t result = std::time(nullptr);
+	return result;
 }

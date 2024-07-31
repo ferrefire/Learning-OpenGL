@@ -37,6 +37,7 @@ class Utilities
 		static glm::vec2 Normalize(const glm::vec2 &vec);
 		static glm::vec3 Normalize(const glm::vec3 &vec);
 		static glm::vec3 Direction(const glm::vec3 &from, const glm::vec3 &to);
+		static glm::vec3 RandomDirection();
 };
 
 #endif

@@ -77,15 +77,16 @@ bool Utilities::Contains(const std::string &str, const std::string &find)
 
 float Utilities::Random11()
 {
-	srand(rand());
-	//seed = rand();
-	return (((float(rand() % 100000) * 0.00001) - 0.5f) * 2.0f);
+	srand(seed);
+	seed = rand();
+	return (((float(seed % 100000) * 0.00001) - 0.5f) * 2.0f);
 }
 
 float Utilities::Random01()
 {
-	srand(rand());
-	return float(rand() % 100000) * 0.00001;
+	srand(seed);
+	seed = rand();
+	return float(seed % 100000) * 0.00001;
 }
 
 float Utilities::SignedFloor(float x)
@@ -135,6 +136,7 @@ float Utilities::Angle(glm::vec2 p1, glm::vec2 p2)
 glm::vec2 Utilities::Normalize(const glm::vec2 &vec)
 {
 	float unit = abs(vec.x) + abs(vec.y);
+	if (unit == 0) return (glm::vec2(0));
 	glm::vec2 result = glm::vec2(vec.x / unit, vec.y / unit);
 	return (result);
 }
@@ -151,6 +153,18 @@ glm::vec3 Utilities::Direction(const glm::vec3 &from, const glm::vec3 &to)
 	glm::vec3 direction = glm::vec3(0);
 
 	direction = to - from;
+	direction = Normalize(direction);
+
+	return (direction);
+}
+
+glm::vec3 Utilities::RandomDirection()
+{
+	glm::vec3 direction = glm::vec3(0);
+	direction.x = Random11() * 10.0;
+	direction.y = Random01() * 10.0;
+	direction.z = Random11() * 10.0;
+
 	direction = Normalize(direction);
 
 	return (direction);
