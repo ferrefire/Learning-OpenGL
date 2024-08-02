@@ -143,29 +143,77 @@ Shape GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2
 {
 	Shape branch = Shape(CYLINDER, resolution);
 	float sideAngle = 0;
+	float sideAngleStart = 0;
 	branch.Scale(glm::vec3(scale.x, scale.y, scale.x));
 
 	int i = 0;
 	float angleDiff = angles.x - angles.y;
-	for (glm::vec3 &vert : branch.GetVertices())
-	{
-		float a = branch.GetUVs()[i].y;
-		branch.RotateVert(i, angles.y + angleDiff * 0.5 + angleDiff * 0.5 * a, glm::vec3(1, 0, 0));
-		i++;
-	}
-	// branch.Rotate(angle, glm::vec3(1, 0, 0));
+
+	//for (glm::vec3 &vert : branch.GetVertices())
+	//{
+	//	float a = branch.GetUVs()[i].y;
+	//	branch.RotateVert(i, angles.y + angleDiff * 0.5 + angleDiff * 0.5 * a, glm::vec3(1, 0, 0));
+	//	i++;
+	//}
+
 	glm::vec2 vec2Offset = glm::vec2(offset.x, offset.z);
 	sideAngle = GetBranchAngle(Utilities::Normalize(vec2Offset));
-	if (sideAngle > 180.0) sideAngle = -(360.0 - sideAngle);
+	sideAngleStart = angles.z;
+	if (sideAngle > 180.0)
+	{
+		sideAngle = -(360.0 - sideAngle);
+		//sideAngleStart = -(360.0 - sideAngleStart);
+	}
 	//if (sideAngle > 360.0) sideAngle -= 360.0;
 
-	i = 0;
-	for (glm::vec3 &vert : branch.GetVertices())
+	//i = 0;
+	//for (glm::vec3 &vert : branch.GetVertices())
+	//{
+	//	float a = branch.GetUVs()[i].y;
+	//	branch.RotateVert(i, glm::mix(angles.z, sideAngle, a), glm::vec3(0, 1, 0));
+	//	i++;
+	//}
+
+	for (int y = 0; y <= resolution; y++)
 	{
-		float a = branch.GetUVs()[i].y;
-		branch.RotateVert(i, glm::mix(angles.z, sideAngle, a), glm::vec3(0, 1, 0));
-		i++;
+		float gradient = float(y) / float(resolution);
+
+		float xAngle = angles.y + angleDiff * 0.5 + angleDiff * 0.5 * gradient;
+		glm::mat4 xRotationMatrix = Utilities::GetRotationMatrix(xAngle, glm::vec3(1, 0, 0));
+
+		float yAngle = glm::mix(sideAngleStart, sideAngle, gradient);
+		glm::mat4 yRotationMatrix = Utilities::GetRotationMatrix(yAngle, glm::vec3(0, 1, 0));
+
+		//glm::mat4 rotationMatrix = Utilities::GetRotationMatrix(glm::vec3(xAngle, yAngle, 0));
+
+		for (int x = 0; x <= resolution; x++)
+		{
+			branch.GetVertices()[branch.GetVertexIndex(y, x)] = xRotationMatrix * 
+				glm::vec4(branch.GetVertices()[branch.GetVertexIndex(y, x)], 1);
+			branch.GetVertices()[branch.GetVertexIndex(y, x)] = yRotationMatrix * 
+				glm::vec4(branch.GetVertices()[branch.GetVertexIndex(y, x)], 1);
+
+			branch.GetNormals()[branch.GetVertexIndex(y, x)] = xRotationMatrix * 
+				glm::vec4(branch.GetNormals()[branch.GetVertexIndex(y, x)], 0);
+			branch.GetNormals()[branch.GetVertexIndex(y, x)] = yRotationMatrix * 
+				glm::vec4(branch.GetNormals()[branch.GetVertexIndex(y, x)], 0);
+
+			if (y == resolution && x == resolution && branch.centerMergePoint != -1)
+			{
+				branch.GetVertices()[branch.centerMergePoint] = xRotationMatrix * 
+					glm::vec4(branch.GetVertices()[branch.centerMergePoint], 1);
+				branch.GetVertices()[branch.centerMergePoint] = yRotationMatrix * 
+					glm::vec4(branch.GetVertices()[branch.centerMergePoint], 1);
+
+				branch.GetNormals()[branch.centerMergePoint] = xRotationMatrix * 
+					glm::vec4(branch.GetNormals()[branch.centerMergePoint], 0);
+				branch.GetNormals()[branch.centerMergePoint] = yRotationMatrix * 
+					glm::vec4(branch.GetNormals()[branch.centerMergePoint], 0);
+			}
+		}
 	}
+
+	branch.RecalculateData();
 
 	// branch.Rotate(sideAngle, glm::vec3(0, 1, 0));
 	branch.Translate(base + offset);
@@ -176,16 +224,17 @@ Shape GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2
 
 	float angleSpacing = 360.0 / splitTimes;
 	float angleMax = angleSpacing * 0.5;
-	//float startAngle = Utilities::Random01() * 360.0;
+	float startAngle = Utilities::Random11() * 180.0;
 
 	//int mainIndex = int(glm::ceil(Utilities::Random01() * splitTimes)) - 1;
 
 	for (int i = 0; i < splitTimes; i++)
 	{
+		//int subResolution = glm::clamp(resolution - int(glm::ceil(float(resolution) / 3.0)), 4, resolution);
 		int subResolution = glm::clamp(int(glm::ceil(resolution * 0.5)), 4, resolution);
 		//if (subResolution % 2 == 1) subResolution += 1;
 
-		float newSubAngle = (i * angleSpacing) + (Utilities::Random11() * angleMax);
+		float newSubAngle = startAngle + (i * angleSpacing) + (Utilities::Random11() * angleMax);
 		//if (newSubAngle >= 360.0) newSubAngle -= 360.0;
 		glm::vec3 subOffset = glm::vec3(0, 0, -1);
 		Utilities::RotateVec3(subOffset, newSubAngle, glm::vec3(0, 1, 0));
@@ -194,7 +243,7 @@ Shape GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2
 
 		//if (!main) subOffset = GetSubOffset(offset, subOffset);
 
-		subOffset.y = 2.0 + Utilities::Random01();
+		subOffset.y = 1.0 + Utilities::Random01();
 		//subOffset.y = 0;
 		//subOffset.x *= (scale.x + scale.y) * 3;
 		//subOffset.y *= (scale.x + scale.y) * 3;
@@ -202,6 +251,7 @@ Shape GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2
 		subOffset *= (scale.x + scale.y) * (main ? 5 : 3);
 
 		float scaleMult = glm::mix(0.9, 1.1, Utilities::Random01());
+		//if (i != 0) scaleMult -= 0.1;
 		glm::vec2 subScale = glm::vec2(scale.x * scaleMult * 0.6, scale.y * scaleMult * 0.75);
 		//glm::vec2 subScale = glm::vec2(1);
 
@@ -218,6 +268,8 @@ Shape GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2
 
 		branch.Join(subBranch, true);
 	}
+
+	branch.CloseUnusedPoints();
 	
 	return (branch);
 }
@@ -242,6 +294,7 @@ Mesh *Trees::GenerateTrunk()
 	Manager::AddShape(treeShape);
 
 	Shape subBranch = GenerateBranch(24, glm::vec3(0), glm::vec3(0), glm::vec2(1), glm::vec3(0), 4, true);
+	//subBranch.CloseUnusedPoints();
  	treeShape->Join(subBranch);
 
 	//treeShape->Rotate(Utilities::Random11() * 180.0, glm::vec3(0, 1, 0));

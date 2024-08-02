@@ -167,3 +167,19 @@ glm::vec3 Utilities::RandomDirection()
 
 	return (direction);
 }
+
+glm::mat4 Utilities::GetRotationMatrix(float angle, glm::vec3 axis)
+{
+	glm::mat4 rotation = glm::mat4(1.0f);
+	rotation = glm::rotate(rotation, glm::radians(angle), axis);
+	return (rotation);
+}
+
+glm::mat4 Utilities::GetRotationMatrix(glm::vec3 angles)
+{
+	glm::mat4 rotation = glm::mat4(1.0f);
+	if (angles.x != 0) rotation = glm::rotate(rotation, glm::radians(angles.x), glm::vec3(1, 0, 0));
+	if (angles.y != 0) rotation = glm::rotate(rotation, glm::radians(angles.y), glm::vec3(0, 1, 0));
+	if (angles.z != 0) rotation = glm::rotate(rotation, glm::radians(angles.z), glm::vec3(0, 0, 1));
+	return (rotation);
+}

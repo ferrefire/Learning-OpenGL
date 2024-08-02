@@ -24,14 +24,14 @@ class Shape
         unsigned int indiceCount;
         unsigned int dataCount;
 
+		int createResolution;
+
         std::vector<glm::vec3> vertices;
 		std::vector<glm::vec2> uvs;
 		std::vector<glm::vec3> normals;
 		std::vector<unsigned int> indices;
 
         std::vector<float> data;
-
-		int mergeIndex = 0;
 
 	public:
         Shape();
@@ -47,6 +47,7 @@ class Shape
 		std::vector<unsigned int> Indices();
 
 		std::vector<glm::vec3> &GetVertices();
+		std::vector<glm::vec3> &GetNormals();
 		std::vector<glm::vec2> &GetUVs();
 
 		unsigned int VertexCount();
@@ -55,6 +56,9 @@ class Shape
 
 		std::vector<unsigned int> mergeTopPoints;
 		std::vector<unsigned int> mergeBottomPoints;
+		std::vector<glm::ivec2> pointMerged;
+
+		int centerMergePoint = -1;
 
 		bool vertexOnly = false;
 
@@ -70,7 +74,11 @@ class Shape
 		void Join(Shape &joinShape, bool merge);
 		void AddIndice(unsigned int indice);
 
-		int ClosestMergeIndex(glm::vec3 position);
+		int ClosestMergeIndex(glm::vec3 position, bool closest, bool top);
+		int GetVertexIndex(int x, int y);
+		glm::ivec2 GetVertexCoords(int i);
+		void CloseUnusedPoints();
+		int GetClosestVertex(glm::vec3 position, bool up);
 
 		glm::vec4 GetBounds();
 		glm::vec3 BottomMergePointsCenter();

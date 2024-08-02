@@ -63,6 +63,8 @@ void main()
 	float x = float(gl_GlobalInvocationID.x) - instanceCountSqrt * 0.5;
     float z = float(gl_GlobalInvocationID.y) - instanceCountSqrt * 0.5;
 
+	if (SquaredDistanceVec2(vec2(x, z), vec2(0)) > pow(instanceCountSqrt * 0.5, 2)) return ;
+
 	//int lod = Inside(vec2(x, z));
 
 	vec2 flooredViewPosition = vec2(round(viewPosition.x * spacingMult) * spacing, 

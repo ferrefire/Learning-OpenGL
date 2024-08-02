@@ -14,6 +14,8 @@ Shape::~Shape()
 
 Shape::Shape(int preset, int resolution)
 {
+	createResolution = resolution;
+
     if (preset == TRIANGLE)
     {
         name = std::string("triangle");
@@ -160,9 +162,22 @@ Shape::Shape(int preset, int resolution)
 			indices.push_back(startVertices[i]);
 		}
 
+		for (int i = 0; i < mergeTopPoints.size(); i++)
+		{
+			pointMerged.push_back(glm::ivec2(0));
+		}
+
 		RecalculateNormals();
 
-        Translate(glm::vec3(0, 0.5, 0));
+		if (resolution > 4)
+		{
+			centerMergePoint = vertices.size();
+			vertices.push_back(TopMergePointsCenter() + glm::vec3(0, 0.05, 0));
+			normals.push_back(glm::vec3(0, 1, 0));
+			uvs.push_back(glm::vec2(0, 1));
+		}
+
+		Translate(glm::vec3(0, 0.5, 0));
         Scale(glm::vec3(3, 50, 3));
     }
     else if (preset == PLANE)
@@ -197,7 +212,7 @@ Shape::Shape(int preset, int resolution)
         vertexCount = vertices.size();
         indiceCount = indices.size();
 
-		//std::cout << vertexCount << std::endl;
+		//std::cout << resolution << " - " << vertexCount << std::endl;
     }
     else if (preset == BLADE)
     {
@@ -286,6 +301,11 @@ std::vector<glm::vec3> Shape::Normals()
 	return (normals);
 }
 
+std::vector<glm::vec3> &Shape::GetNormals()
+{
+	return (normals);
+}
+
 std::vector<unsigned int> Shape::Indices()
 {
     return (indices);
@@ -341,24 +361,9 @@ void Shape::RotateVert(int index, float degrees, const glm::vec3 &axis)
 	glm::vec4 ri = glm::vec4(vertices[index], 1.0f);
 	vertices[index] = rotation * ri;
 
-	//int size = vertices.size();
-	//for (int i = 0; i < size; i++)
-	//{
-	//	glm::vec4 ri = glm::vec4(vertices[i], 1.0f);
-	//	vertices[i] = rotation * ri;
-	//}
-
 	ri = glm::vec4(normals[index], 0.0f); // maybe set 1.0f to 0.0f becaus it is a direction
 	normals[index] = rotation * ri;
-
-	//size = normals.size();
-	//for (int i = 0; i < size; i++)
-	//{
-	//	glm::vec4 ri = glm::vec4(normals[i], 0.0f); // maybe set 1.0f to 0.0f becaus it is a direction
-	//	normals[i] = rotation * ri;
-	//}
-
-	RecalculateData();
+	//RecalculateData();
 }
 
 void Shape::Translate(const glm::vec3 &translation)
@@ -446,19 +451,33 @@ void Shape::Join(Shape &joinShape)
     RecalculateData();
 }
 
-int Shape::ClosestMergeIndex(glm::vec3 position)
+int Shape::ClosestMergeIndex(glm::vec3 position, bool closest, bool top)
 {
 	int index = 0;
 	int closestIndex = 0;
-	float closestDistance = glm::distance(position, vertices[mergeTopPoints[0]]);
+	float closestDistance = 0;
 
-	for (const int &i : mergeTopPoints)
+	if (top) closestDistance = glm::distance(position, vertices[mergeTopPoints[0]]);
+	else closestDistance = glm::distance(position, vertices[mergeBottomPoints[0]]);
+
+	for (const int &i : (top ? mergeTopPoints : mergeBottomPoints))
 	{
 		float currentDistance = glm::distance(position, vertices[i]);
-		if (currentDistance < closestDistance)
+		if (closest)
 		{
-			closestDistance = currentDistance;
-			closestIndex = index;
+			if (currentDistance < closestDistance)
+			{
+				closestDistance = currentDistance;
+				closestIndex = index;
+			}
+		}
+		else
+		{
+			if (currentDistance > closestDistance)
+			{
+				closestDistance = currentDistance;
+				closestIndex = index;
+			}
 		}
 		index++;
 	}
@@ -489,8 +508,8 @@ void Shape::Join(Shape &joinShape, bool merge)
 	int mainPoints = mergeTopPoints.size();
 	int minPoints = glm::min(joinPoints, mainPoints);
 
-	int closestMainPoint = ClosestMergeIndex(joinShape.BottomMergePointsCenter());
-	int furthestJoinPoint = joinShape.ClosestMergeIndex(joinShape.BottomMergePointsCenter() - TopMergePointsCenter());
+	int closestMainPoint = ClosestMergeIndex(joinShape.BottomMergePointsCenter(), true, true);
+	int furthestJoinPoint = joinShape.ClosestMergeIndex(TopMergePointsCenter(), false, false);
 	//mergeIndex = ClosestMergeIndex(joinShape.GetVertices()[joinShape.mergeBottomPoints[0]]);
 	//mergeIndex = minPoints;
 
@@ -509,10 +528,10 @@ void Shape::Join(Shape &joinShape, bool merge)
 		//if (i + 1 >= minPoints) i2 = furthestJoinPoint;
 		//if (i + 1 >= minPoints) i2 = CalculateIndex(i - 1) + furthestJoinPoint;
 
-		if (i1 >= minPoints) i1 -= minPoints;
-		if (i2 >= minPoints) i2 -= minPoints;
-		if (i1 < 0) i1 += minPoints;
-		if (i2 < 0) i2 += minPoints;
+		if (i1 >= joinPoints) i1 -= joinPoints;
+		if (i2 >= joinPoints) i2 -= joinPoints;
+		if (i1 < 0) i1 += joinPoints;
+		if (i2 < 0) i2 += joinPoints;
 
 		//int mi1 = i + closestMainPoint;
 		//int mi2 = i + 1 + closestMainPoint;
@@ -520,9 +539,7 @@ void Shape::Join(Shape &joinShape, bool merge)
 		int mi1 = index + closestMainPoint;
 		int mi2 = index + 1 + closestMainPoint;
 
-		//if (i + 1 >= minPoints) mi1 = CalculateIndex(i - 1)closestMainPoint - 1;
-		if (i + 1 >= minPoints) mi2 = CalculateIndex(i - 1) + closestMainPoint;
-		//else if (i + 2 >= minPoints) mi2 = closestMainPoint - 1;
+		//if (i + 1 >= minPoints) mi2 = CalculateIndex(i - 1) + closestMainPoint;
 
 		if (mi1 >= mainPoints) mi1 -= mainPoints;
 		if (mi1 < 0) mi1 += mainPoints;
@@ -538,11 +555,56 @@ void Shape::Join(Shape &joinShape, bool merge)
 		indices.push_back(mergeTopPoints[mi2]);
 
 		glm::vec3 direction = joinShape.GetVertices()[joinShape.mergeBottomPoints[i1]] - vertices[mergeTopPoints[mi1]];
-		vertices[mergeTopPoints[mi1]] += direction * 0.125f;
-		joinShape.GetVertices()[joinShape.mergeBottomPoints[i1]] -= direction * 0.125f; 
+		joinShape.GetVertices()[joinShape.mergeBottomPoints[i1]] -= direction * 0.25f;
+		direction = joinShape.GetVertices()[joinShape.mergeBottomPoints[i1]] - vertices[mergeTopPoints[mi1]];
+		vertices[mergeTopPoints[mi1]] += direction * 0.1f;
+
+		glm::ivec2 coords = GetVertexCoords(mergeTopPoints[mi1]);
+		int range = int(glm::ceil(createResolution * 0.25));
+		//int range = 2;
+		for (int j = 1; j < range; j++)
+		{
+			//float gradient = 1.0 - (float(j) / float(range));
+			int prev = GetVertexIndex(coords.x - j + 1, coords.y);
+			int below = GetVertexIndex(coords.x - j, coords.y);
+
+			direction = vertices[prev] - vertices[below];
+			//std::cout << mergeTopPoints[mi1] << " " << below << " " << createResolution << std::endl;
+			vertices[below] += direction * 0.25f;
+		}
+
+		pointMerged[mi1].x = 1;
+		pointMerged[mi2].y = 1;
+		//pointMerged[mi2] = true;
+
+		//unUsedPoints.push_back(mi1);
 	}
 
-	mergeIndex += minPoints;
+	if (centerMergePoint != -1)
+	{
+		int index = CalculateIndex(minPoints - 1);
+		int i1 = index + 1 + furthestJoinPoint;
+		if (i1 >= joinPoints) i1 -= joinPoints;
+		if (i1 < 0) i1 += joinPoints;
+
+		int mi1 = index + 1 + closestMainPoint;
+		if (mi1 >= mainPoints) mi1 -= mainPoints;
+		if (mi1 < 0) mi1 += mainPoints;
+
+		indices.push_back(joinShape.mergeBottomPoints[i1] + vertOffset);
+		indices.push_back(centerMergePoint);
+		indices.push_back(mergeTopPoints[mi1]);
+
+		index = CalculateIndex(minPoints - 2);
+
+		mi1 = index + closestMainPoint;
+		if (mi1 >= mainPoints) mi1 -= mainPoints;
+		if (mi1 < 0) mi1 += mainPoints;
+
+		indices.push_back(joinShape.mergeBottomPoints[i1] + vertOffset);
+		indices.push_back(mergeTopPoints[mi1]);
+		indices.push_back(centerMergePoint);
+	}
 
 	Join(joinShape);
 }
@@ -617,6 +679,83 @@ glm::vec3 Shape::TopMergePointsCenter()
 	center /= mergeTopPoints.size();
 
 	return (center);
+}
+
+int Shape::GetVertexIndex(int x, int y)
+{
+	int root = createResolution + 1;
+
+	return (x + y * root);
+}
+
+glm::ivec2 Shape::GetVertexCoords(int i)
+{
+	int root = createResolution + 1;
+
+	glm::ivec2 coords = glm::ivec2(0);
+	coords.y = i / root;
+	coords.x = i % root;
+
+	return (coords);
+}
+
+int Shape::GetClosestVertex(glm::vec3 position, bool up)
+{
+	int index = 0;
+	int closestIndex = 0;
+	float closestDistance = glm::distance(position, vertices[0]);
+
+	for (const glm::vec3 &vertex : vertices)
+	{
+		//bool inMergePoints = false;
+		//for (const unsigned &mergePoint : mergeTopPoints)
+		//{
+		//	if (index == mergePoint)
+		//	{
+		//		inMergePoints = true;
+		//		break ;
+		//	}
+		//}
+
+		if ((up && vertex.y <= position.y))
+		{
+			index++;
+			continue ;
+		}
+
+		float currentDistance = glm::distance(position, vertex);
+		if (currentDistance < closestDistance)
+		{
+			closestDistance = currentDistance;
+			closestIndex = index;
+		}
+
+		index++;
+	}
+
+	return closestIndex;
+}
+
+void Shape::CloseUnusedPoints()
+{
+	if (centerMergePoint == -1) return;
+
+	glm::vec3 center = TopMergePointsCenter();
+
+	int i = 0;
+	for (const unsigned int &point : mergeTopPoints)
+	{
+		if (pointMerged[i].x == 0)
+		{
+			int mi1 = i;
+			int mi2 = i + 1;
+			if (mi2 >= mergeTopPoints.size()) mi2 -= mergeTopPoints.size();
+			indices.push_back(centerMergePoint);
+			indices.push_back(mergeTopPoints[mi2]);
+			indices.push_back(mergeTopPoints[mi1]);
+		}
+		i++;
+	}
 }
 
 //std::vector<int> Shape::GetEndVertices()

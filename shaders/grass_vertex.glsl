@@ -55,7 +55,7 @@ float random (vec2 st)
     return fract(sin(dot(st.xy * 0.001, vec2(12.9898,78.233))) * 43758.5453123);
 }
 
-mat4 rotationMatrix(vec3 axis, float angle)
+/*mat4 rotationMatrix(vec3 axis, float angle)
 {
     //axis = normalize(axis);
     float s = sin(angle);
@@ -66,7 +66,7 @@ mat4 rotationMatrix(vec3 axis, float angle)
                 oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
                 oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
                 0.0,                                0.0,                                0.0,                                1.0);
-}
+}*/
 
 void main()
 {
@@ -100,8 +100,7 @@ void main()
 	//else ran = lodData[gl_InstanceID].rot.x;
 	ran = rot.x;
 
-    mat4 rotation = rotationMatrix(vec3(1.0, 0.0, 0.0), radians(ran * (iPosition.y + 0.25)));
-    //mat4 rotation = rotationMatrix(vec3(1.0, 0.0, 0.0), radians((iPosition.y * 0.5 - GrassCurve(rot.x, iPosition.y * 0.5).y) * 90.0));
+    //mat4 rotation = rotationMatrix(vec3(1.0, 0.0, 0.0), radians(ran * (iPosition.y + 0.25)));
 
 	float squaredDistance = SquaredDistanceToViewPosition(pos);
 	float maxDistance = pow(instanceCountSqrt * spacing, 2);
@@ -111,16 +110,29 @@ void main()
 	scale = 1.0 - pow(1.0 - scale, 4);
 	scale = 1.0 + scale * 2;
 	vec3 position = iPosition * scale;
-    position = (rotation * vec4(position, 1.0)).xyz;
-    normal = (rotation * vec4(normal, 0.0)).xyz;
+
+	//RotatePositionAndNormal(radians(ran * (iPosition.y + 0.25)), vec3(1, 0, 0));
+
+	float angle = radians(ran * (iPosition.y + 0.25));
+	position = Rotate(position, angle, vec3(1, 0, 0));
+	normal = Rotate(normal, angle, vec3(1, 0, 0));
+
+    //position = (rotation * vec4(position, 1.0)).xyz;
+    //normal = (rotation * vec4(normal, 0.0)).xyz;
 
 	//if (lod == 0) ran = data[gl_InstanceID].rot.y;
 	//else ran = lodData[gl_InstanceID].rot.y;
 	ran = rot.y;
 
-    rotation = rotationMatrix(vec3(0.0, 1.0, 0.0), radians(ran));
-    position = (rotation * vec4(position, 1.0)).xyz;
-    normal = (rotation * vec4(normal, 0.0)).xyz;
+	//RotatePositionAndNormal(radians(ran), vec3(0, 1, 0));
+
+	angle = radians(ran);
+	position = Rotate(position, angle, vec3(0, 1, 0));
+	normal = Rotate(normal, angle, vec3(0, 1, 0));
+
+    //rotation = rotationMatrix(vec3(0.0, 1.0, 0.0), radians(ran));
+    //position = (rotation * vec4(position, 1.0)).xyz;
+    //normal = (rotation * vec4(normal, 0.0)).xyz;
 
 	worldPosition = ObjectToWorld(position) + pos;
     gl_Position = projection * view * vec4(worldPosition, 1.0);

@@ -57,7 +57,10 @@ float random(vec2 st)
 
 int Inside(vec2 pos)
 {
-	return (abs(pos.x) < lodRange && abs(pos.y) < lodRange) ? 1 : 0;
+	float dis = SquaredDistanceVec2(pos, vec2(0));
+	if (dis > pow(instanceCountSqrt * 0.5, 2)) return (-1);
+	else if (dis > pow(lodRange * 0.5, 2)) return (0);
+	else return (1);
 }
 
 void main()
@@ -69,7 +72,9 @@ void main()
 
 	int lod = Inside(vec2(x, z));
 
-	if (lod == specificLod) return ;
+	if (lod == specificLod || lod == -1) return ;
+
+	//if (SquaredDistanceVec2(vec2(x, z), vec2(0)) > pow(instanceCountSqrt * 0.5, 2)) return ;
 	//uint packedv2 = packHalf2x16(vec2(0.5, 1.75));
 
 	//uint index = gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * instanceCountSqrt;

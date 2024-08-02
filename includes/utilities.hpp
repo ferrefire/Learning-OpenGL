@@ -38,6 +38,8 @@ class Utilities
 		static glm::vec3 Normalize(const glm::vec3 &vec);
 		static glm::vec3 Direction(const glm::vec3 &from, const glm::vec3 &to);
 		static glm::vec3 RandomDirection();
+		static glm::mat4 GetRotationMatrix(float angle, glm::vec3 axis);
+		static glm::mat4 GetRotationMatrix(glm::vec3 angles);
 };
 
 #endif
