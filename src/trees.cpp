@@ -4,6 +4,9 @@
 #include "time.hpp"
 #include <iostream>
 #include "input.hpp"
+#include "debug.hpp"
+#include <thread>
+#include <future>
 
 void Trees::CreateTrees()
 {
@@ -56,7 +59,9 @@ void Trees::CreateMeshes()
     //Manager::AddShape(treeShape);
 
 	//treeMesh = new Mesh(treeShape, treeShader);
+	//Debug::DurationCheck();
 	treeMesh = GenerateTrunk();
+	//Debug::DurationCheck();
 	Manager::AddMesh(treeMesh);
 }
 
@@ -139,7 +144,13 @@ glm::vec3 GetSubOffset(glm::vec3 base, glm::vec3 direction)
 	return (subOffset);
 }
 
-Shape GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2 scale, glm::vec3 angles, int splitTimes, bool main)
+void Trees::GenerateBranchThreaded(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2 scale, glm::vec3 angles, int splitTimes, bool main,
+	std::promise<Shape> *promise)
+{
+	promise->set_value(GenerateBranch(resolution, base, offset, scale, angles, splitTimes, main));
+}
+
+Shape Trees::GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2 scale, glm::vec3 angles, int splitTimes, bool main)
 {
 	Shape branch = Shape(CYLINDER, resolution);
 	float sideAngle = 0;
@@ -149,13 +160,6 @@ Shape GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2
 	int i = 0;
 	float angleDiff = angles.x - angles.y;
 
-	//for (glm::vec3 &vert : branch.GetVertices())
-	//{
-	//	float a = branch.GetUVs()[i].y;
-	//	branch.RotateVert(i, angles.y + angleDiff * 0.5 + angleDiff * 0.5 * a, glm::vec3(1, 0, 0));
-	//	i++;
-	//}
-
 	glm::vec2 vec2Offset = glm::vec2(offset.x, offset.z);
 	sideAngle = GetBranchAngle(Utilities::Normalize(vec2Offset));
 	sideAngleStart = angles.z;
@@ -164,15 +168,6 @@ Shape GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2
 		sideAngle = -(360.0 - sideAngle);
 		//sideAngleStart = -(360.0 - sideAngleStart);
 	}
-	//if (sideAngle > 360.0) sideAngle -= 360.0;
-
-	//i = 0;
-	//for (glm::vec3 &vert : branch.GetVertices())
-	//{
-	//	float a = branch.GetUVs()[i].y;
-	//	branch.RotateVert(i, glm::mix(angles.z, sideAngle, a), glm::vec3(0, 1, 0));
-	//	i++;
-	//}
 
 	for (int y = 0; y <= resolution; y++)
 	{
@@ -228,6 +223,10 @@ Shape GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2
 
 	//int mainIndex = int(glm::ceil(Utilities::Random01() * splitTimes)) - 1;
 
+	std::vector<std::promise<Shape>> promises = std::vector<std::promise<Shape>>(splitTimes);
+	std::vector<std::future<Shape>> futures = std::vector<std::future<Shape>>(splitTimes);
+	std::vector<std::thread> threads = std::vector<std::thread>(splitTimes);
+
 	for (int i = 0; i < splitTimes; i++)
 	{
 		//int subResolution = glm::clamp(resolution - int(glm::ceil(float(resolution) / 3.0)), 4, resolution);
@@ -241,13 +240,7 @@ Shape GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2
 
 		glm::vec3 subBase = branch.TopMergePointsCenter();
 
-		//if (!main) subOffset = GetSubOffset(offset, subOffset);
-
 		subOffset.y = 1.0 + Utilities::Random01();
-		//subOffset.y = 0;
-		//subOffset.x *= (scale.x + scale.y) * 3;
-		//subOffset.y *= (scale.x + scale.y) * 3;
-		//subOffset.z *= (scale.x + scale.y) * 3;
 		subOffset *= (scale.x + scale.y) * (main ? 5 : 3);
 
 		float scaleMult = glm::mix(0.9, 1.1, Utilities::Random01());
@@ -264,54 +257,44 @@ Shape GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2
 		Utilities::RotateVec3(subOffset, subAngle, glm::vec3(1, 0, 0));
 		Utilities::RotateVec3(subOffset, sideAngle, glm::vec3(0, 1, 0));
 
-		Shape subBranch = GenerateBranch(subResolution, subBase, subOffset, subScale, subAngles, 2, false);
+		//Shape subBranch = GenerateBranch(subResolution, subBase, subOffset, subScale, subAngles, 2, false);
 
+		//std::promise<Shape> branchSetter;
+		//std::future<Shape> branchGetter = branchSetter.get_future();
+		//promises[i] = std::promise<Shape>();
+		futures[i] = promises[i].get_future();
+		threads[i] = std::thread(GenerateBranchThreaded, subResolution, subBase, subOffset, subScale, subAngles, 2, false, &promises[i]);
+		//Shape subBranch = branchGetter.get();
+		//branchThread.join();
+		//std::cout << subBranch.GetVertices().size() << std::endl;
+
+		//branch.Join(subBranch, true);
+	}
+
+	for (int i = 0; i < splitTimes; i++)
+	{
+		Shape subBranch = futures[i].get();
+		threads[i].join();
+		//branchThread.join();
 		branch.Join(subBranch, true);
 	}
 
 	branch.CloseUnusedPoints();
-	
 	return (branch);
 }
 
-/*Shape *GenerateMainBranch(int resolution, glm::vec3 scale, float angle, int splitTimes)
-{
-	Shape *branch = new Shape(CYLINDER, resolution);
-	branch->Scale(scale);
-	branch->Rotate(angle, glm::vec3(1, 0, 0));
-
-	for (int i = 0; i < splitTimes; i++)
-	{
-
-	}
-
-	return (branch);
-}*/
-
 Mesh *Trees::GenerateTrunk()
 {
+	Debug::DurationCheck();
 	Shape *treeShape = new Shape();
 	Manager::AddShape(treeShape);
 
 	Shape subBranch = GenerateBranch(24, glm::vec3(0), glm::vec3(0), glm::vec2(1), glm::vec3(0), 4, true);
-	//subBranch.CloseUnusedPoints();
  	treeShape->Join(subBranch);
-
-	//treeShape->Rotate(Utilities::Random11() * 180.0, glm::vec3(0, 1, 0));
 
 	std::cout << treeShape->VertexCount() << std::endl;
 
-	/*glm::vec3 center = treeShape->TopMergePointsCenter();
-
-	Shape branch = GenerateBranch(7, center, glm::vec3(5, 7.5, -7), glm::vec3(0.625, 0.5, 0.625), 40, 4);
-	treeShape->Join(branch, true);
-
-	branch = GenerateBranch(7, center, glm::vec3(-5, 10, 5), glm::vec3(0.75, 0.625, 0.75), 25, 4);
-	treeShape->Join(branch, true);
-
-	branch = GenerateBranch(7, center, glm::vec3(6, 8.25, 6), glm::vec3(0.75, 0.625, 0.75), 45, 4);
-	treeShape->Join(branch, true);*/
-
 	Mesh *trunk = new Mesh(treeShape, treeShader);
+	Debug::DurationCheck();
 	return (trunk);
 }

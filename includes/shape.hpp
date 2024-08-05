@@ -83,6 +83,8 @@ class Shape
 		glm::vec4 GetBounds();
 		glm::vec3 BottomMergePointsCenter();
 		glm::vec3 TopMergePointsCenter();
+
+		Shape Copy();
 		//std::vector<int> GetEndVertices();
 		//std::vector<int> GetStartVertices();
 };

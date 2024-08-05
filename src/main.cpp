@@ -101,7 +101,7 @@ int Terrain::terrainLod0Resolution = 1024;
 int Terrain::terrainLod1Resolution = 1024;
 int Terrain::terrainShadowResolution = 512;
 int Terrain::terrainChunkResolution = 1024;
-int Terrain::chunkRadius = 4;
+int Terrain::chunkRadius = 1;
 int Terrain::chunksLength = 0;
 int Terrain::chunkCount = 0;
 int Terrain::computePartLod0 = 0;
@@ -128,7 +128,7 @@ Mesh *Terrain::terrainMesh = NULL;
 Mesh *Terrain::terrainLod0Mesh = NULL;
 Mesh *Terrain::terrainLod1Mesh = NULL;
 Object ***Terrain::terrainChunks = NULL;
-int Terrain::terrainRadius = 3;
+int Terrain::terrainRadius = 1;
 int Terrain::terrainLength = 0;
 int Terrain::terrainCount = 0;
 float Terrain::worldSampleDistance = 1;
@@ -354,8 +354,8 @@ int main(int argc, char **argv)
 		}
 		
 		Terrain::NewFrame();
-		//Trees::NewFrame();
-		Grass::NewFrame();
+		Trees::NewFrame();
+		//Grass::NewFrame();
 
 		//quadShader->useShader();
 		//screenQuadMesh->UseMesh();

@@ -758,6 +758,11 @@ void Shape::CloseUnusedPoints()
 	}
 }
 
+Shape Shape::Copy()
+{
+	return *this;
+}
+
 //std::vector<int> Shape::GetEndVertices()
 //{
 //
