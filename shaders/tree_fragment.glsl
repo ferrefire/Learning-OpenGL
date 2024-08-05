@@ -19,7 +19,7 @@ void main()
     vec3 normal = normalize(normal);
 
     vec3 viewDirection = normalize(viewPosition - worldPosition);
-    vec3 treeColor = vec3(0.18, 0.14, 0.08) * 3;
+    vec3 treeColor = vec3(0.18, 0.14, 0.08) * 2;
     
 	float depth = GetDepth(gl_FragCoord.z, near, far);
 	vec3 diffuse = DiffuseLighting(normal, treeColor);

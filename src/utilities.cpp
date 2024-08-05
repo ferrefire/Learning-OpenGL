@@ -140,11 +140,6 @@ float Utilities::Dot(glm::vec2 p1, glm::vec2 p2)
 	return (dot);
 }
 
-float Utilities::Angle(glm::vec2 p1, glm::vec2 p2)
-{
-	
-}
-
 glm::vec2 Utilities::Normalize(const glm::vec2 &vec)
 {
 	float unit = abs(vec.x) + abs(vec.y);

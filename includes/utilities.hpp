@@ -39,7 +39,6 @@ class Utilities
         static float SignedFloor(float x);
 		static std::string GetPath();
 		static float Dot(glm::vec2 p1, glm::vec2 p2);
-		static float Angle(glm::vec2 p1, glm::vec2 p2);
 		static glm::vec2 Normalize(const glm::vec2 &vec);
 		static glm::vec3 Normalize(const glm::vec3 &vec);
 		static glm::vec3 Direction(const glm::vec3 &from, const glm::vec3 &to);

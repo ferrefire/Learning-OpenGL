@@ -143,7 +143,7 @@ void main()
 
 	if (lod == 2)
 	{
-		if (MapOccluded(position + vec3(0, 100, 0)) <= 0) return ;
+		if (MapOccluded(position + vec3(0, 75, 0)) <= 0) return ;
 		if (InView(position + vec3(0, 50, 0), vec3(0)) == 0) return ;
 	}
 	else if (lod == 1)

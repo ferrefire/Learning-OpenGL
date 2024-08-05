@@ -58,7 +58,8 @@ void Trees::CreateBuffers()
     treeLod0CountBuffer->CreateBuffer();
     Manager::AddBuffer(treeLod0CountBuffer);
 
-	treeLod1RenderBuffer = new Buffer(9, (treeLod1Count * treeLod1Count) * (sizeof(float) * 2));
+	int lod1Count = pow(treeLod0Count + treeLod1Count, 2) - pow(treeLod0Count, 2);
+	treeLod1RenderBuffer = new Buffer(9, lod1Count * (sizeof(float) * 2));
 	treeLod1RenderBuffer->CreateBuffer();
 	Manager::AddBuffer(treeLod1RenderBuffer);
 
@@ -66,7 +67,8 @@ void Trees::CreateBuffers()
 	treeLod1CountBuffer->CreateBuffer();
 	Manager::AddBuffer(treeLod1CountBuffer);
 
-	treeLod2RenderBuffer = new Buffer(11, (treeLod2Count * treeLod2Count) * (sizeof(float) * 2));
+	int lod2Count = pow(treeLod0Count + treeLod1Count + treeLod2Count, 2) - pow(treeLod0Count + treeLod1Count, 2);
+	treeLod2RenderBuffer = new Buffer(11, lod2Count * (sizeof(float) * 2));
 	treeLod2RenderBuffer->CreateBuffer();
 	Manager::AddBuffer(treeLod2RenderBuffer);
 

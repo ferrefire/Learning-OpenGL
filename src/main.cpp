@@ -137,7 +137,7 @@ int Terrain::terrainCount = 0;
 float Terrain::worldSampleDistance = 1;
 
 unsigned int Grass::grassCount = 384;
-unsigned int Grass::grassLodCount = 2048;
+unsigned int Grass::grassLodCount = 2048 + 1024;
 unsigned int Grass::grassRenderCount = 0;
 unsigned int Grass::grassLodRenderCount = 0;
 Shader *Grass::grassShader = NULL;
@@ -150,8 +150,8 @@ Mesh *Grass::grassMesh = NULL;
 Mesh *Grass::grassLodMesh = NULL;
 
 unsigned int Trees::treeLod0Count = 16;
-unsigned int Trees::treeLod1Count = 32;
-unsigned int Trees::treeLod2Count = 128;
+unsigned int Trees::treeLod1Count = 24;
+unsigned int Trees::treeLod2Count = 128 + 64;
 unsigned int Trees::treeLod0RenderCount = 0;
 unsigned int Trees::treeLod1RenderCount = 0;
 unsigned int Trees::treeLod2RenderCount = 0;
