@@ -12,9 +12,19 @@ struct datastruct
 	uint posyroty;
 };
 
-layout(std430, binding = 7) buffer iData
+layout(std430, binding = 7) buffer iLod0Data
 {
-    datastruct data[];
+    datastruct lod0Data[];
+};
+
+layout(std430, binding = 9) buffer iLod1Data
+{
+    datastruct lod1Data[];
+};
+
+layout(std430, binding = 11) buffer iLod2Data
+{
+    datastruct lod2Data[];
 };
 
 out vec2 UV;
@@ -35,52 +45,47 @@ uniform float instanceCountSqrtMult;
 
 uniform int lod;
 uniform vec3 computeViewPosition;
-uniform vec3 computeViewPositionLod;
 
 float random (vec2 st)
 {
     return fract(sin(dot(st.xy * 0.001, vec2(12.9898,78.233))) * 43758.5453123);
 }
 
-/*mat4 rotationMatrix(vec3 axis, float angle)
-{
-    //axis = normalize(axis);
-    float s = sin(angle);
-    float c = cos(angle);
-    float oc = 1.0 - c;
-    
-    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
-                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
-                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
-                0.0,                                0.0,                                0.0,                                1.0);
-}*/
-
 void main()
 {
 	vec3 pos = vec3(0);
 	float rot = 0;
 
-    pos.xz = unpackHalf2x16(data[gl_InstanceID].posxz) + computeViewPosition.xz;
-	vec2 yy = unpackHalf2x16(data[gl_InstanceID].posyroty);
-	pos.y = yy.x + computeViewPosition.y;
-	rot = yy.y;
+    //pos.xz = unpackHalf2x16(data[gl_InstanceID].posxz) + computeViewPosition.xz;
+	//vec2 yy = unpackHalf2x16(data[gl_InstanceID].posyroty);
+	//pos.y = yy.x + computeViewPosition.y;
+	//rot = yy.y;
 
-	//if (lod == 0)
-	//{
-	//	pos.xz = unpackHalf2x16(data[gl_InstanceID].posxz) + computeViewPosition.xz;
-	//	norm.xz = unpackHalf2x16(data[gl_InstanceID].normxz);
-	//	vec2 yy = unpackHalf2x16(data[gl_InstanceID].posynormy);
-	//	pos.y = yy.x + computeViewPosition.y;
-	//	norm.y = yy.y;
-	//}
-	//else
-	//{
-	//	pos.xz = unpackHalf2x16(lodData[gl_InstanceID].posxz) + computeViewPositionLod.xz;
-	//	norm.xz = unpackHalf2x16(lodData[gl_InstanceID].normxz);
-	//	vec2 yy = unpackHalf2x16(lodData[gl_InstanceID].posynormy);
-	//	pos.y = yy.x + computeViewPositionLod.y;
-	//	norm.y = yy.y;
-	//}
+	if (lod == 2)
+	{
+		pos.xz = unpackHalf2x16(lod2Data[gl_InstanceID].posxz) + computeViewPosition.xz;
+		vec2 yy = unpackHalf2x16(lod2Data[gl_InstanceID].posyroty);
+		pos.y = yy.x + computeViewPosition.y;
+		rot = yy.y;
+	}
+	else if (lod == 1)
+	{
+		pos.xz = unpackHalf2x16(lod1Data[gl_InstanceID].posxz) + computeViewPosition.xz;
+		vec2 yy = unpackHalf2x16(lod1Data[gl_InstanceID].posyroty);
+		pos.y = yy.x + computeViewPosition.y;
+		rot = yy.y;
+	}
+	else if (lod == 0)
+	{
+		pos.xz = unpackHalf2x16(lod0Data[gl_InstanceID].posxz) + computeViewPosition.xz;
+		vec2 yy = unpackHalf2x16(lod0Data[gl_InstanceID].posyroty);
+		pos.y = yy.x + computeViewPosition.y;
+		rot = yy.y;
+	}
+	else
+	{
+		return ;
+	}
 
 	float squaredDistance = SquaredDistanceToViewPosition(pos);
 	float maxDistance = pow(instanceCountSqrt * spacing, 2);

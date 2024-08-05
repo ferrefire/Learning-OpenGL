@@ -18,6 +18,10 @@ class Utilities
         /* data */
     public:
 		static unsigned int seed;
+		static bool useSeed;
+
+		static std::hash<float> floatHash;
+		static std::hash<size_t> sizetHash;
 
 		static void PrintVec3(std::vector<glm::vec3> vec);
 		static void PrintVec3(const glm::vec3 &vec);
@@ -28,8 +32,10 @@ class Utilities
         static void Upper(std::string &str);
         static bool Contains(const std::string &str, const std::string &find);
 		static float Random11();
+		static float Random11(float newSeed);
 		static float Random01();
-        static int Fits(float part, float whole);
+		static float Random01(float newSeed);
+		static int Fits(float part, float whole);
         static float SignedFloor(float x);
 		static std::string GetPath();
 		static float Dot(glm::vec2 p1, glm::vec2 p2);

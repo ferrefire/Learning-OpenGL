@@ -33,6 +33,9 @@
 #include "trees.hpp"
 
 unsigned int Utilities::seed = 1;
+bool Utilities::useSeed = false;
+std::hash<float> Utilities::floatHash;
+std::hash<size_t> Utilities::sizetHash;
 
 unsigned int Debug::totalFramesThisSecond = 0;
 unsigned int Debug::totalFramesLastSecond = 0;
@@ -101,7 +104,7 @@ int Terrain::terrainLod0Resolution = 1024;
 int Terrain::terrainLod1Resolution = 1024;
 int Terrain::terrainShadowResolution = 512;
 int Terrain::terrainChunkResolution = 1024;
-int Terrain::chunkRadius = 1;
+int Terrain::chunkRadius = 4;
 int Terrain::chunksLength = 0;
 int Terrain::chunkCount = 0;
 int Terrain::computePartLod0 = 0;
@@ -128,13 +131,13 @@ Mesh *Terrain::terrainMesh = NULL;
 Mesh *Terrain::terrainLod0Mesh = NULL;
 Mesh *Terrain::terrainLod1Mesh = NULL;
 Object ***Terrain::terrainChunks = NULL;
-int Terrain::terrainRadius = 1;
+int Terrain::terrainRadius = 3;
 int Terrain::terrainLength = 0;
 int Terrain::terrainCount = 0;
 float Terrain::worldSampleDistance = 1;
 
 unsigned int Grass::grassCount = 384;
-unsigned int Grass::grassLodCount = 1664 + 384;
+unsigned int Grass::grassLodCount = 2048;
 unsigned int Grass::grassRenderCount = 0;
 unsigned int Grass::grassLodRenderCount = 0;
 Shader *Grass::grassShader = NULL;
@@ -146,13 +149,40 @@ Buffer *Grass::countLodBuffer = NULL;
 Mesh *Grass::grassMesh = NULL;
 Mesh *Grass::grassLodMesh = NULL;
 
-unsigned int Trees::treeCount = 8;
-unsigned int Trees::treeRenderCount = 0;
+unsigned int Trees::treeLod0Count = 16;
+unsigned int Trees::treeLod1Count = 32;
+unsigned int Trees::treeLod2Count = 128;
+unsigned int Trees::treeLod0RenderCount = 0;
+unsigned int Trees::treeLod1RenderCount = 0;
+unsigned int Trees::treeLod2RenderCount = 0;
 Shader *Trees::treeShader = NULL;
 Shader *Trees::treeComputeShader = NULL;
-Mesh *Trees::treeMesh = NULL;
-Buffer *Trees::treeRenderBuffer = NULL;
-Buffer *Trees::treeCountBuffer = NULL;
+Mesh *Trees::treeLod0Mesh = NULL;
+Mesh *Trees::treeLod1Mesh = NULL;
+Mesh *Trees::treeLod2Mesh = NULL;
+Buffer *Trees::treeLod0RenderBuffer = NULL;
+Buffer *Trees::treeLod0CountBuffer = NULL;
+Buffer *Trees::treeLod1RenderBuffer = NULL;
+Buffer *Trees::treeLod1CountBuffer = NULL;
+Buffer *Trees::treeLod2RenderBuffer = NULL;
+Buffer *Trees::treeLod2CountBuffer = NULL;
+
+int Trees::minTrunkResolution = 8;
+int Trees::maxTrunkResolution = 24;
+int Trees::minTrunkMainBranchCount = 0;
+int Trees::maxTrunkMainBranchCount = 4;
+int Trees::minTrunkSubBranchCount = 0;
+int Trees::maxTrunkSubBranchCount = 2;
+float Trees::minTrunkMinScaleSize = 1.0;
+float Trees::maxTrunkMinScaleSize = 0.1;
+
+int Trees::tr = 0;
+int Trees::tmbc = 0;
+int Trees::tsbc = 0;
+float Trees::tmss = 0;
+
+float Trees::trunkQuality = 1.0;
+float Trees::trunkSeed = 32.0;
 
 bool makeCinematic = false;
 std::string makeCinName;
@@ -247,8 +277,8 @@ void Print(int val)
 
 int main(int argc, char **argv)
 {
-	//std::cout << glm::mix(25.0f, 45.0f, 0.5f) << std::endl;
-	//std::cout << glm::sqrt(25) << std::endl;
+	// std::cout << glm::mix(25.0f, 45.0f, 0.5f) << std::endl;
+	// std::cout << glm::sqrt(25) << std::endl;
 	//return 0;
 
 	// Utilities::seed = Time::GetTime();
@@ -279,7 +309,7 @@ int main(int argc, char **argv)
 	Grass::CreateGrass();
 	Trees::CreateTrees();
 
-	/*Shader *quadShader = new Shader("screen_quad_vertex.glsl", "screen_quad_fragment.glsl");
+	Shader *quadShader = new Shader("screen_quad_vertex.glsl", "screen_quad_fragment.glsl");
 	Manager::AddShader(quadShader);
 
 	Shape *screenQuadShape = new Shape(SCREEN_QUAD);
@@ -288,7 +318,7 @@ int main(int argc, char **argv)
 	Mesh *screenQuadMesh = new Mesh(screenQuadShape, quadShader);
 	Manager::AddMesh(screenQuadMesh);
 
-	quadShader->setInt("quadTexture", Terrain::depthMapTexture->Index());*/
+	quadShader->setInt("quadTexture", Terrain::depthMapTexture->Index());
 
 	double lastTime = 0;
 
@@ -323,7 +353,7 @@ int main(int argc, char **argv)
 			lastTime = glfwGetTime();
 		}
 
-		bool sunMoved = false;
+		/*bool sunMoved = false;
 		if (Input::GetKey(GLFW_KEY_DOWN).down)
 		{
 			Manager::sunAngles.y += Time::deltaTime * 0.25;
@@ -351,11 +381,11 @@ int main(int argc, char **argv)
 			Manager::sunDirection = Utilities::RotateVec3(Manager::sunDirection, Manager::sunAngles.x * 360.0, glm::vec3(0, 1, 0));
 			Manager::sunDirection = glm::normalize(Manager::sunDirection);
 			Shader::setFloat3Global("lightDirection", Manager::sunDirection);
-		}
+		}*/
 		
 		Terrain::NewFrame();
 		Trees::NewFrame();
-		//Grass::NewFrame();
+		Grass::NewFrame();
 
 		//quadShader->useShader();
 		//screenQuadMesh->UseMesh();

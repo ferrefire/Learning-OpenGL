@@ -10,21 +10,45 @@ struct datastruct
 	uint posyroty;
 };
 
-layout(std430, binding = 7) buffer iData
+layout(std430, binding = 7) buffer iLod0Data
 {
-    datastruct data[];
+    datastruct lod0Data[];
 };
 
-layout(std430, binding = 8) buffer oCount
+layout(std430, binding = 8) buffer oLod0Count
 {
-    uint count;
+    uint lod0Count;
+};
+
+layout(std430, binding = 9) buffer iLod1Data
+{
+    datastruct lod1Data[];
+};
+
+layout(std430, binding = 10) buffer oLod1Count
+{
+    uint lod1Count;
+};
+
+layout(std430, binding = 11) buffer iLod2Data
+{
+    datastruct lod2Data[];
+};
+
+layout(std430, binding = 12) buffer oLod2Count
+{
+    uint lod2Count;
 };
 
 uniform int instanceCount;
 uniform float instanceMult;
 uniform int instanceCountSqrt;
 uniform float instanceCountSqrtMult;
-uniform float lodRange = 256.0;
+uniform float lod0Range = 256.0;
+uniform float lod1Range = 256.0;
+uniform int renderLod0;
+uniform int renderLod1;
+uniform int renderLod2;
 
 float spacing = 100;
 float spacingMult = 0.01;
@@ -42,14 +66,18 @@ float random(vec2 st)
 
 int Inside(vec2 pos)
 {
-	return (abs(pos.x) < lodRange && abs(pos.y) < lodRange) ? 1 : 0;
+	float dis = SquaredDistanceVec2(pos, vec2(0));
+	if (dis > pow(instanceCountSqrt * 0.5, 2)) return (-1);
+	else if (dis > pow(lod1Range * 0.5, 2)) return (2);
+	else if (dis > pow(lod0Range * 0.5, 2)) return (1);
+	else return (0);
 }
 
 void main()
 {
 	if (gl_GlobalInvocationID.x >= instanceCountSqrt || gl_GlobalInvocationID.y >= instanceCountSqrt) return ;
 
-	if (gl_GlobalInvocationID.x == 0 && gl_GlobalInvocationID.y == 0)
+	/*if (gl_GlobalInvocationID.x == 0 && gl_GlobalInvocationID.y == 0)
 	{
 		float rotation = 0;
 		vec3 position = vec3(0, 2000, 0);
@@ -58,12 +86,16 @@ void main()
 		data[index].posxz = packHalf2x16(position.xz - viewPosition.xz);
 		data[index].posyroty = packHalf2x16(vec2(position.y - viewPosition.y, rotation));
 		return ;
-	}
+	}*/
 
 	float x = float(gl_GlobalInvocationID.x) - instanceCountSqrt * 0.5;
     float z = float(gl_GlobalInvocationID.y) - instanceCountSqrt * 0.5;
 
-	if (SquaredDistanceVec2(vec2(x, z), vec2(0)) > pow(instanceCountSqrt * 0.5, 2)) return ;
+	int lod = Inside(vec2(x, z));
+
+	if (lod == -1 || (lod == 2 && renderLod2 == 0) || (lod == 1 && renderLod1 == 0) || (lod == 0 && renderLod0 == 0)) return ;
+
+	//if (SquaredDistanceVec2(vec2(x, z), vec2(0)) > pow(instanceCountSqrt * 0.5, 2)) return ;
 
 	//int lod = Inside(vec2(x, z));
 
@@ -97,9 +129,9 @@ void main()
 
     vec3 position = vec3(x, y, z);
     ran = random(vec2(ran * 100, ran * 200));
-	position.x += (ran - 0.5) * 50.0;
+	position.x += (ran - 0.5) * spacing;
     ran = random(vec2(ran * 200, ran * 100));
-	position.z += (ran - 0.5) * 50.0;
+	position.z += (ran - 0.5) * spacing;
 	//position.y = SampleDynamic(position.xz) * heightMapHeight;
 	position.y = SampleArray((position.xz + terrainWorldOffset) * terrainSizeMult + 0.5) * heightMapHeight;
 
@@ -107,8 +139,24 @@ void main()
 	//viewTolerance = pow(viewTolerance, 8);
 	//if (squaredDistance > 10000 && InView(position + vec3(0, 25, 0), vec3(viewTolerance * 0.1, viewTolerance, 0)) == 0) return ;
 	//if (InView(position, 0) == 0) return ;
-	if (MapOccluded(position + vec3(0, 50, 0)) <= 0) return ;
-	if (AreaInView(position + vec3(0, 25, 0), vec2(2, 25)) == 0) return ;
+	
+
+	if (lod == 2)
+	{
+		if (MapOccluded(position + vec3(0, 100, 0)) <= 0) return ;
+		if (InView(position + vec3(0, 50, 0), vec3(0)) == 0) return ;
+	}
+	else if (lod == 1)
+	{
+		//if (AreaOccluded(position + vec3(0, 75, 0), vec2(25, 75)) == 1) return ;
+		if (MapOccluded(position + vec3(0, 150, 0)) <= 0) return ;
+		if (AreaInView(position + vec3(0, 75, 0), vec2(25, 75)) == 0) return ;
+	}
+	else if (lod == 0)
+	{
+		if (MapOccluded(position + vec3(0, 150, 0)) <= 0) return ;
+		if (AreaInView(position + vec3(0, 75, 0), vec2(25, 75)) == 0) return ;
+	}
 	
 
     //vec3 norm = SampleNormalDynamic(position, 0.5);
@@ -128,20 +176,26 @@ void main()
     //ran = random(vec2(position.xz * ranMult + vec2(position.y + ran * 10, -position.y + ran * 10) * 0.01));
     rotation = ran * 360.0;
 
-    uint index = atomicAdd(count, 1);
-	data[index].posxz = packHalf2x16(position.xz - viewPosition.xz);
-	data[index].posyroty = packHalf2x16(vec2(position.y - viewPosition.y, rotation)); //maybe pos.y * terrainHeightMult for better precision
+    //uint index = atomicAdd(count, 1);
+	//data[index].posxz = packHalf2x16(position.xz - viewPosition.xz);
+	//data[index].posyroty = packHalf2x16(vec2(position.y - viewPosition.y, rotation)); //maybe pos.y * terrainHeightMult for better precision
 
-	//if (lod == 1)
-	//{
-	//	
-	//}
-	//else
-	//{
-	//	uint index = atomicAdd(lodCount, 1);
-	//	lodData[index].posxz = packHalf2x16(position.xz - viewPosition.xz);
-	//	lodData[index].normxz = packHalf2x16(norm.xz);
-	//	lodData[index].posynormy = packHalf2x16(vec2(position.y - viewPosition.y, norm.y)); //maybe pos.y * terrainHeightMult for better precision
-	//	lodData[index].rot = packHalf2x16(rotations);
-	//}
+	if (lod == 2)
+	{
+		uint index = atomicAdd(lod2Count, 1);
+		lod2Data[index].posxz = packHalf2x16(position.xz - viewPosition.xz);
+		lod2Data[index].posyroty = packHalf2x16(vec2(position.y - viewPosition.y, rotation));
+	}
+	else if (lod == 1)
+	{
+		uint index = atomicAdd(lod1Count, 1);
+		lod1Data[index].posxz = packHalf2x16(position.xz - viewPosition.xz);
+		lod1Data[index].posyroty = packHalf2x16(vec2(position.y - viewPosition.y, rotation));
+	}
+	else if (lod == 0)
+	{
+		uint index = atomicAdd(lod0Count, 1);
+		lod0Data[index].posxz = packHalf2x16(position.xz - viewPosition.xz);
+		lod0Data[index].posyroty = packHalf2x16(vec2(position.y - viewPosition.y, rotation));
+	}
 }

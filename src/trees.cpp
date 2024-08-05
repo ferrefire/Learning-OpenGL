@@ -17,24 +17,30 @@ void Trees::CreateTrees()
 
 void Trees::CreateShaders()
 {
+	unsigned int totalTreeCount = treeLod0Count + treeLod1Count + treeLod2Count;
+
     treeShader = new Shader("tree_vertex.glsl", "tree_fragment.glsl");
     Manager::AddShader(treeShader);
-    treeShader->setInt("instanceCount", treeCount * treeCount);
-	treeShader->setFloat("instanceMult", 1.0 / float(treeCount * treeCount));
-	treeShader->setInt("instanceCountSqrt", treeCount);
-	treeShader->setFloat("instanceCountSqrtMult", 1.0 / float(treeCount));
-	treeShader->setFloat("lodRange", float(treeCount) * 0.5);
+    treeShader->setInt("instanceCount", totalTreeCount * totalTreeCount);
+	treeShader->setFloat("instanceMult", 1.0 / float(totalTreeCount * totalTreeCount));
+	treeShader->setInt("instanceCountSqrt", totalTreeCount);
+	treeShader->setFloat("instanceCountSqrtMult", 1.0 / float(totalTreeCount));
+	treeShader->setFloat("lod0Range", float(treeLod0Count));
+	treeShader->setFloat("lod1Range", float(treeLod0Count + treeLod1Count));
+	//treeShader->setFloat("lod2Range", float(treeLod2Count));
 	treeShader->setInt(Terrain::heightMapLod0Texture->Name().c_str(), Terrain::heightMapLod0Texture->Index());
 	treeShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
 	treeShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());
 
     treeComputeShader = new Shader("trees_compute_shader.glsl");
     Manager::AddShader(treeComputeShader);
-    treeComputeShader->setInt("instanceCount", treeCount * treeCount);
-	treeComputeShader->setFloat("instanceMult", 1.0 / float(treeCount * treeCount));
-	treeComputeShader->setInt("instanceCountSqrt", treeCount);
-	treeComputeShader->setFloat("instanceCountSqrtMult", 1.0 / float(treeCount));
-	treeComputeShader->setFloat("lodRange", float(treeCount) * 0.5);
+    treeComputeShader->setInt("instanceCount", totalTreeCount * totalTreeCount);
+	treeComputeShader->setFloat("instanceMult", 1.0 / float(totalTreeCount * totalTreeCount));
+	treeComputeShader->setInt("instanceCountSqrt", totalTreeCount);
+	treeComputeShader->setFloat("instanceCountSqrtMult", 1.0 / float(totalTreeCount));
+	treeComputeShader->setFloat("lod0Range", float(treeLod0Count));
+	treeComputeShader->setFloat("lod1Range", float(treeLod0Count + treeLod1Count));
+	//treeComputeShader->setFloat("lod2Range", float(treeLod2Count));
 	treeComputeShader->setInt(Terrain::heightMapLod0Texture->Name().c_str(), Terrain::heightMapLod0Texture->Index());
 	treeComputeShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
 	treeComputeShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());
@@ -44,60 +50,142 @@ void Trees::CreateShaders()
 
 void Trees::CreateBuffers()
 {
-    treeRenderBuffer = new Buffer(7, (treeCount * treeCount) * (sizeof(float) * 2));
-    treeRenderBuffer->CreateBuffer();
-    Manager::AddBuffer(treeRenderBuffer);
+    treeLod0RenderBuffer = new Buffer(7, (treeLod0Count * treeLod0Count) * (sizeof(float) * 2));
+    treeLod0RenderBuffer->CreateBuffer();
+    Manager::AddBuffer(treeLod0RenderBuffer);
 
-    treeCountBuffer = new Buffer(8, sizeof(unsigned int));
-    treeCountBuffer->CreateBuffer();
-    Manager::AddBuffer(treeCountBuffer);
+    treeLod0CountBuffer = new Buffer(8, sizeof(unsigned int));
+    treeLod0CountBuffer->CreateBuffer();
+    Manager::AddBuffer(treeLod0CountBuffer);
+
+	treeLod1RenderBuffer = new Buffer(9, (treeLod1Count * treeLod1Count) * (sizeof(float) * 2));
+	treeLod1RenderBuffer->CreateBuffer();
+	Manager::AddBuffer(treeLod1RenderBuffer);
+
+	treeLod1CountBuffer = new Buffer(10, sizeof(unsigned int));
+	treeLod1CountBuffer->CreateBuffer();
+	Manager::AddBuffer(treeLod1CountBuffer);
+
+	treeLod2RenderBuffer = new Buffer(11, (treeLod2Count * treeLod2Count) * (sizeof(float) * 2));
+	treeLod2RenderBuffer->CreateBuffer();
+	Manager::AddBuffer(treeLod2RenderBuffer);
+
+	treeLod2CountBuffer = new Buffer(12, sizeof(unsigned int));
+	treeLod2CountBuffer->CreateBuffer();
+	Manager::AddBuffer(treeLod2CountBuffer);
 }
 
 void Trees::CreateMeshes()
 {
-    //Shape *treeShape = new Shape(CYLINDER, 12);
-    //Manager::AddShape(treeShape);
+	treeLod0Mesh = GenerateTrunk(1.0);
+	Manager::AddMesh(treeLod0Mesh);
 
-	//treeMesh = new Mesh(treeShape, treeShader);
-	//Debug::DurationCheck();
-	treeMesh = GenerateTrunk();
-	//Debug::DurationCheck();
-	Manager::AddMesh(treeMesh);
+	treeLod1Mesh = GenerateTrunk(0.75);
+	Manager::AddMesh(treeLod1Mesh);
+
+	treeLod2Mesh = GenerateTrunk(0.5);
+	Manager::AddMesh(treeLod2Mesh);
 }
 
-void Trees::ComputeTrees()
+void Trees::ComputeTrees(bool lod0, bool lod1, bool lod2)
 {
-    treeComputeShader->useShader();
-	glDispatchCompute(treeCount / 4, treeCount / 4, 1);
+	unsigned int totalTreeCount = treeLod0Count + treeLod1Count + treeLod2Count;
 
-    void *countPointer = treeCountBuffer->GetPointer();
-	treeRenderCount = *(unsigned int *)countPointer;
-	*(unsigned int *)countPointer = 0;
-	treeCountBuffer->UnMapBuffer();
+	treeComputeShader->useShader();
+	treeComputeShader->setInt("renderLod0", lod0 ? 1 : 0);
+	treeComputeShader->setInt("renderLod1", lod1 ? 1 : 0);
+	treeComputeShader->setInt("renderLod2", lod2 ? 1 : 0);
+	glDispatchCompute(totalTreeCount / 4, totalTreeCount / 4, 1);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_ATOMIC_COUNTER_BARRIER_BIT);
 
-	treeShader->setFloat3("computeViewPosition", Manager::camera.Position());
+	if (lod0)
+	{
+		void *countPointer = treeLod0CountBuffer->GetPointer();
+		treeLod0RenderCount = *(unsigned int *)countPointer;
+		*(unsigned int *)countPointer = 0;
+		treeLod0CountBuffer->UnMapBuffer();
+	}
+	if (lod1)
+	{
+		void *countPointer = treeLod1CountBuffer->GetPointer();
+		treeLod1RenderCount = *(unsigned int *)countPointer;
+		*(unsigned int *)countPointer = 0;
+		treeLod1CountBuffer->UnMapBuffer();
+	}
+	if (lod2)
+	{
+		void *countPointer = treeLod2CountBuffer->GetPointer();
+		treeLod2RenderCount = *(unsigned int *)countPointer;
+		*(unsigned int *)countPointer = 0;
+		treeLod2CountBuffer->UnMapBuffer();
+	}
 }
 
-void Trees::RenderTrees()
+void Trees::RenderTrees(bool lod0, bool lod1, bool lod2)
 {
     Manager::EnableCulling(true);
 	treeShader->useShader();
 
-	treeMesh->UseMesh();
-	glDrawElementsInstanced(GL_TRIANGLES, treeMesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0, treeRenderCount);
+	if (lod0)
+	{
+		treeShader->setInt("lod", 0);
+		treeLod0Mesh->UseMesh();
+		glDrawElementsInstanced(GL_TRIANGLES, treeLod0Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0, treeLod0RenderCount);
+	}
+	if (lod1)
+	{
+		treeShader->setInt("lod", 1);
+		treeLod1Mesh->UseMesh();
+		glDrawElementsInstanced(GL_TRIANGLES, treeLod1Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0, treeLod1RenderCount);
+	}
+	if (lod2)
+	{
+		treeShader->setInt("lod", 2);
+		treeLod2Mesh->UseMesh();
+		glDrawElementsInstanced(GL_TRIANGLES, treeLod2Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0, treeLod2RenderCount);
+	}
 }
 
 void Trees::NewFrame()
 {
-    if (Time::newFrameTick) ComputeTrees();
-    RenderTrees();
-
-	if (Input::GetKey(GLFW_KEY_G).pressed)
+	if (Time::newFrameTick)
 	{
-		//srand(Time::GetTime());
-		treeMesh = GenerateTrunk();
+		treeShader->setFloat3("computeViewPosition", Manager::camera.Position());
+
+		//ComputeTrees(true);
+		//RenderTrees(true);
+		//ComputeTrees(false);
+		//RenderTrees(false);
+
+		ComputeTrees(true, true, true);
+	}
+	RenderTrees(true, true, true);
+	//if (Manager::firstFrame) return ;
+
+	/*if (Input::GetKey(GLFW_KEY_DOWN).pressed)
+	{
+		trunkQuality = glm::clamp(trunkQuality - 0.5, 0.0, 1.0);
+		treeMesh = GenerateTrunk(trunkQuality);
 		Manager::AddMesh(treeMesh);
 	}
+	else if (Input::GetKey(GLFW_KEY_UP).pressed)
+	{
+		trunkQuality = glm::clamp(trunkQuality + 0.5, 0.0, 1.0);
+		treeMesh = GenerateTrunk(trunkQuality);
+		Manager::AddMesh(treeMesh);
+	}
+	else if (Input::GetKey(GLFW_KEY_RIGHT).pressed)
+	{
+		trunkSeed += 1;
+		treeMesh = GenerateTrunk(trunkQuality);
+		Manager::AddMesh(treeMesh);
+	}
+	else if (Input::GetKey(GLFW_KEY_LEFT).pressed)
+	{
+		trunkSeed -= 1;
+		treeMesh = GenerateTrunk(trunkQuality);
+		Manager::AddMesh(treeMesh);
+	}*/
 
 	//if (Time::newSecond) std::cout << treeRenderCount << std::endl;
 }
@@ -152,6 +240,8 @@ void Trees::GenerateBranchThreaded(int resolution, glm::vec3 base, glm::vec3 off
 
 Shape Trees::GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, glm::vec2 scale, glm::vec3 angles, int splitTimes, bool main)
 {
+	float branchSeed = angles.length() + base.length() + offset.y + trunkSeed;
+
 	Shape branch = Shape(CYLINDER, resolution);
 	float sideAngle = 0;
 	float sideAngleStart = 0;
@@ -213,13 +303,14 @@ Shape Trees::GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, gl
 	// branch.Rotate(sideAngle, glm::vec3(0, 1, 0));
 	branch.Translate(base + offset);
 
-	if (scale.x < 0.1) splitTimes = 0;
+	if (scale.x <= tmss) splitTimes = 0;
 
 	if (splitTimes <= 0) return (branch);
 
 	float angleSpacing = 360.0 / splitTimes;
 	float angleMax = angleSpacing * 0.5;
-	float startAngle = Utilities::Random11() * 180.0;
+	branchSeed = Utilities::Random11(branchSeed);
+	float startAngle = branchSeed * 180.0;
 
 	//int mainIndex = int(glm::ceil(Utilities::Random01() * splitTimes)) - 1;
 
@@ -229,53 +320,43 @@ Shape Trees::GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, gl
 
 	for (int i = 0; i < splitTimes; i++)
 	{
-		//int subResolution = glm::clamp(resolution - int(glm::ceil(float(resolution) / 3.0)), 4, resolution);
 		int subResolution = glm::clamp(int(glm::ceil(resolution * 0.5)), 4, resolution);
-		//if (subResolution % 2 == 1) subResolution += 1;
 
-		float newSubAngle = startAngle + (i * angleSpacing) + (Utilities::Random11() * angleMax);
-		//if (newSubAngle >= 360.0) newSubAngle -= 360.0;
+		branchSeed = Utilities::Random11(branchSeed);
+		float newSubAngle = startAngle + (i * angleSpacing) + (branchSeed * angleMax);
 		glm::vec3 subOffset = glm::vec3(0, 0, -1);
 		Utilities::RotateVec3(subOffset, newSubAngle, glm::vec3(0, 1, 0));
 
 		glm::vec3 subBase = branch.TopMergePointsCenter();
 
-		subOffset.y = 1.0 + Utilities::Random01();
+		branchSeed = Utilities::Random01(branchSeed);
+		subOffset.y = 1.0 + branchSeed;
 		subOffset *= (scale.x + scale.y) * (main ? 5 : 3);
 
-		float scaleMult = glm::mix(0.9, 1.1, Utilities::Random01());
-		//if (i != 0) scaleMult -= 0.1;
+		branchSeed = Utilities::Random01(branchSeed);
+		float scaleMult = glm::mix(0.9, 1.1, branchSeed);
 		glm::vec2 subScale = glm::vec2(scale.x * scaleMult * 0.6, scale.y * scaleMult * 0.75);
-		//glm::vec2 subScale = glm::vec2(1);
 
 		float subAngle = angles.x;
-		if (i == 0) subAngle += glm::mix(0.0, 5.0, Utilities::Random01());
-		else subAngle += glm::mix(5.0, 60.0, Utilities::Random01());
-		//float subAngle = angle + 45.0;
+		branchSeed = Utilities::Random01(branchSeed);
+		if (i == 0) subAngle += glm::mix(0.0, 5.0, branchSeed);
+		else subAngle += glm::mix(5.0, 60.0, branchSeed);
 		glm::vec3 subAngles = glm::vec3(subAngle, angles.x, sideAngle);
 
 		Utilities::RotateVec3(subOffset, subAngle, glm::vec3(1, 0, 0));
 		Utilities::RotateVec3(subOffset, sideAngle, glm::vec3(0, 1, 0));
 
-		//Shape subBranch = GenerateBranch(subResolution, subBase, subOffset, subScale, subAngles, 2, false);
+		// Shape subBranch = GenerateBranch(subResolution, subBase, subOffset, subScale, subAngles, 2, false);
+		// branch.Join(subBranch, true);
 
-		//std::promise<Shape> branchSetter;
-		//std::future<Shape> branchGetter = branchSetter.get_future();
-		//promises[i] = std::promise<Shape>();
 		futures[i] = promises[i].get_future();
-		threads[i] = std::thread(GenerateBranchThreaded, subResolution, subBase, subOffset, subScale, subAngles, 2, false, &promises[i]);
-		//Shape subBranch = branchGetter.get();
-		//branchThread.join();
-		//std::cout << subBranch.GetVertices().size() << std::endl;
-
-		//branch.Join(subBranch, true);
+		threads[i] = std::thread(GenerateBranchThreaded, subResolution, subBase, subOffset, subScale, subAngles, tsbc, false, &promises[i]);
 	}
 
 	for (int i = 0; i < splitTimes; i++)
 	{
 		Shape subBranch = futures[i].get();
 		threads[i].join();
-		//branchThread.join();
 		branch.Join(subBranch, true);
 	}
 
@@ -283,18 +364,25 @@ Shape Trees::GenerateBranch(int resolution, glm::vec3 base, glm::vec3 offset, gl
 	return (branch);
 }
 
-Mesh *Trees::GenerateTrunk()
+Mesh *Trees::GenerateTrunk(float quality)
 {
-	Debug::DurationCheck();
+	//Debug::DurationCheck();
 	Shape *treeShape = new Shape();
 	Manager::AddShape(treeShape);
 
-	Shape subBranch = GenerateBranch(24, glm::vec3(0), glm::vec3(0), glm::vec2(1), glm::vec3(0), 4, true);
+	tr = glm::mix(minTrunkResolution, maxTrunkResolution, quality == 1 ? 1 : quality - 0.5);
+	//tr = int(glm::round(tr * 0.5) * 2.0);
+	tmbc = maxTrunkMainBranchCount;
+	tsbc = maxTrunkSubBranchCount;
+	tmss = glm::mix(minTrunkMinScaleSize, maxTrunkMinScaleSize, quality);
+
+	Shape subBranch = GenerateBranch(tr, glm::vec3(0), glm::vec3(0), glm::vec2(1), glm::vec3(0), tmbc, true);
  	treeShape->Join(subBranch);
 
-	std::cout << treeShape->VertexCount() << std::endl;
+	//std::cout << treeShape->VertexCount() << std::endl;
 
 	Mesh *trunk = new Mesh(treeShape, treeShader);
-	Debug::DurationCheck();
+	//Debug::DurationCheck();
+	//std::cout << trunkSeed << std::endl;
 	return (trunk);
 }

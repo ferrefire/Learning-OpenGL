@@ -7,6 +7,8 @@
 #include "time.hpp"
 #include <iostream>
 #include "trees.hpp"
+#include "debug.hpp"
+#include <thread>
 
 void Terrain::CreateTerrain()
 {
@@ -298,7 +300,6 @@ void Terrain::RenderTerrain()
 {
 	Manager::EnableCulling(true);
 	terrainShader->useShader();
-	
 
 	float sx = Manager::camera.Position().x / float(terrainChunkSize);
 	float sz = Manager::camera.Position().z / float(terrainChunkSize);
@@ -307,6 +308,12 @@ void Terrain::RenderTerrain()
 	glm::mat4 view = Manager::camera.View();
 
 	int amount = 0;
+
+	int index = 0;
+
+	//std::vector<std::thread> threads = std::vector<std::thread>(terrainCount);
+
+	//if (Time::newSecond) Debug::DurationCheck();
 
 	for (int x = -terrainRadius; x <= terrainRadius; x++)
 	{
@@ -324,7 +331,6 @@ void Terrain::RenderTerrain()
 				terrainChunks[ix][iz]->GetPosition().y = 0;
 				terrainMesh->UseMesh();
 				terrainShader->setMatrix4("model", terrainChunks[ix][iz]->Translation());
-				//terrainShader->setFloat("tesselationFactor", 10);
 				glDrawElements(GL_PATCHES, terrainMesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0);
 			}
 			else if (inView)
@@ -334,23 +340,19 @@ void Terrain::RenderTerrain()
 				terrainChunks[ix][iz]->GetPosition().y = pow(factor, 0.5) * -10;
 				terrainLod0Mesh->UseMesh();
 				terrainShader->setMatrix4("model", terrainChunks[ix][iz]->Translation());
-				//terrainShader->setFloat("tesselationFactor", 10.0 + pow(factor, 2) * 10);
 
 				glDrawElements(GL_PATCHES, terrainLod0Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0);
-				amount++;
+				// amount++;
 			}
-			// else if (inView)
-			//{
-			//	//terrainLodShader->useShader();
-			//	terrainChunks[ix][iz]->GetPosition().y = -20;
-			//	terrainLodShader->useShader();
-			//	terrainLod1Mesh->UseMesh();
-			//	terrainLodShader->setMatrix4("model", terrainChunks[ix][iz]->Translation());
-			//	glDrawElements(GL_TRIANGLES, terrainLod1Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0);
-			//	amount++;
-			// }
 		}
 	}
+
+	//for (int i = 0; i < terrainCount; i++)
+	//{
+	//	threads[i].join();
+	//}
+
+	//if (Time::newSecond) Debug::DurationCheck();
 }
 
 void Terrain::NewFrame()

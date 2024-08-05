@@ -71,6 +71,29 @@ float MapOccluded(vec3 position)
 	return (depth - mapValue);
 }
 
+int AreaOccluded(vec3 position, vec2 areaSize)
+{
+	vec3 rightOffset = viewRight * areaSize.x;
+	vec3 upOffset = viewUp * areaSize.y;
+	//float inDistance = pow((areaSize.x * areaSize.y) * 2, 2);
+
+	//if (SquaredDistanceToViewPosition(position) <= inDistance) return (0);
+
+	vec3 areaPosition = position - rightOffset - upOffset;
+    if (MapOccluded(areaPosition) > 0) return (0);
+
+	areaPosition = position + rightOffset + upOffset;
+    if (MapOccluded(areaPosition) > 0) return (0);
+
+	areaPosition = position + rightOffset - upOffset;
+    if (MapOccluded(areaPosition) > 0) return (0);
+
+	areaPosition = position - rightOffset + upOffset;
+    if (MapOccluded(areaPosition) > 0) return (0);
+
+	return (1);
+}
+
 int RayOccluded(vec3 position)
 {
 	vec3 rayPosition;

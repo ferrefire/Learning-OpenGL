@@ -12,6 +12,8 @@ out vec4 fragmentColor;
 #include "depth.glsl"
 #include "lighting.glsl"
 
+uniform int lod;
+
 void main()
 {
     vec3 normal = normalize(normal);
@@ -25,7 +27,7 @@ void main()
 	//vec3 terrainSpecular = SpecularLighting(terrainNormal, viewDirection, 16);
 	vec3 endColor = Fog(diffuse, depth);
 
-	if (newFrame == 1 && depth < 0.25)
+	if (lod == 0 && newFrame == 1 && depth < 0.25)
 	{
 		ivec2 coordinates = ivec2(0);
 		coordinates.x = int(floor(gl_FragCoord.x));

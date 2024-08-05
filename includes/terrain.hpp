@@ -82,6 +82,7 @@ class Terrain
 
 		static void RenderTerrain();
 		static void CheckTerrainOffset();
+
 		static void NewFrame();
 
 		static bool Generating();

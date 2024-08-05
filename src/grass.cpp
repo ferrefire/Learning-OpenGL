@@ -20,7 +20,7 @@ void Grass::CreateShaders()
 	grassShader->setFloat("instanceMult", 1.0 / float(totalGrassCount * totalGrassCount));
 	grassShader->setInt("instanceCountSqrt", totalGrassCount);
 	grassShader->setFloat("instanceCountSqrtMult", 1.0 / float(totalGrassCount));
-	grassShader->setFloat("lodRange", float(grassCount) * 0.5);
+	grassShader->setFloat("lodRange", float(grassCount));
 	grassShader->setInt(Terrain::heightMapLod0Texture->Name().c_str(), Terrain::heightMapLod0Texture->Index());
 	grassShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
 	grassShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());
@@ -31,7 +31,7 @@ void Grass::CreateShaders()
 	grassComputeShader->setFloat("instanceMult", 1.0 / float(totalGrassCount * totalGrassCount));
 	grassComputeShader->setInt("instanceCountSqrt", totalGrassCount);
 	grassComputeShader->setFloat("instanceCountSqrtMult", 1.0 / float(totalGrassCount));
-	grassComputeShader->setFloat("lodRange", float(grassCount) * 0.5);
+	grassComputeShader->setFloat("lodRange", float(grassCount));
 	grassComputeShader->setInt(Terrain::heightMapLod0Texture->Name().c_str(), Terrain::heightMapLod0Texture->Index());
 	grassComputeShader->setInt(Terrain::heightMapLod1Texture->Name().c_str(), Terrain::heightMapLod1Texture->Index());
 	grassComputeShader->setInt(Terrain::heightMapArrayTexture->Name().c_str(), Terrain::heightMapArrayTexture->Index());

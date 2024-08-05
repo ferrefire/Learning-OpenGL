@@ -80,11 +80,25 @@ float Utilities::Random11()
 	return ((Random01() - 0.5f) * 2.0f);
 }
 
+float Utilities::Random11(float newSeed)
+{
+	return ((Random01(newSeed) - 0.5f) * 2.0f);
+}
+
 float Utilities::Random01()
 {
 	//srand(seed);
 	seed = rand();
 	return float(double(seed) / double(RAND_MAX));
+}
+
+float Utilities::Random01(float newSeed)
+{
+	size_t seed1 = floatHash(newSeed);
+	size_t seed2 = sizetHash(seed1);
+	glm::dvec2 vecSeed = glm::dvec2(seed1, seed2);
+
+	return glm::fract(sin(glm::dot(vecSeed, glm::dvec2(12.9898, 78.233))) * 43758.5453123);
 }
 
 float Utilities::SignedFloor(float x)
