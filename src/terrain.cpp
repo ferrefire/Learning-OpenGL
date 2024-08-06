@@ -357,19 +357,9 @@ void Terrain::RenderTerrain()
 
 void Terrain::NewFrame()
 {
-	//if (Input::GetKey(GLFW_KEY_G).pressed)
-	//{
-	//	seed = glm::vec2(int(Utilities::Random11() * 100), int(Utilities::Random11() * 100));
-	//	heightMapComputeShader->setFloat2("seed", seed);
-	//	heightMapArrayComputeShader->setFloat2("seed", seed);
-	//	GenerateHeightMap(0);
-	//	GenerateHeightMap(1);
-	//	GenerateHeightMapArray();
-	//}
-
 	if (generating) GenerateHeightMapArrayPart();
 
-	if (true || Time::newFrameTick)
+	if (!computeOnTick || Time::newFrameTick)
 	{
 		depthMapTexture->ClearImage();
 		terrainShader->setInt("newFrame", 1);

@@ -39,6 +39,8 @@ class Terrain
 		static int terrainLength;
 		static int terrainCount;
 
+		static bool computeOnTick;
+
 		static glm::vec2 terrainOffset;
 		static glm::vec2 offsetLod0;
 		static glm::vec2 offsetLod1;

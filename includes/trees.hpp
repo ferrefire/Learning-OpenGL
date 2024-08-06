@@ -35,6 +35,8 @@ class Trees
 		static unsigned int treeLod1RenderCount;
 		static unsigned int treeLod2RenderCount;
 
+		static bool computeOnTick;
+
 		static Shader *treeShader;
 
         static Shader *treeComputeShader;

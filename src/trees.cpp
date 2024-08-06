@@ -150,7 +150,7 @@ void Trees::RenderTrees(bool lod0, bool lod1, bool lod2)
 
 void Trees::NewFrame()
 {
-	if (true || Time::newFrameTick)
+	if (!computeOnTick || Time::newFrameTick)
 	{
 		treeShader->setFloat3("computeViewPosition", Manager::camera.Position());
 
@@ -162,7 +162,6 @@ void Trees::NewFrame()
 		ComputeTrees(true, true, true);
 	}
 	RenderTrees(true, true, true);
-	//if (Manager::firstFrame) return ;
 
 	/*if (Input::GetKey(GLFW_KEY_DOWN).pressed)
 	{

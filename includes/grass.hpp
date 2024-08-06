@@ -15,6 +15,8 @@ class Grass
 		static unsigned int grassRenderCount;
 		static unsigned int grassLodRenderCount;
 
+		static bool computeOnTick;
+
 		static Shader *grassShader;
 
 		static Shader *grassComputeShader;

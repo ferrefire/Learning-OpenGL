@@ -61,8 +61,8 @@ bool Time::newSubTick = false;
 bool Time::newFrameTick = false;
 int Time::framesSinceLastFrameTick = 0;
 
-float Input::height = 900.0;
-float Input::width = 1600.0;
+float Input::height = 1350.0;
+float Input::width = 2400.0;
 float Input::lastX = Input::width * 0.5f;
 float Input::lastY = Input::height * 0.5f;
 float Input::sensitivity = 0.1f;
@@ -135,6 +135,7 @@ int Terrain::terrainRadius = 3;
 int Terrain::terrainLength = 0;
 int Terrain::terrainCount = 0;
 float Terrain::worldSampleDistance = 1;
+bool Terrain::computeOnTick = true;
 
 unsigned int Grass::grassCount = 384;
 unsigned int Grass::grassLodCount = 2048 + 1024;
@@ -148,6 +149,7 @@ Buffer *Grass::countBuffer = NULL;
 Buffer *Grass::countLodBuffer = NULL;
 Mesh *Grass::grassMesh = NULL;
 Mesh *Grass::grassLodMesh = NULL;
+bool Grass::computeOnTick = true;
 
 unsigned int Trees::treeLod0Count = 16;
 unsigned int Trees::treeLod1Count = 32;
@@ -183,6 +185,8 @@ float Trees::tmss = 0;
 
 float Trees::trunkQuality = 1.0;
 float Trees::trunkSeed = 32.0;
+
+bool Trees::computeOnTick = true;
 
 bool makeCinematic = false;
 std::string makeCinName;
