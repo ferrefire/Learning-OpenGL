@@ -1,6 +1,8 @@
 #ifndef DEBUG_HPP
 #define DEBUG_HPP
 
+#include <string>
+
 class Debug
 {
 	private:
@@ -16,6 +18,7 @@ class Debug
 		
 		static void NewFrame();
 		static void DurationCheck();
+		static void DurationCheck(const std::string &message);
 		static void CalculateFramesPerSecond();
 };
 

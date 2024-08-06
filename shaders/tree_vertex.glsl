@@ -17,14 +17,29 @@ layout(std430, binding = 7) buffer iLod0Data
     datastruct lod0Data[];
 };
 
+layout(std430, binding = 8) buffer oLod0Count
+{
+    uint lod0Count;
+};
+
 layout(std430, binding = 9) buffer iLod1Data
 {
     datastruct lod1Data[];
 };
 
+layout(std430, binding = 10) buffer oLod1Count
+{
+    uint lod1Count;
+};
+
 layout(std430, binding = 11) buffer iLod2Data
 {
     datastruct lod2Data[];
+};
+
+layout(std430, binding = 12) buffer oLod2Count
+{
+    uint lod2Count;
 };
 
 out vec2 UV;
@@ -84,6 +99,10 @@ void main()
 	}
 	else
 	{
+		worldPosition = ObjectToWorld(iPosition) + vec3(0, 2000, 0);
+    	gl_Position = projection * view * vec4(worldPosition, 1.0);
+		UV = iUV;
+		normal = iNormal;
 		return ;
 	}
 

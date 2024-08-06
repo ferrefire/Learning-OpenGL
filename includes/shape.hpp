@@ -30,8 +30,9 @@ class Shape
 		std::vector<glm::vec2> uvs;
 		std::vector<glm::vec3> normals;
 		std::vector<unsigned int> indices;
+		std::vector<unsigned short> indicesShort;
 
-        std::vector<float> data;
+		std::vector<float> data;
 
 	public:
         Shape();
@@ -39,9 +40,10 @@ class Shape
 		~Shape();
 
         float *GetData();
-        unsigned int *GetIndices();
+		unsigned int *GetIndices();
+		unsigned short *GetIndicesShort();
 
-        std::vector<glm::vec3> Vertices();
+		std::vector<glm::vec3> Vertices();
 		std::vector<glm::vec2> Uvs();
 		std::vector<glm::vec3> Normals();
 		std::vector<unsigned int> Indices();
@@ -61,6 +63,8 @@ class Shape
 		int centerMergePoint = -1;
 
 		bool vertexOnly = false;
+		bool joinOffset = true;
+		bool useShortIndices = false;
 
 		void Rotate(float degrees, const glm::vec3 &axis);
 		void RotateVert(int index, float degrees, const glm::vec3 &axis);

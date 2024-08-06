@@ -18,7 +18,14 @@ Mesh::Mesh(Shape *shape, Shader *shader)
 	glBufferData(GL_ARRAY_BUFFER, shape->DataCount() * sizeof(float), shape->GetData(), GL_STATIC_COPY);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape->IndiceCount() * sizeof(unsigned int), shape->GetIndices(), GL_STATIC_COPY);
+    if (shape->useShortIndices)
+	{
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape->IndiceCount() * sizeof(unsigned short), shape->GetIndicesShort(), GL_STATIC_COPY);
+	}
+	else
+	{
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape->IndiceCount() * sizeof(unsigned int), shape->GetIndices(), GL_STATIC_COPY);
+	}
 
     if (shape->vertexOnly)
     {

@@ -36,11 +36,13 @@ class Trees
 		static unsigned int treeLod2RenderCount;
 
 		static bool computeOnTick;
+		static bool debugComputeTime;
 
 		static Shader *treeShader;
 
         static Shader *treeComputeShader;
 
+		static Mesh *treeCombinedMesh;
 		static Mesh *treeLod0Mesh;
 		static Mesh *treeLod1Mesh;
 		static Mesh *treeLod2Mesh;
@@ -51,6 +53,8 @@ class Trees
 		static Buffer *treeLod1CountBuffer;
 		static Buffer *treeLod2RenderBuffer;
 		static Buffer *treeLod2CountBuffer;
+
+		//static Buffer *treeCurrentLodBuffer;
 
 		static int trunkResolution;
 		static int trunkMainBranchCount;

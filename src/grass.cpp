@@ -2,6 +2,7 @@
 #include "manager.hpp"
 #include "terrain.hpp"
 #include "time.hpp"
+#include "debug.hpp"
 
 void Grass::CreateGrass()
 {
@@ -88,18 +89,20 @@ void Grass::RenderGrass()
 
 void Grass::ComputeGrass(int lod)
 {
+	if (debugComputeTime && Time::newSecond) Debug::DurationCheck();
+
 	int totalGrassCount = grassCount + grassLodCount;
 
 	grassComputeShader->useShader();
 	grassComputeShader->setInt("specificLod", lod);
 	glDispatchCompute(totalGrassCount / 4, totalGrassCount / 4, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_ATOMIC_COUNTER_BARRIER_BIT);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
 	if (lod == 0 || lod == -1)
 	{
 		void *countPointer = countBuffer->GetPointer();
 		grassRenderCount = *(unsigned int *)countPointer;
-		*(unsigned int *)countPointer = 0;
+		//*(unsigned int *)countPointer = 0;
 		countBuffer->UnMapBuffer();
 
 		grassShader->setFloat3("computeViewPosition", Manager::camera.Position());
@@ -108,10 +111,17 @@ void Grass::ComputeGrass(int lod)
 	{
 		void *countLodPointer = countLodBuffer->GetPointer();
 		grassLodRenderCount = *(unsigned int *)countLodPointer;
-		*(unsigned int *)countLodPointer = 0;
+		//*(unsigned int *)countLodPointer = 0;
 		countLodBuffer->UnMapBuffer();
 
 		grassShader->setFloat3("computeViewPositionLod", Manager::camera.Position());
+	}
+
+	if (debugComputeTime && Time::newSecond)
+	{
+		Debug::DurationCheck("grass compute");
+		std::cout << "lod 0 instances: " << grassRenderCount << std::endl;
+		std::cout << "lod 1 instances: " << grassLodRenderCount << std::endl;
 	}
 }
 

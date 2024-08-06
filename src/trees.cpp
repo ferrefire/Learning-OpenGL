@@ -75,6 +75,10 @@ void Trees::CreateBuffers()
 	treeLod2CountBuffer = new Buffer(12, sizeof(unsigned int));
 	treeLod2CountBuffer->CreateBuffer();
 	Manager::AddBuffer(treeLod2CountBuffer);
+
+	//treeCurrentLodBuffer = new Buffer(13, sizeof(unsigned int));
+	//treeCurrentLodBuffer->CreateBuffer();
+	//Manager::AddBuffer(treeCurrentLodBuffer);
 }
 
 void Trees::CreateMeshes()
@@ -87,10 +91,22 @@ void Trees::CreateMeshes()
 
 	treeLod2Mesh = GenerateTrunk(0.5);
 	Manager::AddMesh(treeLod2Mesh);
+
+	Shape *combinedTreeShape = new Shape();
+	Manager::AddShape(combinedTreeShape);
+	combinedTreeShape->useShortIndices = true;
+	//combinedTreeShape->joinOffset = false;
+	combinedTreeShape->Join(*treeLod0Mesh->GetShape());
+	combinedTreeShape->Join(*treeLod1Mesh->GetShape());
+	combinedTreeShape->Join(*treeLod2Mesh->GetShape());
+	treeCombinedMesh = new Mesh(combinedTreeShape, treeShader);
+	Manager::AddMesh(treeCombinedMesh);
 }
 
 void Trees::ComputeTrees(bool lod0, bool lod1, bool lod2)
 {
+	if (debugComputeTime && Time::newSecond) Debug::DurationCheck();
+
 	unsigned int totalTreeCount = treeLod0Count + treeLod1Count + treeLod2Count;
 
 	treeComputeShader->useShader();
@@ -98,54 +114,66 @@ void Trees::ComputeTrees(bool lod0, bool lod1, bool lod2)
 	treeComputeShader->setInt("renderLod1", lod1 ? 1 : 0);
 	treeComputeShader->setInt("renderLod2", lod2 ? 1 : 0);
 	glDispatchCompute(totalTreeCount / 4, totalTreeCount / 4, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_ATOMIC_COUNTER_BARRIER_BIT);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+	//if (debugComputeTime && Time::newSecond) Debug::DurationCheck("tree compute");
+	//if (debugComputeTime && Time::newSecond) Debug::DurationCheck();
 
 	if (lod0)
 	{
 		void *countPointer = treeLod0CountBuffer->GetPointer();
 		treeLod0RenderCount = *(unsigned int *)countPointer;
-		*(unsigned int *)countPointer = 0;
+		//*(unsigned int *)countPointer = 0;
 		treeLod0CountBuffer->UnMapBuffer();
 	}
 	if (lod1)
 	{
 		void *countPointer = treeLod1CountBuffer->GetPointer();
 		treeLod1RenderCount = *(unsigned int *)countPointer;
-		*(unsigned int *)countPointer = 0;
+		//*(unsigned int *)countPointer = 0;
 		treeLod1CountBuffer->UnMapBuffer();
 	}
 	if (lod2)
 	{
 		void *countPointer = treeLod2CountBuffer->GetPointer();
 		treeLod2RenderCount = *(unsigned int *)countPointer;
-		*(unsigned int *)countPointer = 0;
+		//*(unsigned int *)countPointer = 0;
 		treeLod2CountBuffer->UnMapBuffer();
 	}
+
+	if (debugComputeTime && Time::newSecond) Debug::DurationCheck("tree compute");
 }
 
 void Trees::RenderTrees(bool lod0, bool lod1, bool lod2)
 {
+	//if (debugComputeTime && Time::newSecond) Debug::DurationCheck();
+
     Manager::EnableCulling(true);
 	treeShader->useShader();
+	treeCombinedMesh->UseMesh();
 
 	if (lod0)
 	{
 		treeShader->setInt("lod", 0);
-		treeLod0Mesh->UseMesh();
-		glDrawElementsInstanced(GL_TRIANGLES, treeLod0Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0, treeLod0RenderCount);
+		//treeLod0Mesh->UseMesh();
+		glDrawElementsInstanced(GL_TRIANGLES, treeLod0Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_SHORT, 0, treeLod0RenderCount);
 	}
 	if (lod1)
 	{
 		treeShader->setInt("lod", 1);
-		treeLod1Mesh->UseMesh();
-		glDrawElementsInstanced(GL_TRIANGLES, treeLod1Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0, treeLod1RenderCount);
+		//treeLod1Mesh->UseMesh();
+		glDrawElementsInstanced(GL_TRIANGLES, treeLod1Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_SHORT, 
+			(void *)(treeLod0Mesh->GetShape()->IndiceCount() * sizeof(unsigned short)), treeLod1RenderCount);
 	}
 	if (lod2)
 	{
 		treeShader->setInt("lod", 2);
-		treeLod2Mesh->UseMesh();
-		glDrawElementsInstanced(GL_TRIANGLES, treeLod2Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 0, treeLod2RenderCount);
+		//treeLod2Mesh->UseMesh();
+		glDrawElementsInstanced(GL_TRIANGLES, treeLod2Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_SHORT, 
+			(void *)((treeLod0Mesh->GetShape()->IndiceCount() + treeLod1Mesh->GetShape()->IndiceCount()) * sizeof(unsigned short)), treeLod2RenderCount);
 	}
+
+	//if (debugComputeTime && Time::newSecond) Debug::DurationCheck("tree render time");
 }
 
 void Trees::NewFrame()

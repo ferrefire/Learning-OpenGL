@@ -66,6 +66,11 @@ int Inside(vec2 pos)
 void main()
 {
 	if (gl_GlobalInvocationID.x >= instanceCountSqrt || gl_GlobalInvocationID.y >= instanceCountSqrt) return ;
+	if (gl_GlobalInvocationID.x == 0 && gl_GlobalInvocationID.y == 0)
+	{
+		atomicExchange(count, 0);
+		atomicExchange(lodCount, 0);
+	}
 
 	float x = float(gl_GlobalInvocationID.x) - instanceCountSqrt * 0.5;
     float z = float(gl_GlobalInvocationID.y) - instanceCountSqrt * 0.5;
@@ -136,23 +141,17 @@ void main()
 	if (lod == 1)
 	{
 		uint index = atomicAdd(count, 1);
-    	//data[index].pos = position;
 		data[index].posxz = packHalf2x16(position.xz - viewPosition.xz);
-		//data[index].norm = norm;
 		data[index].normxz = packHalf2x16(norm.xz);
-		data[index].posynormy = packHalf2x16(vec2(position.y - viewPosition.y, norm.y)); //maybe pos.y * terrainHeightMult for better precision
-		//data[index].rot = rotations;
+		data[index].posynormy = packHalf2x16(vec2(position.y - viewPosition.y, norm.y));
 		data[index].rot = packHalf2x16(rotations);
 	}
 	else
 	{
 		uint index = atomicAdd(lodCount, 1);
-
 		lodData[index].posxz = packHalf2x16(position.xz - viewPosition.xz);
-		//lodData[index].norm = norm;
 		lodData[index].normxz = packHalf2x16(norm.xz);
-		lodData[index].posynormy = packHalf2x16(vec2(position.y - viewPosition.y, norm.y)); //maybe pos.y * terrainHeightMult for better precision
-		//lodData[index].rot = rotations;
+		lodData[index].posynormy = packHalf2x16(vec2(position.y - viewPosition.y, norm.y));
 		lodData[index].rot = packHalf2x16(rotations);
 	}
 }

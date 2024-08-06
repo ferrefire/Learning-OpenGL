@@ -316,6 +316,18 @@ unsigned int *Shape::GetIndices()
     return (indices.data());
 }
 
+unsigned short *Shape::GetIndicesShort()
+{
+	indicesShort.clear();
+
+	for (const unsigned int &i : indices)
+	{
+		indicesShort.push_back((unsigned short)i);
+	}
+
+	return (indicesShort.data());
+}
+
 unsigned int Shape::VertexCount()
 {
     return (vertexCount);
@@ -445,7 +457,7 @@ void Shape::Join(Shape &joinShape)
     addSize = addIndices.size();
     for (int i = 0; i < addSize; i++)
     {
-        indices.push_back(addIndices[i] + vertOffset);
+        indices.push_back(addIndices[i] + (joinOffset ? vertOffset : 0));
     }
 
     RecalculateData();

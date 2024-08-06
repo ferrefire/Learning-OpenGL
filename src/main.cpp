@@ -61,14 +61,16 @@ bool Time::newSubTick = false;
 bool Time::newFrameTick = false;
 int Time::framesSinceLastFrameTick = 0;
 
-float Input::height = 1350.0;
-float Input::width = 2400.0;
+float Input::height = 900.0;
+float Input::width = 1600.0;
 float Input::lastX = Input::width * 0.5f;
 float Input::lastY = Input::height * 0.5f;
 float Input::sensitivity = 0.1f;
 bool Input::canMove = true;
 bool Input::canLook = true;
 std::map<int, Input::KeyStatus> Input::keys = std::map<int, Input::KeyStatus>();
+
+bool computeOnTicksAll = false;
 
 Camera cam = Camera();
 
@@ -135,7 +137,7 @@ int Terrain::terrainRadius = 3;
 int Terrain::terrainLength = 0;
 int Terrain::terrainCount = 0;
 float Terrain::worldSampleDistance = 1;
-bool Terrain::computeOnTick = true;
+bool Terrain::computeOnTick = false;
 
 unsigned int Grass::grassCount = 384;
 unsigned int Grass::grassLodCount = 2048 + 1024;
@@ -149,7 +151,8 @@ Buffer *Grass::countBuffer = NULL;
 Buffer *Grass::countLodBuffer = NULL;
 Mesh *Grass::grassMesh = NULL;
 Mesh *Grass::grassLodMesh = NULL;
-bool Grass::computeOnTick = true;
+bool Grass::computeOnTick = false;
+bool Grass::debugComputeTime = false;
 
 unsigned int Trees::treeLod0Count = 16;
 unsigned int Trees::treeLod1Count = 32;
@@ -159,6 +162,7 @@ unsigned int Trees::treeLod1RenderCount = 0;
 unsigned int Trees::treeLod2RenderCount = 0;
 Shader *Trees::treeShader = NULL;
 Shader *Trees::treeComputeShader = NULL;
+Mesh *Trees::treeCombinedMesh = NULL;
 Mesh *Trees::treeLod0Mesh = NULL;
 Mesh *Trees::treeLod1Mesh = NULL;
 Mesh *Trees::treeLod2Mesh = NULL;
@@ -168,6 +172,7 @@ Buffer *Trees::treeLod1RenderBuffer = NULL;
 Buffer *Trees::treeLod1CountBuffer = NULL;
 Buffer *Trees::treeLod2RenderBuffer = NULL;
 Buffer *Trees::treeLod2CountBuffer = NULL;
+//Buffer *Trees::treeCurrentLodBuffer = NULL;
 
 int Trees::minTrunkResolution = 8;
 int Trees::maxTrunkResolution = 24;
@@ -186,7 +191,8 @@ float Trees::tmss = 0;
 float Trees::trunkQuality = 1.0;
 float Trees::trunkSeed = 32.0;
 
-bool Trees::computeOnTick = true;
+bool Trees::computeOnTick = false;
+bool Trees::debugComputeTime = false;
 
 bool makeCinematic = false;
 std::string makeCinName;
@@ -286,6 +292,7 @@ int main(int argc, char **argv)
 	//return 0;
 
 	// Utilities::seed = Time::GetTime();
+	//Input::canLook = false;
 	Utilities::seed = rand();
 	GetArguments(argc, argv);
 	GLFWwindow *window = setupGLFW();
@@ -357,6 +364,14 @@ int main(int argc, char **argv)
 			lastTime = glfwGetTime();
 		}
 
+		if (Input::GetKey(GLFW_KEY_T).pressed)
+		{
+			computeOnTicksAll = !computeOnTicksAll;
+			Terrain::computeOnTick = computeOnTicksAll;
+			Grass::computeOnTick = computeOnTicksAll;
+			Trees::computeOnTick = computeOnTicksAll;
+		}
+
 		/*bool sunMoved = false;
 		if (Input::GetKey(GLFW_KEY_DOWN).down)
 		{
@@ -390,6 +405,12 @@ int main(int argc, char **argv)
 		Terrain::NewFrame();
 		Trees::NewFrame();
 		Grass::NewFrame();
+
+		//Trees::treeShader->useShader();
+		//Trees::treeShader->setInt("lod", -1);
+		//Trees::treeCombinedMesh->UseMesh();
+		//glDrawElementsInstanced(GL_TRIANGLES, Trees::treeLod2Mesh->GetShape()->IndiceCount(), GL_UNSIGNED_INT, 
+		//	(void *)((Trees::treeLod0Mesh->GetShape()->IndiceCount() + Trees::treeLod1Mesh->GetShape()->IndiceCount()) * sizeof(unsigned int)), 1);
 
 		//quadShader->useShader();
 		//screenQuadMesh->UseMesh();

@@ -73,3 +73,12 @@ void Debug::DurationCheck()
 		start = -1;
 	}
 }
+
+void Debug::DurationCheck(const std::string &message)
+{
+	if (start != -1)
+	{
+		std::cout << message << " ";
+	}
+	DurationCheck();
+}

@@ -76,6 +76,12 @@ int Inside(vec2 pos)
 void main()
 {
 	if (gl_GlobalInvocationID.x >= instanceCountSqrt || gl_GlobalInvocationID.y >= instanceCountSqrt) return ;
+	if (gl_GlobalInvocationID.x == 0 && gl_GlobalInvocationID.y == 0)
+	{
+		atomicExchange(lod0Count, 0);
+		atomicExchange(lod1Count, 0);
+		atomicExchange(lod2Count, 0);
+	}
 
 	/*if (gl_GlobalInvocationID.x == 0 && gl_GlobalInvocationID.y == 0)
 	{

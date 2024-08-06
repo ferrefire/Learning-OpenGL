@@ -33,13 +33,18 @@ void Buffer::BindBuffer()
 
 void *Buffer::GetPointer()
 {
-	BindBuffer();
-	void *ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+	//BindBuffer();
+	void *ptr = glMapNamedBuffer(ID, GL_READ_ONLY);
 	return ptr;
 }
 
 void Buffer::UnMapBuffer()
 {
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	glUnmapNamedBuffer(ID);
+	//glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+unsigned int Buffer::GetID()
+{
+	return ID;
 }

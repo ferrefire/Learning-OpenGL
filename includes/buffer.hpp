@@ -12,11 +12,14 @@ class Buffer
 		Buffer(unsigned int index, unsigned int size);
 		~Buffer();
 
+		//void *pointer = nullptr;
+
 		void CreateBuffer();
 		void BindBufferBase(unsigned int bindIndex);
 		void BindBuffer();
 		void *GetPointer();
 		void UnMapBuffer();
+		unsigned int GetID();
 };
 
 #endif
