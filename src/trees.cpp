@@ -150,7 +150,7 @@ void Trees::RenderTrees(bool lod0, bool lod1, bool lod2)
 
 void Trees::NewFrame()
 {
-	if (Time::newFrameTick)
+	if (true || Time::newFrameTick)
 	{
 		treeShader->setFloat3("computeViewPosition", Manager::camera.Position());
 

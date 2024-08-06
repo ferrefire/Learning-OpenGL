@@ -118,7 +118,7 @@ void Grass::ComputeGrass(int lod)
 void Grass::NewFrame()
 {
 	//maybe every tick
-	if (Time::newFrameTick) ComputeGrass(-1);
+	if (true || Time::newFrameTick) ComputeGrass(-1);
 	//if (Time::newTick) ComputeGrass(1);
 	RenderGrass();
 }

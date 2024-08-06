@@ -150,8 +150,8 @@ Mesh *Grass::grassMesh = NULL;
 Mesh *Grass::grassLodMesh = NULL;
 
 unsigned int Trees::treeLod0Count = 16;
-unsigned int Trees::treeLod1Count = 24;
-unsigned int Trees::treeLod2Count = 128 + 64;
+unsigned int Trees::treeLod1Count = 32;
+unsigned int Trees::treeLod2Count = 128;
 unsigned int Trees::treeLod0RenderCount = 0;
 unsigned int Trees::treeLod1RenderCount = 0;
 unsigned int Trees::treeLod2RenderCount = 0;

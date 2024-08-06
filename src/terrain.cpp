@@ -369,7 +369,7 @@ void Terrain::NewFrame()
 
 	if (generating) GenerateHeightMapArrayPart();
 
-	if (Time::newFrameTick)
+	if (true || Time::newFrameTick)
 	{
 		depthMapTexture->ClearImage();
 		terrainShader->setInt("newFrame", 1);
