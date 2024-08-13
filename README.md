@@ -12,14 +12,10 @@ How to build
 
 -------------------------------------------------
 
--------------------------------------------------
-
 How to run
 
 Linux: Execute './learningOpenGL'
 Windows: Execute 'start .\Release\learningOpenGL'
-
--------------------------------------------------
 
 -------------------------------------------------
 
@@ -31,8 +27,6 @@ Command arguments
 
 -------------------------------------------------
 
--------------------------------------------------
-
 Controls
 
 WASD: relative horizontal movement.
@@ -41,8 +35,6 @@ MOUSE SCROLL WHEEL: increase or decrease movement speed.
 Q: exit the program.
 V: enable or disable vsync.
 L: enable or disable wireframe mode.
-
--------------------------------------------------
 
 -------------------------------------------------
 
