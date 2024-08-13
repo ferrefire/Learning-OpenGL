@@ -1,6 +1,8 @@
 This is a project I'm working on to learn OpenGL.
 
-How to build-------------------------------------
+------------------------------------------------
+
+How to build
 
 1. Clone the repository.
 2. Create a 'build' directory inside te cloned repository.
@@ -10,14 +12,18 @@ How to build-------------------------------------
 
 -------------------------------------------------
 
-How to run---------------------------------------
+-------------------------------------------------
+
+How to run
 
 Linux: Execute './learningOpenGL'
 Windows: Execute 'start .\Release\learningOpenGL'
 
 -------------------------------------------------
 
-Run commands-------------------------------------
+-------------------------------------------------
+
+Command arguments
 
 'FULL': Launch the program in fullscreen at full resolution.
 'CIN=': The program will play a cinematic at launch and print the average FPS afterwards. Some pre-existing cinematics are: "grass", "testCin", "generalQuick".
@@ -25,7 +31,9 @@ Run commands-------------------------------------
 
 -------------------------------------------------
 
-Controls-----------------------------------------
+-------------------------------------------------
+
+Controls
 
 WASD: relative horizontal movement.
 LEFT CTRL and SPACE: relative vertical movement.
@@ -36,7 +44,9 @@ L: enable or disable wireframe mode.
 
 -------------------------------------------------
 
-Notes--------------------------------------------
+-------------------------------------------------
+
+Notes
 
 This project is absolutely not finished.
 When using windows, the terrain generation is not 100% working and can show straight lines.
