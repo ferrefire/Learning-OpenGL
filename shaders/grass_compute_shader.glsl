@@ -91,7 +91,9 @@ void main()
 
 	vec3 position = vec3(x, y, z);
 
-	if (InView(position + vec3(0, 0.5, 0), 0) == 0) return ;
+	if (lod == 0 && InView(position + vec3(0, 0.5, 0), 0) == 0) return ;
+
+	//if (InView(position + vec3(0, 0.5, 0), 0) == 0) return ;
 
 	//float depth = GetWorldDepth(position);
 
@@ -119,6 +121,10 @@ void main()
     ran = random(vec2(ran * 200, ran * 100));
 	position.z += ran - 0.5;
 	position.y = SampleDynamic(position.xz) * heightMapHeight;
+
+	if (lod == 1 && InView(position + vec3(0, 1.0, 0), 0) == 0 && 
+		InView(position, 0) == 0) return ;
+
     vec3 norm = SampleNormalDynamic(position, 0.5);
 
     float steepness = GetSteepness(norm);
@@ -128,8 +134,8 @@ void main()
     //if (InView(position + vec3(0, 0.5, 0), 0.1) == 0) return ;
 
     vec2 rotations = vec2(0);
-    float wave = sin(time * 2 + (x + z) * 0.1) * 0.5 + 0.5;
-    //float wave = 0;
+    //float wave = sin(time * 2 + (x + z) * 0.1) * 0.5 + 0.5;
+    float wave = 0;
     ran = random(position.xz * ranMult + vec2(position.y, -position.y) * 0.01);
     rotations.x = mix(0.25, 1.0, ran);
 	rotations.x = mix(rotations.x, 1.0 + (ran - 0.5) * 0.25, wave);
