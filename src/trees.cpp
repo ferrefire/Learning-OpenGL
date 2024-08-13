@@ -114,7 +114,7 @@ void Trees::ComputeTrees(bool lod0, bool lod1, bool lod2)
 	treeComputeShader->setInt("renderLod1", lod1 ? 1 : 0);
 	treeComputeShader->setInt("renderLod2", lod2 ? 1 : 0);
 	glDispatchCompute(totalTreeCount / 4, totalTreeCount / 4, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
 	//if (debugComputeTime && Time::newSecond) Debug::DurationCheck("tree compute");
 	//if (debugComputeTime && Time::newSecond) Debug::DurationCheck();

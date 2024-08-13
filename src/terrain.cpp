@@ -187,7 +187,7 @@ void Terrain::GenerateHeightMap(int lod)
 		heightMapComputeShader->setFloat2("worldOffset", terrainOffset / terrainChunkSize);
 		heightMapComputeShader->setFloat2("part", 0, 0);
 		glDispatchCompute(heightMapLod0Texture->Resolution() / 4, heightMapLod0Texture->Resolution() / 4, 1);
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	}
 	else if (lod == 1)
 	{
@@ -201,7 +201,7 @@ void Terrain::GenerateHeightMap(int lod)
 		heightMapComputeShader->setFloat2("worldOffset", terrainOffset / terrainChunkSize);
 		heightMapComputeShader->setFloat2("part", 0, 0);
 		glDispatchCompute(heightMapLod1Texture->Resolution() / 4, heightMapLod1Texture->Resolution() / 4, 1);
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	}
 }
 

@@ -96,7 +96,7 @@ void Grass::ComputeGrass(int lod)
 	grassComputeShader->useShader();
 	grassComputeShader->setInt("specificLod", lod);
 	glDispatchCompute(totalGrassCount / 4, totalGrassCount / 4, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
 	if (lod == 0 || lod == -1)
 	{
