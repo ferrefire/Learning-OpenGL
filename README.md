@@ -14,8 +14,8 @@ How to build
 
 How to run
 
-Linux: Execute './learningOpenGL'
-Windows: Execute 'start .\Release\learningOpenGL'
+Linux: Execute './learningOpenGL'.
+Windows: Execute 'start .\Release\learningOpenGL'.
 
 -------------------------------------------------
 
