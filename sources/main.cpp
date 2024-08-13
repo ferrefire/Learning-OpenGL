@@ -11,7 +11,7 @@
 #include <sstream>
 #include <filesystem>
 #include <cmath>
-#include "stb_image.h"
+//#include "stb_image.h"
 #include "texture.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -243,7 +243,7 @@ void setupSettings(int argc, char **argv, GLFWwindow *window)
 {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    stbi_set_flip_vertically_on_load(true);
+    //stbi_set_flip_vertically_on_load(true);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
