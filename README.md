@@ -9,7 +9,7 @@ How to build
 2. Create a 'build' directory inside te cloned repository.
 3. Execute 'cmake ..' inside the build directory.
 4. Linux: Execute 'make' or 'make -j' for parralel building.
-4. Windows: Execute 'cmake --build . --configure Release'.
+4. Windows: Execute 'cmake --build . --config Release'.
 
 -------------------------------------------------
 
