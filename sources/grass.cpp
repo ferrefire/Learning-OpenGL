@@ -146,8 +146,8 @@ void Grass::NewFrame()
 	windStrengthTarget += Time::deltaTime * 0.5f * (Input::GetKey(GLFW_KEY_UP).down ? 1.0f : (Input::GetKey(GLFW_KEY_DOWN).down ? -1.0f : 0));
 	if (windStrengthTarget < 0.0f) windStrengthTarget = 0.0f;
 
-	if (Input::GetKey(GLFW_KEY_RIGHT).pressed) windFrequencyTarget *= 2.0f;
-	if (Input::GetKey(GLFW_KEY_LEFT).pressed) windFrequencyTarget /= 2.0f;
+	if (Input::GetKey(GLFW_KEY_RIGHT).pressed) windFrequencyTarget *= 1.5f;
+	if (Input::GetKey(GLFW_KEY_LEFT).pressed) windFrequencyTarget /= 1.5f;
 
 	if (windStrength != windStrengthTarget)
 	{
