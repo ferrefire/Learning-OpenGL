@@ -152,6 +152,11 @@ Mesh *Grass::grassMesh = NULL;
 Mesh *Grass::grassLodMesh = NULL;
 bool Grass::computeOnTick = false;
 bool Grass::debugComputeTime = false;
+float Grass::windStrength = 0;
+float Grass::windStrengthTarget = 0.05f;
+float Grass::windFrequency = 0;
+float Grass::windFrequencyTarget = 2.5f;
+bool Grass::windEnabled = false;
 
 unsigned int Trees::treeLod0Count = 16;
 unsigned int Trees::treeLod1Count = 32;

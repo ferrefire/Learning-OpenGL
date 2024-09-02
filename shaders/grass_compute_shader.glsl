@@ -41,6 +41,8 @@ uniform int instanceCountSqrt;
 uniform float instanceCountSqrtMult;
 uniform float lodRange = 256.0;
 uniform int specificLod = -1;
+uniform float windStrength = 0;
+uniform float windFrequency = 2;
 
 float spacing = 0.25;
 float spacingMult = 4;
@@ -134,8 +136,8 @@ void main()
     //if (InView(position + vec3(0, 0.5, 0), 0.1) == 0) return ;
 
     vec2 rotations = vec2(0);
-    //float wave = sin(time * 2 + (x + z) * 0.1) * 0.5 + 0.5;
     float wave = 0;
+	if (windStrength > 0.0) wave = (sin(time * 2 + (x + z) * 0.1 * windFrequency) * 0.5 + 0.5) * windStrength;
     ran = random(position.xz * ranMult + vec2(position.y, -position.y) * 0.01);
     rotations.x = mix(0.25, 1.0, ran);
 	rotations.x = mix(rotations.x, 1.0 + (ran - 0.5) * 0.25, wave);

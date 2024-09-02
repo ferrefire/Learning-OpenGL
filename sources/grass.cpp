@@ -3,6 +3,7 @@
 #include "terrain.hpp"
 #include "time.hpp"
 #include "debug.hpp"
+#include "input.hpp"
 
 void Grass::CreateGrass()
 {
@@ -127,7 +128,67 @@ void Grass::ComputeGrass(int lod)
 
 void Grass::NewFrame()
 {
-	//maybe every tick
+	if (Input::GetKey(GLFW_KEY_B).pressed)
+	{
+		//windEnabled = !windEnabled;
+		if (windStrengthTarget != 0.0f)
+		{
+			windStrengthTarget = 0.0f;
+			//windFrequencyTarget = 4.0f;
+		}
+		else if (windStrengthTarget == 0.0f)
+		{
+			windStrengthTarget = 1.0f;
+			windFrequencyTarget = 1.0f;
+		}
+	}
+
+	windStrengthTarget += Time::deltaTime * 0.5f * (Input::GetKey(GLFW_KEY_UP).down ? 1.0f : (Input::GetKey(GLFW_KEY_DOWN).down ? -1.0f : 0));
+	if (windStrengthTarget < 0.0f) windStrengthTarget = 0.0f;
+
+	if (Input::GetKey(GLFW_KEY_RIGHT).pressed) windFrequencyTarget *= 2.0f;
+	if (Input::GetKey(GLFW_KEY_LEFT).pressed) windFrequencyTarget /= 2.0f;
+
+	if (windStrength != windStrengthTarget)
+	{
+		float modifier = (windStrengthTarget - windStrength) * Time::deltaTime * 0.5f;
+		if (glm::abs(modifier) <= Time::deltaTime * 0.01f) windStrength = windStrengthTarget;
+		else windStrength += modifier;
+		grassComputeShader->setFloat("windStrength", windStrength);
+	}
+
+	if (windFrequency != windFrequencyTarget)
+	{
+		windFrequency = windFrequencyTarget;
+		grassComputeShader->setFloat("windFrequency", windFrequency);
+	}
+
+	//if (Input::GetKey(GLFW_KEY_UP).down)
+	//{
+	//	windStrength += Time::deltaTime * 0.5f;
+	//	grassComputeShader->setFloat("windStrength", windStrength);
+	//}
+	//else if (Input::GetKey(GLFW_KEY_DOWN).down)
+	//{
+	//	windStrength -= Time::deltaTime * 0.5f;
+	//	grassComputeShader->setFloat("windStrength", windStrength);
+	//}
+
+	//if (windEnabled && windStrength != 1.0f)
+	//{
+	//	if (windStrength < 0.0f) windStrength = 0.0f;
+	//	windStrength += Time::deltaTime * 0.2f * glm::sign(1.0f - windStrength);
+	//	if (glm::abs(windStrength - 1.0f) <= Time::deltaTime * 0.2f) windStrength = 1.0f;
+	//	grassComputeShader->setFloat("windStrength", windStrength);
+	//}
+	//else if (!windEnabled && windStrength != 0.0f)
+	//{
+	//	if (windStrength < 0.0f) windStrength = 0.0f;
+	//	windStrength += Time::deltaTime * 0.2f * glm::sign(-windStrength);
+	//	if (glm::abs(windStrength) <= Time::deltaTime * 0.2f) windStrength = 0.0f;
+	//	grassComputeShader->setFloat("windStrength", windStrength);
+	//}
+
 	if (!computeOnTick || Time::newFrameTick) ComputeGrass(-1);
 	//if (Time::newTick) ComputeGrass(1);
 	RenderGrass();

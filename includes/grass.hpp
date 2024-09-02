@@ -8,7 +8,12 @@
 class Grass
 {
 	private:
-		/* data */
+		static float windFrequency;
+		static float windFrequencyTarget;
+		static float windStrength;
+		static float windStrengthTarget;
+		static bool windEnabled;
+
 	public:
 		static unsigned int grassCount;
 		static unsigned int grassLodCount;
