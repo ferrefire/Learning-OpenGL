@@ -139,7 +139,7 @@ float Terrain::worldSampleDistance = 1;
 bool Terrain::computeOnTick = false;
 
 unsigned int Grass::grassCount = 384;
-unsigned int Grass::grassLodCount = 2048 + 1024;
+unsigned int Grass::grassLodCount = 2048 + 2048;
 unsigned int Grass::grassRenderCount = 0;
 unsigned int Grass::grassLodRenderCount = 0;
 Shader *Grass::grassShader = NULL;
@@ -160,7 +160,7 @@ bool Grass::windEnabled = false;
 
 unsigned int Trees::treeLod0Count = 16;
 unsigned int Trees::treeLod1Count = 32;
-unsigned int Trees::treeLod2Count = 128;
+unsigned int Trees::treeLod2Count = 256;
 unsigned int Trees::treeLod0RenderCount = 0;
 unsigned int Trees::treeLod1RenderCount = 0;
 unsigned int Trees::treeLod2RenderCount = 0;
@@ -183,7 +183,7 @@ int Trees::maxTrunkResolution = 24;
 int Trees::minTrunkMainBranchCount = 0;
 int Trees::maxTrunkMainBranchCount = 4;
 int Trees::minTrunkSubBranchCount = 0;
-int Trees::maxTrunkSubBranchCount = 2;
+int Trees::maxTrunkSubBranchCount = 3;
 float Trees::minTrunkMinScaleSize = 1.0;
 float Trees::maxTrunkMinScaleSize = 0.1;
 
