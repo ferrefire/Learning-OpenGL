@@ -32,6 +32,7 @@ void Input::ProcessInput()
     SetKeyStatus();
 
 	if (GetKey(GLFW_KEY_Q).pressed) Manager::Close();
+	if (GetKey(GLFW_KEY_LEFT_SHIFT).down && GetKey(GLFW_KEY_M).pressed) Input::canMove = !Input::canMove;
 
     if (Input::canMove) CameraMovement();
 }
